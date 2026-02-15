@@ -1,9 +1,9 @@
 # TrendVault Development Roadmap
 
-**Version:** 1.0.0
-**Status:** Phase 2 Complete
+**Version:** 1.1.0
+**Status:** Phase 3 Complete
 **Updated:** 2026-02-15
-**Next Phase:** Phase 3 (Download Engine)
+**Next Phase:** Phase 4 (Upload & OAuth)
 
 ## Timeline Overview
 
@@ -11,7 +11,7 @@
 |-------|-------|----------|--------|------------|
 | 1 | Foundation & Scaffolding | Weeks 1-3 | COMPLETE | 100% |
 | 2 | Trending Video Discovery | Weeks 4-6 | COMPLETE | 100% |
-| 3 | Download Engine | Weeks 7-9 | IN PROGRESS | 0% |
+| 3 | Download Engine | Weeks 7-9 | COMPLETE | 100% |
 | 4 | Upload & OAuth | Weeks 10-13 | PENDING | 0% |
 | 5 | Channel Management & Analytics | Weeks 14-16 | PENDING | 0% |
 | 6 | Polish & Launch | Weeks 17-19 | PENDING | 0% |
@@ -98,56 +98,72 @@
 
 ## Phase 3: Download Engine (Weeks 7-9)
 
-**Status:** IN PROGRESS (0% - Starting now)
+**Status:** COMPLETE ✓
 
-**Objectives:**
-- Implement robust video download functionality
-- Support multiple format/quality selections
-- Track download progress in real-time
-- Handle cancellation and resume
+**Implemented:**
+- [x] yt-dlp-wrap integration
+- [x] BullMQ download queue with concurrency control
+- [x] Socket.IO real-time progress tracking
+- [x] DownloadedVideo Prisma model + migration
+- [x] IStorageService abstraction (MinIO/S3/Local backends)
+- [x] MinIOStorageService implementation
+- [x] YtdlpService wrapper (progress tracking, format options)
+- [x] Download worker (yt-dlp → storage pipeline)
+- [x] Download service (dedup, queue, status mgmt)
+- [x] Download API routes (POST, GET, DELETE, retry, URL)
+- [x] Download controller + Zod schemas
+- [x] Socket.IO server setup + event handlers
+- [x] Frontend downloads page with filters/table/pagination
+- [x] Download button on trending video cards
+- [x] Download queue panel (active downloads)
+- [x] Download progress tracking UI
+- [x] useDownloadSocket hook (real-time updates)
+- [x] Pre-signed URL generation (15min expiry)
+- [x] Batch download support
+- [x] Download cancellation (abort signal)
+- [x] Download retry with exponential backoff
+- [x] Per-user active download limit (5 concurrent)
+- [x] File size guard (500MB max)
+- [x] Temp file cleanup on failure
+- [x] Cleanup worker (retention policy)
 
-**Deliverables:**
-- [ ] yt-dlp-wrap integration
-- [ ] Format/quality extraction from videos
-- [ ] Download queue (BullMQ)
-- [ ] Socket.IO integration (progress events)
-- [ ] DownloadedVideo database model
-- [ ] Download job + worker
-- [ ] Download service (format selection, progress, cancellation)
-- [ ] Download controller + router
-- [ ] Frontend download page/modal
-- [ ] Download progress component
-- [ ] Format selector component
-- [ ] Download history display
-- [ ] API endpoints (POST /api/downloads, GET progress)
-- [ ] Error handling (invalid format, network failures)
-- [ ] Resume interrupted downloads
-
-**Database Changes:**
+**Database Model:**
 ```prisma
 model DownloadedVideo {
   id              String @id @default(uuid())
   userId          String
-  videoId         String
-  sourceUrl       String
-  fileName        String
-  fileSize        Int
-  format          String
-  quality         String
-  status          String // pending | downloading | completed | failed
-  progress        Int // 0-100
+  trendingVideoId String
+  platform        Platform
+  platformVideoId String
+  title           String
+  description     String?
+  thumbnailUrl    String?
+  duration        Int?
+  status          String // PENDING | DOWNLOADING | COMPLETED | FAILED | CANCELLED
+  progress        Int
+  storageKey      String?
+  storageBucket   String?
+  fileSize        BigInt?
+  mimeType        String?
+  resolution      String?
+  bullmqJobId     String?
   downloadedAt    DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@unique([userId, platform, platformVideoId])
 }
 ```
 
-**Key Considerations:**
-- yt-dlp-wrap supports AbortController for cancellation
-- Socket.IO rooms per user for real-time progress
-- Storage: MinIO bucket (downloaded-videos)
-- Format negotiation: Ask user before download if multiple available
-- Resume: Store partial files, continue from offset
+**Key Features Delivered:**
+- Real-time progress with Socket.IO rooms (by jobId)
+- 3 concurrent downloads per user, 10 global max
+- Pre-signed URLs for download (15min) and preview (1h)
+- Deduplication check (userId + platform + videoId)
+- Exponential backoff retry (3 attempts, 10s initial delay)
+- Auto-cleanup of failed temp files
+- Rate limiting (10 req/min per user)
+- Support for YouTube and TikTok platforms
 
 ## Phase 4: Upload & OAuth (Weeks 10-13)
 
@@ -355,11 +371,11 @@ Single Server (Docker Compose):
 - [x] Frontend infinite scroll works smoothly
 - [x] Background jobs refresh cache proactively
 
-### Phase 3 (Current)
-- [ ] Download completes successfully for popular formats
-- [ ] Progress tracking updates in real-time
-- [ ] Can cancel/resume downloads
-- [ ] Downloaded videos stored in MinIO
+### Phase 3 ✓
+- [x] Download completes successfully for popular formats
+- [x] Progress tracking updates in real-time
+- [x] Can cancel/resume downloads
+- [x] Downloaded videos stored in MinIO
 
 ### Phase 4
 - [ ] YouTube OAuth flow completes

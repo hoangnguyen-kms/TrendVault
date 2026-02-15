@@ -1,15 +1,26 @@
-import { ExternalLink, Clock, Eye, ThumbsUp, MessageCircle } from 'lucide-react';
+import { ExternalLink, Clock, Eye, ThumbsUp, MessageCircle, Download, Loader2 } from 'lucide-react';
 import type { TrendingVideo } from '@trendvault/shared-types';
+import { useQueueDownload } from '@/pages/downloads/hooks/use-downloads';
 
 interface TrendingVideoCardProps {
   video: TrendingVideo;
 }
 
 export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
+  const queueDownload = useQueueDownload();
+
   const externalUrl =
     video.platform === 'YOUTUBE'
       ? `https://www.youtube.com/watch?v=${video.platformVideoId}`
       : `https://www.tiktok.com/@${video.channelId ?? 'user'}/video/${video.platformVideoId}`;
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (video.id) {
+      queueDownload.mutate(video.id);
+    }
+  };
 
   return (
     <a
@@ -49,9 +60,21 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
           {video.platform === 'YOUTUBE' ? 'YT' : 'TT'}
         </span>
 
-        {/* External link icon on hover */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
+        {/* Hover overlay with actions */}
+        <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/0 group-hover:bg-black/20 transition-colors">
           <ExternalLink className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+          <button
+            onClick={handleDownload}
+            disabled={queueDownload.isPending}
+            className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full bg-blue-600 p-2 text-white hover:bg-blue-700 disabled:opacity-50"
+            title="Download video"
+          >
+            {queueDownload.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+          </button>
         </div>
       </div>
 

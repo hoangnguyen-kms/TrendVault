@@ -6,6 +6,7 @@ const RegisterPage = lazy(() => import('@/pages/auth/register-page'));
 const RootLayout = lazy(() => import('@/components/layout/root-layout'));
 const DashboardPage = lazy(() => import('@/pages/dashboard-page'));
 const TrendingPage = lazy(() => import('@/pages/trending/trending-page'));
+const DownloadsPage = lazy(() => import('@/pages/downloads/downloads-page'));
 
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -59,6 +60,14 @@ export const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <TrendingPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: 'downloads',
+        element: (
+          <SuspenseWrapper>
+            <DownloadsPage />
           </SuspenseWrapper>
         ),
       },

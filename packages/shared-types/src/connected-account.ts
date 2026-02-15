@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PlatformSchema } from './platform';
+import { PlatformSchema } from './platform.js';
 
 export const ConnectedAccountSchema = z.object({
   id: z.string().uuid(),

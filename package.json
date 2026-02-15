@@ -7,9 +7,9 @@
     "lint": "turbo lint",
     "test": "turbo test",
     "type-check": "turbo type-check",
-    "db:migrate": "pnpm --filter @trendvault/api prisma migrate dev",
-    "db:seed": "pnpm --filter @trendvault/api prisma db seed",
-    "db:studio": "pnpm --filter @trendvault/api prisma studio",
+    "db:migrate": "pnpm --filter @trendvault/api exec prisma migrate dev",
+    "db:seed": "pnpm --filter @trendvault/api exec prisma db seed",
+    "db:studio": "pnpm --filter @trendvault/api exec prisma studio",
     "docker:up": "docker compose -f docker/docker-compose.yml up -d",
     "docker:down": "docker compose -f docker/docker-compose.yml down"
   },

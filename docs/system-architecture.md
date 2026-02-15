@@ -1,7 +1,7 @@
 # TrendVault System Architecture
 
-**Version:** 1.0.0
-**Status:** Phase 2 Complete
+**Version:** 1.1.0
+**Status:** Phase 3 Complete
 **Last Updated:** 2026-02-15
 
 ## Architecture Overview
@@ -12,23 +12,25 @@ TrendVault is a full-stack monorepo web application with clear separation of con
 ┌─────────────────────────────────────────────────────────────────────┐
 │                     Client (React 19 + Vite)                        │
 │  ┌──────────────────────────────────────────────────────────────┐  │
-│  │  Trending Page  │  Auth Pages  │  Dashboard  │  Layout       │  │
+│  │  Trending  │  Downloads  │  Auth  │  Dashboard  │  Layout  │  │
 │  └──────────────┬───────────────────────────────────────────────┘  │
 └─────────────────┼──────────────────────────────────────────────────┘
-                  │ HTTP/REST
+           │ HTTP/REST + WebSocket (Socket.IO)
 ┌─────────────────▼──────────────────────────────────────────────────┐
 │                 API Server (Express 5)                             │
 │  ┌──────────────────────────────────────────────────────────────┐  │
-│  │  Auth Routes  │  Trending Routes  │  Error Handling  │ CORS  │  │
-│  └──────────┬────────────┬──────────────────────────────────────┘  │
-└─────────────┼────────────┼──────────────────────────────────────────┘
-              │            │
-      ┌───────▼───┐  ┌─────▼──────────────┐
-      │ Auth      │  │ Trending Service   │
-      │ Service   │  │ - Adapters         │
-      └───────┬───┘  │ - Cache Layer      │
-              │      │ - Jobs             │
-              │      └─────┬──────────────┘
+│  │ Auth │ Trending │ Downloads │ Socket.IO │ Error │ CORS │ ... │ │
+│  └─┬──────┬──────────┬─────────────┬─────────────────────────────┘ │
+└───┼──────┼──────────┼─────────────┼────────────────────────────────┘
+    │      │          │             │
+┌───▼──┐ ┌─▼─────────▼──┐    ┌─────▼───────────┐
+│ Auth │ │ Trending     │    │ Download       │
+│      │ │ Service      │    │ Service        │
+│      │ │ - Adapters   │    │ - yt-dlp       │
+└───┬──┘ │ - Cache      │    │ - BullMQ       │
+    │    │ - Jobs       │    │ - MinIO        │
+    │    └─┬──────┬─────┘    │ - Tracking     │
+    │      │      │          └────┬───────────┘
               │            │
     ┌─────────▼────────────▼──────────────────────────┐
     │         Data Layer (Prisma ORM)                 │
@@ -122,20 +124,35 @@ api/src/
 │   │   ├── auth-controller.ts
 │   │   ├── auth-service.ts
 │   │   └── auth-schemas.ts
-│   └── trending/
-│       ├── trending-router.ts
-│       ├── trending-controller.ts
-│       ├── trending-service.ts
-│       ├── trending-service-instance.ts
-│       ├── trending-cache.ts
-│       ├── trending-schemas.ts
-│       ├── adapters/
-│       │   ├── platform-adapter.interface.ts
-│       │   ├── youtube-adapter.ts
-│       │   └── tiktok-adapter.ts
+│   ├── trending/
+│   │   ├── trending-router.ts
+│   │   ├── trending-controller.ts
+│   │   ├── trending-service.ts
+│   │   ├── trending-service-instance.ts
+│   │   ├── trending-cache.ts
+│   │   ├── trending-schemas.ts
+│   │   ├── adapters/
+│   │   │   ├── platform-adapter.interface.ts
+│   │   │   ├── youtube-adapter.ts
+│   │   │   └── tiktok-adapter.ts
+│   │   └── jobs/
+│   │       ├── trending-refresh-job.ts
+│   │       └── trending-refresh-worker.ts
+│   └── downloads/
+│       ├── download-router.ts
+│       ├── download-controller.ts
+│       ├── download-service.ts
+│       ├── download-schemas.ts
+│       ├── download-helpers.ts
+│       ├── ytdlp-service.ts
 │       └── jobs/
-│           ├── trending-refresh-job.ts
-│           └── trending-refresh-worker.ts
+│           ├── download-queue.ts
+│           └── download-worker.ts
+├── services/
+│   └── storage/
+│       ├── storage-service.interface.ts
+│       ├── minio-storage-service.ts
+│       └── storage-factory.ts
 ├── app.ts                  # Express app initialization
 └── server.ts               # Server startup
 ```
@@ -289,7 +306,72 @@ Response:
 }
 ```
 
-### 4. Authentication Module (Phase 1)
+### 4. Download Module (Phase 3)
+
+**Location:** `apps/api/src/modules/downloads/`
+
+**Responsibilities:**
+- Extract available video formats/qualities from URLs
+- Manage download queue with BullMQ
+- Emit real-time progress via Socket.IO
+- Store downloaded files in MinIO
+- Track download status and history
+
+**Components:**
+
+#### 4.1 yt-dlp Service
+Wrapper around yt-dlp binary for video format extraction
+
+**Methods:**
+- `getFormats(videoUrl)` - Extract available formats
+- `download(videoUrl, format, progressCallback)` - Download video
+- `abort()` - Cancel ongoing download
+
+#### 4.2 Download Service
+Main orchestrator for download workflows
+
+**Methods:**
+- `initiateDownload(videoUrl, format, userId)` - Queue download job
+- `getFormats(videoUrl)` - Fetch available formats
+- `getDownloadProgress(downloadId)` - Query job status
+- `cancelDownload(downloadId)` - Abort job
+- `getDownloadHistory(userId)` - Get user's downloads
+
+#### 4.3 Download Queue & Worker
+**Framework:** BullMQ (Redis-backed job queue)
+
+**Job: DownloadJob**
+- Contains: videoUrl, format, userId, downloadId
+- Progress tracking: emitted via Socket.IO
+- Storage: Files saved to MinIO bucket
+
+**Worker: DownloadWorker**
+- Listens for DownloadJob
+- Calls yt-dlp-service
+- Emits progress events to Socket.IO room
+- Updates PostgreSQL status
+
+#### 4.4 Socket.IO Integration
+Real-time progress tracking via WebSocket
+
+**Events:**
+- `download:start` - Download initiated
+- `download:progress` - Progress update (percentage, speed, ETA)
+- `download:complete` - Download finished
+- `download:error` - Error occurred
+- `download:cancelled` - Cancelled by user
+
+**Rooms:** User-specific (e.g., `user:${userId}`)
+
+**Authentication:** JWT validation middleware
+
+#### 4.5 MinIO Storage
+S3-compatible file storage
+
+**Buckets:**
+- `downloaded-videos` - User-downloaded videos (organized by userId/downloadId)
+
+### 5. Authentication Module (Phase 1)
 
 **Location:** `apps/api/src/modules/auth/`
 
@@ -323,7 +405,7 @@ Response:
 
 **Prisma Schema Location:** `apps/api/prisma/schema.prisma`
 
-**Current Entities (Phase 2):**
+**Current Entities (Phase 3):**
 
 **User**
 ```prisma
@@ -382,8 +464,39 @@ model TrendingVideo {
 }
 ```
 
+**DownloadedVideo** (Phase 3)
+```prisma
+enum DownloadStatus {
+  PENDING
+  DOWNLOADING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model DownloadedVideo {
+  id              String @id @default(uuid())
+  userId          String
+  sourceVideoUrl  String
+  fileName        String
+  fileSize        Int?
+  format          String      // format_id from yt-dlp
+  quality         String      // quality label (e.g., "1080p")
+  status          DownloadStatus @default(PENDING)
+  progress        Int @default(0)  // 0-100
+  minioPath       String?     // Object path in MinIO
+  downloadedAt    DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([createdAt])
+}
+```
+
 **Migrations:**
 - `20260215075820_add_trending_video` - Adds Platform enum + TrendingVideo table
+- `20260215XXXXXX_add_downloaded_video` - Adds DownloadStatus enum + DownloadedVideo table (Phase 3)
 
 #### 5.2 Redis (7)
 
@@ -644,9 +757,9 @@ export const trendingService = new TrendingService(
 - Playwright: Full user flow
 - Trending discovery → Download → Publish
 
-## Next Steps (Phases 3-6)
+## Next Steps (Phases 4-6)
 
-**Phase 3:** Add DownloadedVideo entity, implement download queue & Socket.IO progress
+**Phase 3:** Complete ✓ - Download engine with yt-dlp, BullMQ, MinIO, Socket.IO
 **Phase 4:** Add UploadJob + Channel entities, implement OAuth flows
 **Phase 5:** Add VideoStatsSnapshot + partitioning, analytics aggregation
 **Phase 6:** Security audit, performance testing, production deployment guide

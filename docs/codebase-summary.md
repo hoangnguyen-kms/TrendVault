@@ -1,6 +1,6 @@
 # TrendVault Codebase Summary
 
-**Version:** 1.0.0 (Phase 2 Complete)
+**Version:** 1.1.0 (Phase 3 Complete)
 **Generated:** 2026-02-15
 **Monorepo Structure:** Turborepo + pnpm workspaces
 
@@ -12,11 +12,21 @@ TrendVault/
 │   ├── api/                 # Express 5 backend
 │   │   ├── src/
 │   │   │   ├── config/              # Configuration modules
+│   │   │   │   ├── socket-io.ts       # Socket.IO setup + JWT auth (Phase 3)
+│   │   │   │   ├── ... (other configs)
 │   │   │   ├── lib/                 # Shared utilities
 │   │   │   ├── middleware/          # Express middleware
+│   │   │   │   ├── rate-limiter.ts  # Updated with downloadLimiter (Phase 3)
+│   │   │   │   ├── ... (other middleware)
+│   │   │   ├── services/            # Shared services (Phase 3)
+│   │   │   │   └── storage/
+│   │   │   │       ├── storage-service.interface.ts
+│   │   │   │       ├── minio-storage-service.ts
+│   │   │   │       └── storage-factory.ts
 │   │   │   ├── modules/             # Feature modules
 │   │   │   │   ├── auth/            # Authentication (Phase 1)
-│   │   │   │   └── trending/        # Trending discovery (Phase 2)
+│   │   │   │   ├── trending/        # Trending discovery (Phase 2)
+│   │   │   │   └── downloads/       # Download engine (Phase 3)
 │   │   │   ├── app.ts               # Express app
 │   │   │   └── server.ts            # Server startup
 │   │   ├── prisma/
@@ -30,11 +40,14 @@ TrendVault/
 │       ├── src/
 │       │   ├── pages/               # Page components
 │       │   │   ├── auth/            # Login, Register (Phase 1)
-│       │   │   └── trending/        # Trending discovery (Phase 2)
+│       │   │   ├── trending/        # Trending discovery (Phase 2)
+│       │   │   └── downloads/       # Download interface (Phase 3)
 │       │   ├── components/          # Reusable components
 │       │   ├── hooks/               # Custom hooks
 │       │   ├── stores/              # Zustand stores
-│       │   ├── lib/                 # Utilities
+│       │   ├── lib/
+│       │   │   ├── socket-client.ts # Socket.IO client (Phase 3)
+│       │   │   ├── ... (other libs)
 │       │   ├── app.tsx              # Root component
 │       │   ├── router.tsx           # React Router 7 config
 │       │   └── main.tsx             # Entry point
@@ -81,6 +94,17 @@ TrendVault/
 | `database.ts` | Prisma client instance |
 | `redis.ts` | Redis client instance |
 | `cors.ts` | CORS policy configuration |
+| `socket-io.ts` | Socket.IO server setup with JWT auth middleware (Phase 3) |
+
+### Storage Services (`src/services/storage/`)
+
+**Phase 3 Complete**
+
+| File | Purpose |
+|------|---------|
+| `storage-service.interface.ts` | Abstraction for storage operations |
+| `minio-storage-service.ts` | MinIO implementation (S3-compatible) |
+| `storage-factory.ts` | Factory pattern for service instantiation |
 
 ### Library Layer (`src/lib/`)
 
@@ -96,7 +120,7 @@ TrendVault/
 |------|---------|
 | `auth-middleware.ts` | JWT validation & user extraction |
 | `error-handler.ts` | Centralized error handling |
-| `rate-limiter.ts` | Express rate limiting |
+| `rate-limiter.ts` | Express rate limiting + downloadLimiter (Phase 3) |
 | `request-logger.ts` | Request/response logging (Morgan) |
 | `validate-request.ts` | Zod schema validation wrapper |
 
@@ -116,6 +140,36 @@ TrendVault/
 - `login(email, password)` - Validate + issue JWT tokens
 - `refresh(refreshToken)` - Extend session
 - `logout()` - Invalidate token (client-side only)
+
+### Download Module (`src/modules/downloads/`)
+
+**Phase 3 Complete**
+
+```
+downloads/
+├── download-service.ts          # Download orchestration
+├── download-controller.ts       # HTTP handlers
+├── download-router.ts           # Route definitions
+├── download-schemas.ts          # Zod validation schemas
+├── download-helpers.ts          # Utility functions
+├── ytdlp-service.ts             # yt-dlp-wrap integration
+└── jobs/
+    ├── download-queue.ts        # BullMQ queue setup
+    └── download-worker.ts       # BullMQ job processor
+```
+
+**Key Responsibilities:**
+- Extract video formats/qualities via yt-dlp
+- Manage download queue with BullMQ
+- Emit real-time progress via Socket.IO
+- Store files in MinIO
+- Track download status in PostgreSQL
+
+**Key Methods:**
+- `initiateDownload(videoUrl, format)` - Queue download job
+- `getFormats(videoUrl)` - Fetch available formats
+- `getDownloadProgress(downloadId)` - Query job status
+- `cancelDownload(downloadId)` - Abort job
 
 ### Trending Module (`src/modules/trending/`)
 
@@ -200,16 +254,19 @@ class TrendingService {
 | `seed.ts` | Test data seeding script |
 | `migrations/` | Database migration history |
 
-**Current Schema (Phase 2):**
+**Current Schema (Phase 3):**
 ```prisma
 model User { ... }                    # Phase 1
 model ConnectedAccount { ... }        # Phase 1
 enum Platform { YOUTUBE, TIKTOK }    # Phase 2
 model TrendingVideo { ... }          # Phase 2
+enum DownloadStatus { PENDING, DOWNLOADING, COMPLETED, FAILED, CANCELLED }  # Phase 3
+model DownloadedVideo { ... }        # Phase 3
 ```
 
 **Migrations:**
 - `20260215075820_add_trending_video/` - Platform enum + TrendingVideo table
+- `20260215XXXXXX_add_downloaded_video/` - DownloadStatus enum + DownloadedVideo table (Phase 3)
 
 ## Frontend (`apps/web/`)
 
@@ -219,6 +276,7 @@ model TrendingVideo { ... }          # Phase 2
 |-----------|-------|-------|--------|
 | `pages/auth/` | `login-page.tsx`, `register-page.tsx` | 1 | Complete |
 | `pages/trending/` | `trending-page.tsx` + 3 components + 2 hooks | 2 | Complete |
+| `pages/downloads/` | `downloads-page.tsx` + components + hooks | 3 | Complete |
 | `pages/` | `dashboard-page.tsx` | 1 | Scaffolded |
 
 ### Trending Page (`pages/trending/`)
@@ -277,6 +335,7 @@ trending-page.tsx (main page component)
 |------|---------|
 | `api-client.ts` | HTTP client + TanStack Query integration |
 | `query-client.ts` | TanStack Query configuration |
+| `socket-client.ts` | Socket.IO client for real-time updates (Phase 3) |
 | `utils.ts` | Helper functions (formatting, etc.) |
 
 **API Client:**
@@ -348,6 +407,9 @@ export type User = z.infer<typeof UserSchema>
 | `@prisma/client` | ^6.0.0 | Prisma runtime client |
 | `redis` | ^4.6.0 | Redis client |
 | `bullmq` | ^5.0.0 | Job queue (Redis-backed) |
+| `socket.io` | ^4.7.0 | Real-time communication (Phase 3) |
+| `yt-dlp-wrap` | Latest | Video format extraction (Phase 3) |
+| `minio` | ^7.0.0 | S3-compatible storage (Phase 3) |
 | `jsonwebtoken` | ^9.0.0 | JWT token handling |
 | `bcryptjs` | ^2.4.0 | Password hashing |
 | `axios` | ^1.0.0 | HTTP requests (adapters) |
@@ -365,6 +427,7 @@ export type User = z.infer<typeof UserSchema>
 | `react-router-dom` | ^7.0.0 | Client routing |
 | `@tanstack/react-query` | ^5.0.0 | Server state management |
 | `zustand` | ^5.0.0 | Client state (Zustand) |
+| `socket.io-client` | ^4.7.0 | Real-time client (Phase 3) |
 | `tailwindcss` | ^4.0.0 | Utility CSS |
 | `shadcn/ui` | Latest | Component library |
 | `vite` | ^6.0.0 | Build tool |
@@ -453,7 +516,6 @@ pnpm -F web dev       # Start Web only
 
 | Item | Phase | Notes |
 |------|-------|-------|
-| Video download | Phase 3 | Requires yt-dlp-wrap + Socket.IO |
 | OAuth publishing | Phase 4 | YouTube OAuth, TikTok Inbox Upload |
 | Analytics dashboard | Phase 5 | VideoStatsSnapshot model + partitioning |
 | E2E tests | Phase 6 | Playwright test suite |
@@ -463,13 +525,14 @@ pnpm -F web dev       # Start Web only
 
 | Metric | Value |
 |--------|-------|
-| Total Files | 90 |
-| Backend Source Files | ~15 (excl. migrations) |
-| Frontend Source Files | ~12 |
+| Total Files | 110+ |
+| Backend Source Files | ~25 (excl. migrations) |
+| Frontend Source Files | ~15 |
 | Shared Package Files | 8 |
-| Database Entities | 3 (User, ConnectedAccount, TrendingVideo) |
-| API Endpoints | 6 (auth: 4, trending: 3) |
+| Database Entities | 4 (User, ConnectedAccount, TrendingVideo, DownloadedVideo) |
+| API Endpoints | 10+ (auth: 4, trending: 3, downloads: 3+) |
 | Redis Cache Keys | 5+ patterns |
+| Socket.IO Events | 3+ (download:start, download:progress, download:complete) |
 
 ## Documentation Map
 
