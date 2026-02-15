@@ -1,0 +1,21 @@
+{
+  "name": "trendvault",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "type-check": "turbo type-check",
+    "db:migrate": "pnpm --filter @trendvault/api prisma migrate dev",
+    "db:seed": "pnpm --filter @trendvault/api prisma db seed",
+    "db:studio": "pnpm --filter @trendvault/api prisma studio",
+    "docker:up": "docker compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker compose -f docker/docker-compose.yml down"
+  },
+  "devDependencies": {
+    "turbo": "^2.4",
+    "prettier": "^3.5"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
