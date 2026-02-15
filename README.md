@@ -2,6 +2,20 @@
 
 Cross-platform trending video discovery, download & re-upload web app.
 
+## Features
+
+### Implemented
+
+- **Authentication** — JWT-based auth with httpOnly cookies, register/login/logout
+- **Trending Discovery** — Browse trending videos from YouTube & TikTok across 12 regions (US, GB, JP, KR, BR, IN, DE, FR, AU, CA, MX, VN). Platform adapter pattern with Redis caching and BullMQ background refresh.
+- **Trending Dashboard** — Filter by platform/region/category, infinite scroll, auto-refresh toggle with configurable interval
+
+### Planned
+
+- **Video Downloads** — yt-dlp powered download queue with progress tracking (Phase 3)
+- **Re-Upload** — OAuth-connected YouTube & TikTok upload with metadata editing (Phase 4)
+- **Channel Analytics** — Multi-channel dashboard with stats sync and charts (Phase 5)
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -88,16 +102,47 @@ pnpm dev
 | `pnpm db:seed` | Seed database |
 | `pnpm db:studio` | Open Prisma Studio |
 
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/login` | Login (sets httpOnly cookie) |
+| POST | `/api/auth/logout` | Logout (clears cookie) |
+| GET | `/api/auth/me` | Current user profile |
+| GET | `/api/trending` | List trending videos (query: platform, region, category, page, limit) |
+| GET | `/api/trending/regions` | Supported regions & YouTube categories |
+| GET | `/api/trending/:id` | Single trending video details |
+
 ## Project Structure
 
 ```
 TrendVault/
 ├── apps/
-│   ├── api/          # Express 5 backend
-│   └── web/          # React 19 frontend
+│   ├── api/                # Express 5 backend
+│   │   └── src/modules/
+│   │       ├── auth/       # JWT authentication
+│   │       └── trending/   # Trending discovery + adapters + BullMQ jobs
+│   └── web/                # React 19 frontend
+│       └── src/pages/
+│           └── trending/   # Trending dashboard + filters + infinite scroll
 ├── packages/
-│   ├── shared-types/ # Zod schemas + TypeScript types
-│   └── config/       # Shared tsconfig + ESLint
-├── docker/           # Docker Compose configs
-└── plans/            # Implementation plans
+│   ├── shared-types/       # Zod schemas + TypeScript types
+│   └── config/             # Shared tsconfig + ESLint
+├── docker/                 # Docker Compose configs
+├── docs/                   # Project documentation
+└── plans/                  # Implementation plans
 ```
+
+## Environment Variables
+
+See `.env.example` for all available configuration. Key variables:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `REDIS_URL` | Yes | Redis connection string |
+| `JWT_SECRET` | Yes | JWT signing secret (min 32 chars) |
+| `ENCRYPTION_MASTER_KEY` | Yes | AES-256 key for OAuth tokens (64 hex chars) |
+| `YOUTUBE_API_KEY` | No | YouTube Data API v3 key (for trending) |
+| `APIFY_API_TOKEN` | No | Apify token (for TikTok trending) |
