@@ -1,6 +1,5 @@
 import youtubedl from 'youtube-dl-exec';
 import path from 'path';
-import os from 'os';
 import fs from 'fs';
 
 export interface DownloadOptions {
@@ -26,7 +25,7 @@ export interface DownloadResult {
   title: string;
 }
 
-const DOWNLOAD_DIR = path.join(os.tmpdir(), 'trendvault-downloads');
+const DOWNLOAD_DIR = path.resolve(process.cwd(), '../../downloads');
 
 /** Wraps youtube-dl-exec for video downloading with progress parsing */
 export class YtdlpService {

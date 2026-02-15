@@ -1,6 +1,6 @@
 # TrendVault Codebase Summary
 
-**Version:** 1.2.0 (Phase 4 Complete)
+**Version:** 1.3.0 (Phase 5 Complete)
 **Generated:** 2026-02-15
 **Monorepo Structure:** Turborepo + pnpm workspaces
 
@@ -32,7 +32,10 @@ TrendVault/
 │   │   │   │   ├── oauth/           # OAuth 2.0 flows (Phase 4)
 │   │   │   │   ├── uploads/         # Upload & publishing (Phase 4)
 │   │   │   │   ├── accounts/        # Connected accounts (Phase 4)
-│   │   │   │   └── channels/        # User channels (Phase 4)
+│   │   │   │   ├── channels/        # User channels (Phase 4)
+│   │   │   │   ├── analytics/       # Analytics & stats (Phase 5)
+│   │   │   │   ├── videos/          # Video detail (Phase 5)
+│   │   │   │   └── sync/            # Background sync jobs (Phase 5)
 │   │   │   ├── app.ts               # Express app
 │   │   │   └── server.ts            # Server startup
 │   │   ├── prisma/
@@ -47,7 +50,12 @@ TrendVault/
 │       │   ├── pages/               # Page components
 │       │   │   ├── auth/            # Login, Register (Phase 1)
 │       │   │   ├── trending/        # Trending discovery (Phase 2)
-│       │   │   └── downloads/       # Download interface (Phase 3)
+│       │   │   ├── downloads/       # Download interface (Phase 3)
+│       │   │   ├── uploads/         # Upload interface (Phase 4)
+│       │   │   ├── settings/        # Connected accounts (Phase 4)
+│       │   │   ├── channels/        # Channel dashboard (Phase 5)
+│       │   │   ├── videos/          # Video detail (Phase 5)
+│       │   │   └── analytics/       # Cross-channel analytics (Phase 5)
 │       │   ├── components/          # Reusable components
 │       │   ├── hooks/               # Custom hooks
 │       │   ├── stores/              # Zustand stores
@@ -65,7 +73,8 @@ TrendVault/
 │   │   └── src/
 │   │       ├── auth.ts
 │   │       ├── trending.ts
-│   │       └── platform.ts
+│   │       ├── platform.ts
+│   │       └── analytics.ts     # Phase 5 analytics types
 │   └── config/              # Shared configs
 │       ├── tsconfig/        # TypeScript presets
 │       └── eslint/          # ESLint configs
@@ -324,6 +333,60 @@ uploads/
 - Decrypts on retrieval for API calls
 - Master key: Environment variable (HSM in production)
 
+### Sync Module (`src/modules/sync/`)
+
+**Phase 5 Complete**
+
+```
+sync/
+├── sync-scheduler.ts                    # BullMQ repeatable job registration (6 jobs)
+├── sync-worker.ts                       # BullMQ worker dispatcher
+├── platform-stats/
+│   ├── platform-stats-fetcher-interface.ts  # Strategy pattern interface
+│   ├── youtube-stats-fetcher.ts             # YouTube Data API v3
+│   └── tiktok-stats-fetcher.ts              # TikTok Video Query API
+└── handlers/
+    ├── channel-metadata-sync-handler.ts   # Sync channel info (6h)
+    ├── video-list-sync-handler.ts         # Sync video list (12h, max 250/channel)
+    ├── stats-snapshot-sync-handler.ts     # Capture stats (6h recent, 24h all)
+    ├── stats-aggregation-handler.ts       # 90d+ daily → weekly summaries (daily 2AM)
+    └── partition-management-handler.ts    # Auto-create next 2 month partitions
+```
+
+**Sync Schedule:**
+- Channel metadata: every 6 hours
+- Video list: every 12 hours
+- Stats (recent <7d): every 6 hours
+- Stats (all): daily at 3 AM
+- Aggregation: daily at 2 AM
+- Partition: 1st of each month
+
+### Analytics Module (`src/modules/analytics/`)
+
+**Phase 5 Complete**
+
+| File | Purpose |
+|------|---------|
+| `analytics-service.ts` | 6 methods: overview, videos, stats, lifecycle, aggregate, compare |
+| `analytics-router.ts` | 6 GET routes (all auth-protected) |
+| `analytics-schemas.ts` | Zod schemas + date range helper |
+
+**Endpoints:**
+- GET `/api/analytics/channels/:channelId/overview` - Channel KPIs + recent videos
+- GET `/api/analytics/channels/:channelId/videos` - Paginated video list
+- GET `/api/analytics/videos/:videoId/stats` - Time-series stats
+- GET `/api/analytics/videos/:videoId/lifecycle` - Content lifecycle (trending→download→upload→published)
+- GET `/api/analytics/cross-channel` - Aggregate stats across all channels
+- GET `/api/analytics/cross-channel/compare` - Same-content cross-channel comparison
+
+### Videos Module (`src/modules/videos/`)
+
+**Phase 5 Complete**
+
+| File | Purpose |
+|------|---------|
+| `videos-router.ts` | GET `/api/videos/:videoId` - Video detail with BigInt→Number conversion |
+
 ### Root Entry Points
 
 | File | Purpose |
@@ -339,7 +402,7 @@ uploads/
 | `seed.ts` | Test data seeding script |
 | `migrations/` | Database migration history |
 
-**Current Schema (Phase 4):**
+**Current Schema (Phase 5):**
 ```prisma
 model User { ... }                    # Phase 1
 model ConnectedAccount { ... }        # Phase 1 (updated Phase 4: encrypted tokens)
@@ -349,7 +412,8 @@ enum DownloadStatus { ... }           # Phase 3
 model DownloadedVideo { ... }        # Phase 3
 model Channel { ... }                 # Phase 4
 model UploadJob { ... }              # Phase 4
-model PublishedVideo { ... }         # Phase 4
+model PublishedVideo { ... }         # Phase 4 (updated Phase 5: stats fields + @@unique)
+model VideoStatsSnapshot { ... }     # Phase 5
 ```
 
 **Migrations:**
@@ -368,6 +432,9 @@ model PublishedVideo { ... }         # Phase 4
 | `pages/downloads/` | `downloads-page.tsx` + components + hooks | 3 | Complete |
 | `pages/uploads/` | `uploads-page.tsx`, `upload-form.tsx`, `upload-history-table.tsx`, 1 hook | 4 | Complete |
 | `pages/settings/` | `connected-accounts-page.tsx`, `connected-account-card.tsx`, 1 hook | 4 | Complete |
+| `pages/channels/` | `channel-dashboard-page.tsx` + 6 components + 2 hooks | 5 | Complete |
+| `pages/videos/` | `video-detail-page.tsx` + 4 components + 1 hook | 5 | Complete |
+| `pages/analytics/` | `cross-channel-page.tsx` + 3 components + 1 hook | 5 | Complete |
 | `pages/` | `dashboard-page.tsx` | 1 | Scaffolded |
 
 ### Trending Page (`pages/trending/`)
@@ -461,6 +528,7 @@ export const apiClient = {
 | `connected-account.ts` | OAuth account types | `ConnectedAccountDTO` |
 | `channel.ts` | Channel entity types (Phase 4) | `ChannelDTO`, `ChannelSchema` |
 | `upload.ts` | Upload job types (Phase 4) | `UploadJobDTO`, `PublishedVideoDTO` |
+| `analytics.ts` | Analytics schemas (Phase 5) | `VideoStatsSnapshot`, `StatsTimeSeries`, `ChannelOverview` |
 | `api-response.ts` | Standard response shape | `ApiResponse<T>` |
 | `user.ts` | User entity types | `User`, `UserProfile` |
 | `index.ts` | Package exports | All types |
@@ -523,6 +591,8 @@ export type User = z.infer<typeof UserSchema>
 | `socket.io-client` | ^4.7.0 | Real-time client (Phase 3) |
 | `tailwindcss` | ^4.0.0 | Utility CSS |
 | `shadcn/ui` | Latest | Component library |
+| `recharts` | ^2.0.0 | Charts & data visualization (Phase 5) |
+| `date-fns` | ^4.0.0 | Date formatting utilities (Phase 5) |
 | `vite` | ^6.0.0 | Build tool |
 | `typescript` | ^5.3.0 | Type checking |
 | `zod` | ^3.0.0 | Schema validation |
@@ -582,6 +652,31 @@ pnpm -F web dev       # Start Web only
 - Shared Types: `channel.ts`, `upload.ts`
 - Database: Phase 4 migration (Channel, UploadJob, PublishedVideo models)
 
+## Phase 5 Implementation Summary
+
+**Completed Features:**
+- Background sync jobs (BullMQ repeatable: 6 job types)
+- Platform stats fetchers (YouTube Data API v3, TikTok Video Query API)
+- Channel metadata, video list, and stats snapshot syncing
+- Stats aggregation (90d+ daily → weekly, ~80% storage reduction)
+- Analytics API (6 endpoints: overview, videos, stats, lifecycle, cross-channel, compare)
+- Video detail API with BigInt→Number conversion
+- Channel dashboard (sidebar, overview with charts, video library)
+- Video detail page (stats chart, lifecycle timeline, player)
+- Cross-channel analytics (KPI cards, platform bar chart, content comparison table)
+- Recharts integration (LineChart, BarChart)
+- Format utilities (compact numbers, dates, duration)
+
+**Files Added/Modified:**
+- Backend Modules: `sync/` (10 files), `analytics/` (3 files), `videos/` (1 file)
+- Frontend Pages: `channels/` (7 files), `videos/` (5 files), `analytics/` (4 files)
+- Frontend Hooks: 4 new hooks
+- Frontend Utilities: `format-utils.ts`
+- Shared Types: `analytics.ts`
+- Schema: VideoStatsSnapshot model, PublishedVideo stats fields, @@unique constraint
+- Router: 3 new routes (channels, videos/:id, analytics)
+- Sidebar: 2 nav items enabled (Channels, Analytics)
+
 ## Code Quality Standards
 
 ### TypeScript
@@ -616,21 +711,22 @@ pnpm -F web dev       # Start Web only
 
 | Item | Phase | Notes |
 |------|-------|-------|
-| Analytics dashboard | Phase 5 | VideoStatsSnapshot model + partitioning |
 | E2E tests | Phase 6 | Playwright test suite |
 | Deployment guide | Phase 6 | Docker, Nginx, backup strategy |
+| Dark mode | Phase 6 | UI/UX polish |
+| API docs (Swagger) | Phase 6 | OpenAPI spec generation |
 | Direct TikTok posting | Future | Currently Inbox Upload only; requires audit approval |
 
 ## Statistics
 
 | Metric | Value |
 |--------|-------|
-| Total Files | 150+ |
-| Backend Source Files | ~40 (excl. migrations) |
-| Frontend Source Files | ~20 |
+| Total Files | 180+ |
+| Backend Source Files | ~55 (excl. migrations) |
+| Frontend Source Files | ~40 |
 | Shared Package Files | 10 |
-| Database Entities | 7 (User, ConnectedAccount, TrendingVideo, DownloadedVideo, Channel, UploadJob, PublishedVideo) |
-| API Endpoints | 20+ (auth: 4, trending: 3, downloads: 3, uploads: 4, accounts: 3, channels: 2) |
+| Database Entities | 8 (User, ConnectedAccount, TrendingVideo, DownloadedVideo, Channel, UploadJob, PublishedVideo, VideoStatsSnapshot) |
+| API Endpoints | 30+ (auth: 4, trending: 3, downloads: 3, uploads: 4, accounts: 3, channels: 2, analytics: 6, videos: 1) |
 | OAuth Providers | 2 (Google, TikTok) |
 | Upload Uploaders | 2 (YouTube, TikTok) |
 | Redis Cache Keys | 5+ patterns |

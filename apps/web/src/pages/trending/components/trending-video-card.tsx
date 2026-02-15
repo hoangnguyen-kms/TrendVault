@@ -15,19 +15,21 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
       : `https://www.tiktok.com/@${video.channelId ?? 'user'}/video/${video.platformVideoId}`;
 
   const handleDownload = (e: React.MouseEvent) => {
-    e.preventDefault();
     e.stopPropagation();
     if (video.id) {
       queueDownload.mutate(video.id);
     }
   };
 
+  const handleCardClick = () => {
+    window.open(externalUrl, '_blank', 'noopener,noreferrer');
+  };
+
   return (
-    <a
-      href={externalUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+    <div
+      role="link"
+      onClick={handleCardClick}
+      className="group block cursor-pointer rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden"
     >
       {/* Thumbnail */}
       <div className="relative aspect-video bg-gray-100">
@@ -115,7 +117,7 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
           )}
         </div>
       </div>
-    </a>
+    </div>
   );
 }
 

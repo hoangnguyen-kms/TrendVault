@@ -6,6 +6,7 @@ import {
   Upload,
   BarChart3,
   Settings,
+  Tv,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -14,7 +15,8 @@ const navigation = [
   { name: 'Trending', href: '/trending', icon: TrendingUp, disabled: false },
   { name: 'Downloads', href: '/downloads', icon: Download, disabled: false },
   { name: 'Uploads', href: '/uploads', icon: Upload, disabled: false },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3, disabled: true },
+  { name: 'Channels', href: '/channels', icon: Tv, disabled: false },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3, disabled: false },
   { name: 'Settings', href: '/settings', icon: Settings, disabled: false },
 ];
 

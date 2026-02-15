@@ -12,6 +12,8 @@ import { oauthRouter } from './modules/oauth/oauth-router.js';
 import { accountsRouter } from './modules/accounts/accounts-router.js';
 import { channelsRouter } from './modules/channels/channels-router.js';
 import { uploadRouter } from './modules/uploads/upload-router.js';
+import { analyticsRouter } from './modules/analytics/analytics-router.js';
+import { videosRouter } from './modules/videos/videos-router.js';
 import { successResponse } from './lib/api-response.js';
 
 const app = express();
@@ -29,6 +31,8 @@ app.use('/api/oauth', oauthRouter);
 app.use('/api/accounts', accountsRouter);
 app.use('/api/channels', channelsRouter);
 app.use('/api/uploads', uploadRouter);
+app.use('/api/analytics', analyticsRouter);
+app.use('/api/videos', videosRouter);
 
 app.get('/api/health', (req, res) => {
   res.json(successResponse({ status: 'ok', timestamp: new Date().toISOString() }));

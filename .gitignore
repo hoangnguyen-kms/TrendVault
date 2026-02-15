@@ -33,6 +33,9 @@ apps/api/prisma/migrations/*_migration_lock.toml
 # MinIO / storage data
 data/
 
+# Downloaded videos (root-level only)
+/downloads/
+
 # OS
 Thumbs.db
 

@@ -63,12 +63,12 @@ export class TrendingService {
     const offset = (page - 1) * limit;
     const paginatedVideos = allVideos.slice(offset, offset + limit);
 
-    // 6. Upsert to DB (background, don't block response)
-    this.upsertVideos(allVideos).catch(() => {});
+    // 6. Upsert to DB and get IDs for the response
+    const idMap = await this.upsertVideos(allVideos);
 
-    // 7. Format response
+    // 7. Format response (include DB id for download actions)
     const response: CachedTrendingPage = {
-      data: paginatedVideos.map(serializeVideo),
+      data: paginatedVideos.map((v) => serializeVideo(v, idMap)),
       page,
       limit,
       total: allVideos.length,
@@ -113,11 +113,11 @@ export class TrendingService {
     try {
       const result = await adapter.fetchTrending({ region, maxResults: 20 });
       if (result.videos.length > 0) {
-        await this.upsertVideos(result.videos);
+        const idMap = await this.upsertVideos(result.videos);
         // Warm the "page 1" cache
         const cacheKey = `${platform}:${region}:all:1:20`;
         const response: CachedTrendingPage = {
-          data: result.videos.map(serializeVideo),
+          data: result.videos.map((v) => serializeVideo(v, idMap)),
           page: 1,
           limit: 20,
           total: result.videos.length,
@@ -131,10 +131,12 @@ export class TrendingService {
     }
   }
 
-  private async upsertVideos(videos: TrendingVideoDTO[]): Promise<void> {
-    if (videos.length === 0) return;
+  /** Upserts videos and returns a composite-key → id map */
+  private async upsertVideos(videos: TrendingVideoDTO[]): Promise<Map<string, string>> {
+    const idMap = new Map<string, string>();
+    if (videos.length === 0) return idMap;
 
-    await prisma.$transaction(
+    const records = await prisma.$transaction(
       videos.map((v) =>
         prisma.trendingVideo.upsert({
           where: {
@@ -180,13 +182,19 @@ export class TrendingService {
         }),
       ),
     );
+
+    for (const r of records) {
+      idMap.set(`${r.platform}:${r.platformVideoId}:${r.region}`, r.id);
+    }
+    return idMap;
   }
 }
 
 // --- Helpers ---
 
-function serializeVideo(v: TrendingVideoDTO) {
+function serializeVideo(v: TrendingVideoDTO, idMap: Map<string, string>) {
   return {
+    id: idMap.get(`${v.platform}:${v.platformVideoId}:${v.region}`) ?? null,
     platform: v.platform,
     platformVideoId: v.platformVideoId,
     region: v.region,

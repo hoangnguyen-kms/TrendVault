@@ -209,14 +209,42 @@ model PublishedVideo {
   privacyStatus   String?   @map("privacy_status")
   duration        Int?
   tags            String[]
+  viewCount       BigInt?   @default(0) @map("view_count")
+  likeCount       BigInt?   @default(0) @map("like_count")
+  commentCount    BigInt?   @default(0) @map("comment_count")
+  shareCount      BigInt?   @default(0) @map("share_count")
+  lastStatsSyncAt DateTime? @map("last_stats_sync_at")
   publishedAt     DateTime? @map("published_at")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  channel   Channel    @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  uploadJob UploadJob? @relation(fields: [uploadJobId], references: [id], onDelete: SetNull)
+  channel          Channel              @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  uploadJob        UploadJob?           @relation(fields: [uploadJobId], references: [id], onDelete: SetNull)
+  statsSnapshots   VideoStatsSnapshot[]
 
+  @@unique([channelId, platformVideoId])
   @@index([channelId])
   @@index([platform, platformVideoId])
   @@map("published_videos")
+}
+
+// --- Phase 5: Channel Management & Analytics ---
+
+model VideoStatsSnapshot {
+  id               String   @id @default(uuid()) @db.Uuid
+  publishedVideoId String   @map("published_video_id") @db.Uuid
+  viewCount        BigInt   @default(0) @map("view_count")
+  likeCount        BigInt   @default(0) @map("like_count")
+  commentCount     BigInt   @default(0) @map("comment_count")
+  shareCount       BigInt   @default(0) @map("share_count")
+  engagementRate   Float?   @map("engagement_rate")
+  isWeeklySummary  Boolean  @default(false) @map("is_weekly_summary")
+  snapshotAt       DateTime @map("snapshot_at")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  publishedVideo PublishedVideo @relation(fields: [publishedVideoId], references: [id], onDelete: Cascade)
+
+  @@index([publishedVideoId, snapshotAt])
+  @@index([snapshotAt])
+  @@map("video_stats_snapshots")
 }

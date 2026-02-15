@@ -7,6 +7,8 @@ import { scheduleTrendingRefreshJobs } from './modules/trending/jobs/trending-re
 import { createTrendingRefreshWorker } from './modules/trending/jobs/trending-refresh-worker.js';
 import { createDownloadWorker, initDownloadQueueEvents } from './modules/downloads/jobs/download-worker.js';
 import { createUploadWorker, initUploadQueueEvents } from './modules/uploads/jobs/upload-worker.js';
+import { scheduleSyncJobs } from './modules/sync/sync-scheduler.js';
+import { createSyncWorker } from './modules/sync/sync-worker.js';
 
 const logger = pino({
   transport:
@@ -51,5 +53,14 @@ server.listen(env.PORT, async () => {
     logger.info('Upload worker initialized');
   } catch (error) {
     logger.error(error, 'Failed to initialize upload worker');
+  }
+
+  // Start sync worker + schedule sync jobs (Phase 5)
+  try {
+    createSyncWorker();
+    await scheduleSyncJobs();
+    logger.info('Sync worker initialized and jobs scheduled');
+  } catch (error) {
+    logger.error(error, 'Failed to initialize sync worker');
   }
 });

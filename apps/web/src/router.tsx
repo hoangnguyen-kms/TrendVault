@@ -9,6 +9,9 @@ const TrendingPage = lazy(() => import('@/pages/trending/trending-page'));
 const DownloadsPage = lazy(() => import('@/pages/downloads/downloads-page'));
 const UploadsPage = lazy(() => import('@/pages/uploads/uploads-page'));
 const ConnectedAccountsPage = lazy(() => import('@/pages/settings/connected-accounts-page'));
+const ChannelDashboardPage = lazy(() => import('@/pages/channels/channel-dashboard-page'));
+const VideoDetailPage = lazy(() => import('@/pages/videos/video-detail-page'));
+const CrossChannelPage = lazy(() => import('@/pages/analytics/cross-channel-page'));
 
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -78,6 +81,30 @@ export const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <UploadsPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: 'channels',
+        element: (
+          <SuspenseWrapper>
+            <ChannelDashboardPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: 'videos/:videoId',
+        element: (
+          <SuspenseWrapper>
+            <VideoDetailPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: 'analytics',
+        element: (
+          <SuspenseWrapper>
+            <CrossChannelPage />
           </SuspenseWrapper>
         ),
       },
