@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard, disabled: false },
-  { name: 'Trending', href: '/trending', icon: TrendingUp, disabled: true },
+  { name: 'Trending', href: '/trending', icon: TrendingUp, disabled: false },
   { name: 'Downloads', href: '/downloads', icon: Download, disabled: true },
   { name: 'Uploads', href: '/uploads', icon: Upload, disabled: true },
   { name: 'Analytics', href: '/analytics', icon: BarChart3, disabled: true },

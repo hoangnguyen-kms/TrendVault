@@ -15,3 +15,11 @@ export const registerLimiter = rateLimit({
   legacyHeaders: false,
   message: 'Too many registration attempts, please try again later',
 });
+
+export const trendingLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many trending requests, please try again later',
+});

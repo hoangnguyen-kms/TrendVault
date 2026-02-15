@@ -20,6 +20,7 @@ const envSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   TIKTOK_CLIENT_KEY: z.string().optional(),
   TIKTOK_CLIENT_SECRET: z.string().optional(),
+  APIFY_API_TOKEN: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

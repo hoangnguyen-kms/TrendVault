@@ -51,3 +51,33 @@ model ConnectedAccount {
   @@index([userId])
   @@map("connected_accounts")
 }
+
+model TrendingVideo {
+  id              String   @id @default(uuid()) @db.Uuid
+  platform        Platform
+  platformVideoId String   @map("platform_video_id")
+  region          String   @db.VarChar(5)
+  title           String
+  description     String?  @db.Text
+  thumbnailUrl    String?  @map("thumbnail_url")
+  channelName     String?  @map("channel_name")
+  channelId       String?  @map("channel_id")
+  duration        Int?     // seconds
+  viewCount       BigInt?  @map("view_count")
+  likeCount       BigInt?  @map("like_count")
+  commentCount    BigInt?  @map("comment_count")
+  shareCount      BigInt?  @map("share_count")
+  publishedAt     DateTime? @map("published_at")
+  trendingRank    Int?     @map("trending_rank")
+  category        String?
+  tags            String[]
+  rawMetadata     Json?    @map("raw_metadata")
+  fetchedAt       DateTime @default(now()) @map("fetched_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@unique([platform, platformVideoId, region])
+  @@index([platform, region])
+  @@index([fetchedAt])
+  @@map("trending_videos")
+}
