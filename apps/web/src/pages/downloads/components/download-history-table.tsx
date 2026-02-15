@@ -1,4 +1,5 @@
-import { Download, RotateCcw, Trash2, ExternalLink } from 'lucide-react';
+import { Download, RotateCcw, Trash2, ExternalLink, Upload } from 'lucide-react';
+import { useNavigate } from 'react-router';
 import type { DownloadedVideo } from '@trendvault/shared-types';
 import { apiClient } from '@/lib/api-client';
 import { DownloadStatusBadge, formatFileSize, formatDate } from './download-status-badge';
@@ -85,6 +86,7 @@ function DownloadRow({
   isRetrying: boolean;
   isDeleting: boolean;
 }) {
+  const navigate = useNavigate();
   const handleGetUrl = async () => {
     try {
       const response = await apiClient.get<{ success: true; data: { url: string } }>(
@@ -144,13 +146,22 @@ function DownloadRow({
       <td className="px-4 py-3">
         <div className="flex items-center justify-end gap-1">
           {download.status === 'COMPLETED' && (
-            <button
-              onClick={handleGetUrl}
-              className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600"
-              title="Download file"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </button>
+            <>
+              <button
+                onClick={() => navigate('/uploads')}
+                className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-purple-600"
+                title="Upload to platform"
+              >
+                <Upload className="h-4 w-4" />
+              </button>
+              <button
+                onClick={handleGetUrl}
+                className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600"
+                title="Download file"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </button>
+            </>
           )}
           {(download.status === 'FAILED' || download.status === 'CANCELLED') && (
             <button

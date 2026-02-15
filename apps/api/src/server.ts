@@ -6,6 +6,7 @@ import pino from 'pino';
 import { scheduleTrendingRefreshJobs } from './modules/trending/jobs/trending-refresh-job.js';
 import { createTrendingRefreshWorker } from './modules/trending/jobs/trending-refresh-worker.js';
 import { createDownloadWorker, initDownloadQueueEvents } from './modules/downloads/jobs/download-worker.js';
+import { createUploadWorker, initUploadQueueEvents } from './modules/uploads/jobs/upload-worker.js';
 
 const logger = pino({
   transport:
@@ -41,5 +42,14 @@ server.listen(env.PORT, async () => {
     logger.info('Download worker initialized');
   } catch (error) {
     logger.error(error, 'Failed to initialize download worker');
+  }
+
+  // Start upload worker + bridge BullMQ events to Socket.IO
+  try {
+    createUploadWorker();
+    initUploadQueueEvents();
+    logger.info('Upload worker initialized');
+  } catch (error) {
+    logger.error(error, 'Failed to initialize upload worker');
   }
 });

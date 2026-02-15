@@ -53,6 +53,12 @@ export class MinIOStorageService implements IStorageService {
     };
   }
 
+  async getReadStream(key: string): Promise<Readable> {
+    const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
+    const response = await this.client.send(command);
+    return response.Body as Readable;
+  }
+
   async getDownloadUrl(key: string, expiresIn = 900): Promise<string> {
     const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
     return getSignedUrl(this.client, command, { expiresIn });

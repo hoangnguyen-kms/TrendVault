@@ -18,9 +18,12 @@ const envSchema = z.object({
   YOUTUBE_API_KEY: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_REDIRECT_URI: z.string().optional(),
   TIKTOK_CLIENT_KEY: z.string().optional(),
   TIKTOK_CLIENT_SECRET: z.string().optional(),
+  TIKTOK_REDIRECT_URI: z.string().optional(),
   APIFY_API_TOKEN: z.string().optional(),
+  FRONTEND_URL: z.string().default('http://localhost:5173'),
 });
 
 export type Env = z.infer<typeof envSchema>;

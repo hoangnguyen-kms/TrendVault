@@ -31,3 +31,11 @@ export const downloadLimiter = rateLimit({
   legacyHeaders: false,
   message: 'Too many download requests, please try again later',
 });
+
+export const uploadLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many upload requests, please try again later',
+});

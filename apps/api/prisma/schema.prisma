@@ -18,6 +18,7 @@ model User {
 
   connectedAccounts ConnectedAccount[]
   downloadedVideos  DownloadedVideo[]
+  uploadJobs        UploadJob[]
 
   @@map("users")
 }
@@ -46,7 +47,8 @@ model ConnectedAccount {
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channels Channel[]
 
   @@unique([userId, platform, platformUserId])
   @@index([userId])
@@ -118,9 +120,103 @@ model DownloadedVideo {
 
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   trendingVideo TrendingVideo @relation(fields: [trendingVideoId], references: [id], onDelete: Cascade)
+  uploadJobs    UploadJob[]
 
   @@unique([userId, platform, platformVideoId])
   @@index([userId, status])
   @@index([status])
   @@map("downloaded_videos")
+}
+
+// --- Phase 4: Upload & OAuth ---
+
+enum UploadStatus {
+  PENDING
+  UPLOADING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model Channel {
+  id                 String   @id @default(uuid()) @db.Uuid
+  connectedAccountId String   @map("connected_account_id") @db.Uuid
+  platform           Platform
+  platformChannelId  String   @map("platform_channel_id")
+  name               String
+  avatarUrl          String?  @map("avatar_url")
+  region             String?  @db.VarChar(5)
+  subscriberCount    BigInt?  @map("subscriber_count")
+  totalViews         BigInt?  @map("total_views")
+  videoCount         Int?     @map("video_count")
+  isActive           Boolean  @default(true) @map("is_active")
+  lastSyncedAt       DateTime? @map("last_synced_at")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  connectedAccount ConnectedAccount @relation(fields: [connectedAccountId], references: [id], onDelete: Cascade)
+  uploadJobs       UploadJob[]
+  publishedVideos  PublishedVideo[]
+
+  @@unique([connectedAccountId, platformChannelId])
+  @@index([connectedAccountId])
+  @@map("channels")
+}
+
+model UploadJob {
+  id                String       @id @default(uuid()) @db.Uuid
+  userId            String       @map("user_id") @db.Uuid
+  downloadedVideoId String       @map("downloaded_video_id") @db.Uuid
+  channelId         String       @map("channel_id") @db.Uuid
+  platform          Platform
+  title             String
+  description       String?      @db.Text
+  tags              String[]
+  privacyStatus     String       @default("private") @map("privacy_status")
+  uploadMode        String?      @map("upload_mode") // 'direct_post' | 'inbox' (TikTok only)
+  status            UploadStatus @default(PENDING)
+  bullmqJobId       String?      @map("bullmq_job_id")
+  platformVideoId   String?      @map("platform_video_id")
+  publishUrl        String?      @map("publish_url")
+  progress          Int          @default(0)
+  errorMessage      String?      @map("error_message") @db.Text
+  uploadedAt        DateTime?    @map("uploaded_at")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  downloadedVideo DownloadedVideo @relation(fields: [downloadedVideoId], references: [id], onDelete: Cascade)
+  channel         Channel         @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  publishedVideo  PublishedVideo?
+
+  @@index([userId, status])
+  @@index([channelId])
+  @@index([downloadedVideoId])
+  @@index([status])
+  @@map("upload_jobs")
+}
+
+model PublishedVideo {
+  id              String    @id @default(uuid()) @db.Uuid
+  channelId       String    @map("channel_id") @db.Uuid
+  uploadJobId     String?   @unique @map("upload_job_id") @db.Uuid
+  platform        Platform
+  platformVideoId String    @map("platform_video_id")
+  title           String
+  description     String?   @db.Text
+  thumbnailUrl    String?   @map("thumbnail_url")
+  privacyStatus   String?   @map("privacy_status")
+  duration        Int?
+  tags            String[]
+  publishedAt     DateTime? @map("published_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  channel   Channel    @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  uploadJob UploadJob? @relation(fields: [uploadJobId], references: [id], onDelete: SetNull)
+
+  @@index([channelId])
+  @@index([platform, platformVideoId])
+  @@map("published_videos")
 }

@@ -30,10 +30,20 @@ export function initSocketIO(httpServer: HttpServer): SocketIOServer {
   io.on('connection', (socket) => {
     // Client joins a room keyed by BullMQ jobId — validates ownership first
     socket.on('job:subscribe', async (jobId: string) => {
+      // Check download jobs
       const download = await prisma.downloadedVideo.findFirst({
         where: { bullmqJobId: jobId, userId: socket.data.userId },
       });
-      if (download) socket.join(jobId);
+      if (download) {
+        socket.join(jobId);
+        return;
+      }
+
+      // Check upload jobs
+      const upload = await prisma.uploadJob.findFirst({
+        where: { bullmqJobId: jobId, userId: socket.data.userId },
+      });
+      if (upload) socket.join(jobId);
     });
     socket.on('job:unsubscribe', (jobId: string) => {
       socket.leave(jobId);

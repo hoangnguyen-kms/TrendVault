@@ -1,8 +1,9 @@
 # TrendVault Code Standards & Best Practices
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Last Updated:** 2026-02-15
 **Scope:** Backend (Node.js/TypeScript), Frontend (React/TypeScript), Shared packages
+**Phase 4 Updates:** OAuth patterns, encryption, token management
 
 ## General Principles
 
@@ -351,6 +352,104 @@ export class TrendingCache {
 - TTL per cache type (not magic numbers)
 - Handle cache misses gracefully
 - Log cache operations for debugging
+
+### Token Encryption Pattern (Phase 4)
+
+**Encrypting Sensitive Tokens:**
+```typescript
+export class EncryptionService {
+  private masterKey: Buffer
+
+  constructor(keyHex: string) {
+    this.masterKey = Buffer.from(keyHex, 'hex')
+  }
+
+  encrypt(plaintext: string): string {
+    const iv = crypto.randomBytes(16)
+    const cipher = crypto.createCipheriv('aes-256-gcm', this.masterKey, iv)
+
+    let encrypted = cipher.update(plaintext, 'utf8', 'hex')
+    encrypted += cipher.final('hex')
+
+    const authTag = cipher.getAuthTag()
+    return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`
+  }
+
+  decrypt(ciphertext: string): string {
+    const [ivHex, authTagHex, encrypted] = ciphertext.split(':')
+    const iv = Buffer.from(ivHex, 'hex')
+    const authTag = Buffer.from(authTagHex, 'hex')
+
+    const decipher = crypto.createDecipheriv('aes-256-gcm', this.masterKey, iv)
+    decipher.setAuthTag(authTag)
+
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8')
+    decrypted += decipher.final('utf8')
+    return decrypted
+  }
+}
+```
+
+**Usage for OAuth Tokens:**
+```typescript
+// Store encrypted
+const encryptedToken = encryptionService.encrypt(accessToken)
+await prisma.connectedAccount.update({
+  where: { id },
+  data: { accessToken: encryptedToken }
+})
+
+// Retrieve & decrypt
+const account = await prisma.connectedAccount.findUnique({ where: { id } })
+const decryptedToken = encryptionService.decrypt(account.accessToken)
+```
+
+**Best Practices:**
+- Algorithm: AES-256-GCM (authenticated encryption)
+- IV: Random per encryption (prepended to ciphertext)
+- Auth Tag: Integrity check (prevents tampering)
+- Master Key: Environment variable (HSM in production)
+- Never store plaintext tokens in database
+
+### OAuth CSRF Protection Pattern (Phase 4)
+
+**CSRF State Management:**
+```typescript
+// Generate authorization URL with state
+async generateAuthorizationUrl(provider: string): Promise<string> {
+  const state = crypto.randomBytes(32).toString('hex')
+  const stateKey = `oauth:state:${state}`
+
+  // Store state in Redis with 5min TTL
+  await this.redis.setex(stateKey, 300, Date.now().toString())
+
+  const url = new URL(`https://${provider}.example.com/oauth/authorize`)
+  url.searchParams.set('state', state)
+  url.searchParams.set('client_id', this.config.clientId)
+  url.searchParams.set('redirect_uri', this.config.redirectUri)
+
+  return url.toString()
+}
+
+// Validate state on callback
+async validateState(state: string): Promise<boolean> {
+  const stateKey = `oauth:state:${state}`
+  const exists = await this.redis.exists(stateKey)
+
+  if (!exists) return false
+
+  // Delete state (one-time use)
+  await this.redis.del(stateKey)
+  return true
+}
+```
+
+**Best Practices:**
+- Generate cryptographically secure random state (32 bytes)
+- Store in Redis with short TTL (5 minutes)
+- Validate on callback (verify state exists)
+- Delete after validation (one-time use only)
+- Prevents cross-site request forgery in OAuth flow
 
 ## Frontend Code Patterns
 

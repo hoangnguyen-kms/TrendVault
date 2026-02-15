@@ -1,6 +1,6 @@
 # TrendVault Codebase Summary
 
-**Version:** 1.1.0 (Phase 3 Complete)
+**Version:** 1.2.0 (Phase 4 Complete)
 **Generated:** 2026-02-15
 **Monorepo Structure:** Turborepo + pnpm workspaces
 
@@ -18,15 +18,21 @@ TrendVault/
 │   │   │   ├── middleware/          # Express middleware
 │   │   │   │   ├── rate-limiter.ts  # Updated with downloadLimiter (Phase 3)
 │   │   │   │   ├── ... (other middleware)
-│   │   │   ├── services/            # Shared services (Phase 3)
-│   │   │   │   └── storage/
-│   │   │   │       ├── storage-service.interface.ts
-│   │   │   │       ├── minio-storage-service.ts
-│   │   │   │       └── storage-factory.ts
+│   │   │   ├── services/            # Shared services (Phase 3-4)
+│   │   │   │   ├── storage/
+│   │   │   │   │   ├── storage-service.interface.ts
+│   │   │   │   │   ├── minio-storage-service.ts
+│   │   │   │   │   └── storage-factory.ts
+│   │   │   │   └── encryption/
+│   │   │   │       └── encryption-service.ts  # AES-256-GCM (Phase 4)
 │   │   │   ├── modules/             # Feature modules
 │   │   │   │   ├── auth/            # Authentication (Phase 1)
 │   │   │   │   ├── trending/        # Trending discovery (Phase 2)
-│   │   │   │   └── downloads/       # Download engine (Phase 3)
+│   │   │   │   ├── downloads/       # Download engine (Phase 3)
+│   │   │   │   ├── oauth/           # OAuth 2.0 flows (Phase 4)
+│   │   │   │   ├── uploads/         # Upload & publishing (Phase 4)
+│   │   │   │   ├── accounts/        # Connected accounts (Phase 4)
+│   │   │   │   └── channels/        # User channels (Phase 4)
 │   │   │   ├── app.ts               # Express app
 │   │   │   └── server.ts            # Server startup
 │   │   ├── prisma/
@@ -120,7 +126,7 @@ TrendVault/
 |------|---------|
 | `auth-middleware.ts` | JWT validation & user extraction |
 | `error-handler.ts` | Centralized error handling |
-| `rate-limiter.ts` | Express rate limiting + downloadLimiter (Phase 3) |
+| `rate-limiter.ts` | Express rate limiting + downloadLimiter (Phase 3) + uploadLimiter (Phase 4) |
 | `request-logger.ts` | Request/response logging (Morgan) |
 | `validate-request.ts` | Zod schema validation wrapper |
 
@@ -239,6 +245,85 @@ class TrendingService {
 - `tiktok-adapter.ts` - TikTok + Apify integration
 - `trending-refresh-job.ts` - BullMQ repeatable job (every 30min)
 
+### OAuth Module (`src/modules/oauth/`)
+
+**Phase 4 Complete**
+
+| File | Purpose |
+|------|---------|
+| `oauth-service.ts` | OAuth 2.0 flow orchestration (Google + TikTok) |
+| `oauth-router.ts` | OAuth callback routes (/callback/{provider}) |
+
+**Features:**
+- Google OAuth 2.0 (youtube.upload scope)
+- TikTok OAuth 2.0 (video.publish scope)
+- CSRF protection via Redis state storage
+- Token blob encryption (AES-256-GCM)
+- Automatic token refresh on expiry
+
+### Upload Module (`src/modules/uploads/`)
+
+**Phase 4 Complete**
+
+```
+uploads/
+├── upload-service.ts            # Upload orchestration
+├── upload-controller.ts         # HTTP handlers
+├── upload-router.ts             # Route definitions
+├── upload-schemas.ts            # Zod validation schemas
+├── uploaders/
+│   ├── platform-uploader-interface.ts  # Strategy pattern
+│   ├── youtube-uploader.ts             # YouTube API integration
+│   └── tiktok-uploader.ts              # TikTok Inbox Upload
+└── jobs/
+    ├── upload-queue.ts          # BullMQ queue setup
+    └── upload-worker.ts         # BullMQ job processor
+```
+
+**Key Methods:**
+- `initiateUpload(downloadedVideoId, channelId, metadata)` - Queue upload job
+- `getUploadStatus(uploadId)` - Query job status
+- `cancelUpload(uploadId)` - Abort job
+
+### Accounts Module (`src/modules/accounts/`)
+
+**Phase 4 Complete**
+
+| File | Purpose |
+|------|---------|
+| `accounts-router.ts` | Connected accounts API routes |
+
+**Endpoints:**
+- GET `/api/accounts` - List connected accounts per user
+- POST `/api/accounts/{accountId}/refresh` - Force token refresh
+- DELETE `/api/accounts/{accountId}` - Disconnect account
+
+### Channels Module (`src/modules/channels/`)
+
+**Phase 4 Complete**
+
+| File | Purpose |
+|------|---------|
+| `channels-router.ts` | User channels API routes |
+
+**Endpoints:**
+- GET `/api/channels` - List channels per user
+- GET `/api/channels/{channelId}` - Get channel details
+
+### Encryption Service (`src/services/encryption/`)
+
+**Phase 4 Complete**
+
+| File | Purpose |
+|------|---------|
+| `encryption-service.ts` | AES-256-GCM token blob encryption |
+
+**Usage:**
+- Encrypts OAuth access/refresh tokens as single JSON blob before DB storage
+- Async PBKDF2 key derivation per user (cached 5min)
+- Decrypts on retrieval for API calls
+- Master key: Environment variable (HSM in production)
+
 ### Root Entry Points
 
 | File | Purpose |
@@ -254,19 +339,23 @@ class TrendingService {
 | `seed.ts` | Test data seeding script |
 | `migrations/` | Database migration history |
 
-**Current Schema (Phase 3):**
+**Current Schema (Phase 4):**
 ```prisma
 model User { ... }                    # Phase 1
-model ConnectedAccount { ... }        # Phase 1
+model ConnectedAccount { ... }        # Phase 1 (updated Phase 4: encrypted tokens)
 enum Platform { YOUTUBE, TIKTOK }    # Phase 2
 model TrendingVideo { ... }          # Phase 2
-enum DownloadStatus { PENDING, DOWNLOADING, COMPLETED, FAILED, CANCELLED }  # Phase 3
+enum DownloadStatus { ... }           # Phase 3
 model DownloadedVideo { ... }        # Phase 3
+model Channel { ... }                 # Phase 4
+model UploadJob { ... }              # Phase 4
+model PublishedVideo { ... }         # Phase 4
 ```
 
 **Migrations:**
 - `20260215075820_add_trending_video/` - Platform enum + TrendingVideo table
 - `20260215XXXXXX_add_downloaded_video/` - DownloadStatus enum + DownloadedVideo table (Phase 3)
+- `202602XXXXXX_add_upload_models/` - Channel, UploadJob, PublishedVideo tables (Phase 4)
 
 ## Frontend (`apps/web/`)
 
@@ -277,6 +366,8 @@ model DownloadedVideo { ... }        # Phase 3
 | `pages/auth/` | `login-page.tsx`, `register-page.tsx` | 1 | Complete |
 | `pages/trending/` | `trending-page.tsx` + 3 components + 2 hooks | 2 | Complete |
 | `pages/downloads/` | `downloads-page.tsx` + components + hooks | 3 | Complete |
+| `pages/uploads/` | `uploads-page.tsx`, `upload-form.tsx`, `upload-history-table.tsx`, 1 hook | 4 | Complete |
+| `pages/settings/` | `connected-accounts-page.tsx`, `connected-account-card.tsx`, 1 hook | 4 | Complete |
 | `pages/` | `dashboard-page.tsx` | 1 | Scaffolded |
 
 ### Trending Page (`pages/trending/`)
@@ -368,6 +459,8 @@ export const apiClient = {
 | `trending.ts` | Trending schemas + types | `TrendingVideoSchema`, `TrendingQuerySchema` |
 | `platform.ts` | Platform enums + types | `Platform`, `PlatformType` |
 | `connected-account.ts` | OAuth account types | `ConnectedAccountDTO` |
+| `channel.ts` | Channel entity types (Phase 4) | `ChannelDTO`, `ChannelSchema` |
+| `upload.ts` | Upload job types (Phase 4) | `UploadJobDTO`, `PublishedVideoDTO` |
 | `api-response.ts` | Standard response shape | `ApiResponse<T>` |
 | `user.ts` | User entity types | `User`, `UserProfile` |
 | `index.ts` | Package exports | All types |
@@ -463,24 +556,31 @@ pnpm -F api dev       # Start API only
 pnpm -F web dev       # Start Web only
 ```
 
-## Phase 2 Implementation Summary
+## Phase 4 Implementation Summary
 
 **Completed Features:**
-- YouTube trending via Data API v3 (mostPopular + search.list)
-- TikTok trending via Apify (primary) + Research API (optional)
-- Platform adapter pattern (strategy pattern)
-- Redis caching (30min YouTube, 15min TikTok)
-- BullMQ background refresh jobs (every 30min)
-- Trending service orchestration
-- Frontend trending page with filters, infinite scroll, auto-refresh
-- Database TrendingVideo model + migration
-- Shared Zod schemas for validation
+- OAuth 2.0 integration (Google + TikTok)
+- Token encryption (AES-256-GCM)
+- CSRF protection (Redis state storage)
+- YouTube upload service (metadata, thumbnail, privacy)
+- TikTok Inbox Upload service
+- BullMQ upload queue with progress tracking
+- Socket.IO real-time upload progress
+- Connected accounts management
+- Channel management API
+- Upload history tracking
+- Frontend OAuth login flow
+- Upload form with metadata
+- Connected accounts page
+- Shared upload/channel types
 
 **Files Added/Modified:**
-- Backend: `apps/api/src/modules/trending/` (11 files)
-- Frontend: `apps/web/src/pages/trending/` (5 files)
-- Database: `apps/api/prisma/migrations/20260215075820_add_trending_video/`
-- Shared Types: `packages/shared-types/src/trending.ts`
+- Backend Modules: `oauth/`, `uploads/`, `accounts/`, `channels/`
+- Backend Services: `encryption/`
+- Frontend Pages: `uploads/`, `settings/`
+- Frontend Hooks: `use-uploads.ts`, `use-connected-accounts.ts`
+- Shared Types: `channel.ts`, `upload.ts`
+- Database: Phase 4 migration (Channel, UploadJob, PublishedVideo models)
 
 ## Code Quality Standards
 
@@ -516,23 +616,25 @@ pnpm -F web dev       # Start Web only
 
 | Item | Phase | Notes |
 |------|-------|-------|
-| OAuth publishing | Phase 4 | YouTube OAuth, TikTok Inbox Upload |
 | Analytics dashboard | Phase 5 | VideoStatsSnapshot model + partitioning |
 | E2E tests | Phase 6 | Playwright test suite |
 | Deployment guide | Phase 6 | Docker, Nginx, backup strategy |
+| Direct TikTok posting | Future | Currently Inbox Upload only; requires audit approval |
 
 ## Statistics
 
 | Metric | Value |
 |--------|-------|
-| Total Files | 110+ |
-| Backend Source Files | ~25 (excl. migrations) |
-| Frontend Source Files | ~15 |
-| Shared Package Files | 8 |
-| Database Entities | 4 (User, ConnectedAccount, TrendingVideo, DownloadedVideo) |
-| API Endpoints | 10+ (auth: 4, trending: 3, downloads: 3+) |
+| Total Files | 150+ |
+| Backend Source Files | ~40 (excl. migrations) |
+| Frontend Source Files | ~20 |
+| Shared Package Files | 10 |
+| Database Entities | 7 (User, ConnectedAccount, TrendingVideo, DownloadedVideo, Channel, UploadJob, PublishedVideo) |
+| API Endpoints | 20+ (auth: 4, trending: 3, downloads: 3, uploads: 4, accounts: 3, channels: 2) |
+| OAuth Providers | 2 (Google, TikTok) |
+| Upload Uploaders | 2 (YouTube, TikTok) |
 | Redis Cache Keys | 5+ patterns |
-| Socket.IO Events | 3+ (download:start, download:progress, download:complete) |
+| Socket.IO Events | 6+ (download:*, upload:*, OAuth:*) |
 
 ## Documentation Map
 

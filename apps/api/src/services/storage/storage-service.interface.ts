@@ -16,6 +16,7 @@ export interface ObjectMetadata {
 
 export interface IStorageService {
   upload(key: string, stream: Readable, metadata?: Record<string, string>): Promise<UploadResult>;
+  getReadStream(key: string): Promise<Readable>;
   getDownloadUrl(key: string, expiresIn?: number): Promise<string>;
   delete(key: string): Promise<void>;
   exists(key: string): Promise<boolean>;

@@ -1,7 +1,7 @@
 # TrendVault System Architecture
 
-**Version:** 1.1.0
-**Status:** Phase 3 Complete
+**Version:** 1.2.0
+**Status:** Phase 4 Complete
 **Last Updated:** 2026-02-15
 
 ## Architecture Overview
@@ -19,7 +19,7 @@ TrendVault is a full-stack monorepo web application with clear separation of con
 ┌─────────────────▼──────────────────────────────────────────────────┐
 │                 API Server (Express 5)                             │
 │  ┌──────────────────────────────────────────────────────────────┐  │
-│  │ Auth │ Trending │ Downloads │ Socket.IO │ Error │ CORS │ ... │ │
+│  │ Auth │ Trending │ Downloads │ Uploads │ OAuth │ Socket.IO │ ... │ │
 │  └─┬──────┬──────────┬─────────────┬─────────────────────────────┘ │
 └───┼──────┼──────────┼─────────────┼────────────────────────────────┘
     │      │          │             │
@@ -138,21 +138,41 @@ api/src/
 │   │   └── jobs/
 │   │       ├── trending-refresh-job.ts
 │   │       └── trending-refresh-worker.ts
-│   └── downloads/
-│       ├── download-router.ts
-│       ├── download-controller.ts
-│       ├── download-service.ts
-│       ├── download-schemas.ts
-│       ├── download-helpers.ts
-│       ├── ytdlp-service.ts
-│       └── jobs/
-│           ├── download-queue.ts
-│           └── download-worker.ts
+│   ├── downloads/
+│   │   ├── download-router.ts
+│   │   ├── download-controller.ts
+│   │   ├── download-service.ts
+│   │   ├── download-schemas.ts
+│   │   ├── download-helpers.ts
+│   │   ├── ytdlp-service.ts
+│   │   └── jobs/
+│   │       ├── download-queue.ts
+│   │       └── download-worker.ts
+│   ├── oauth/
+│   │   ├── oauth-router.ts
+│   │   └── oauth-service.ts
+│   ├── uploads/
+│   │   ├── upload-router.ts
+│   │   ├── upload-service.ts
+│   │   ├── upload-schemas.ts
+│   │   ├── uploaders/
+│   │   │   ├── platform-uploader-interface.ts
+│   │   │   ├── youtube-uploader.ts
+│   │   │   └── tiktok-uploader.ts
+│   │   └── jobs/
+│   │       ├── upload-queue.ts
+│   │       └── upload-worker.ts
+│   ├── accounts/
+│   │   └── accounts-router.ts
+│   └── channels/
+│       └── channels-router.ts
 ├── services/
-│   └── storage/
-│       ├── storage-service.interface.ts
-│       ├── minio-storage-service.ts
-│       └── storage-factory.ts
+│   ├── storage/
+│   │   ├── storage-service.interface.ts
+│   │   ├── minio-storage-service.ts
+│   │   └── storage-factory.ts
+│   └── encryption/
+│       └── encryption-service.ts
 ├── app.ts                  # Express app initialization
 └── server.ts               # Server startup
 ```
@@ -371,7 +391,183 @@ S3-compatible file storage
 **Buckets:**
 - `downloaded-videos` - User-downloaded videos (organized by userId/downloadId)
 
-### 5. Authentication Module (Phase 1)
+### 5. OAuth Module (Phase 4)
+
+**Location:** `apps/api/src/modules/oauth/`
+
+**Responsibilities:**
+- OAuth 2.0 authorization flows (Google + TikTok)
+- CSRF token management via Redis state storage
+- Authorization code exchange for access tokens
+- Token encryption before database storage
+
+**Components:**
+
+#### 5.1 OAuth Service
+**Key Methods:**
+- `generateAuthorizationUrl(provider)` - Create OAuth consent URL with state
+- `exchangeCodeForTokens(provider, code, state)` - Exchange code for tokens
+- `storeTokens(userId, provider, tokens)` - Encrypt + save tokens
+- `getDecryptedTokens(userId, provider)` - Retrieve + decrypt tokens
+
+**CSRF Flow:**
+```
+1. Generate random state: crypto.randomBytes(32).toString('hex')
+2. Store in Redis: oauth:state:{state} → userId (10min TTL)
+3. Include in auth URL
+4. Callback: no cookie auth required — userId derived from Redis state
+5. Validate on callback (state matches, not expired)
+6. Delete state from Redis (one-time use)
+```
+
+**Token Blob Encryption:**
+```
+Algorithm: AES-256-GCM
+Master Key: process.env.ENCRYPTION_KEY
+Key Derivation: Async PBKDF2 (per-user, cached 5min)
+Storage: Single encrypted JSON blob for both access + refresh tokens
+IV: Random per encryption (stored in ConnectedAccount)
+Auth Tag: Integrity verification (stored in ConnectedAccount)
+```
+
+#### 5.2 OAuth Endpoints
+
+**GET /oauth/authorize?provider=google**
+```
+Response: Redirect to Google OAuth consent screen
+```
+
+**GET /oauth/callback?code=...&state=...**
+```
+1. Validate state (CSRF)
+2. Exchange code for tokens
+3. Create ConnectedAccount (if new)
+4. Encrypt tokens via EncryptionService
+5. Redirect to frontend with session token
+```
+
+### 6. Upload Module (Phase 4)
+
+**Location:** `apps/api/src/modules/uploads/`
+
+**Responsibilities:**
+- Queue video upload jobs
+- Manage upload lifecycle (pending → uploading → completed)
+- Emit real-time progress via Socket.IO
+- Call platform uploaders (YouTube, TikTok)
+- Track published videos
+
+**Components:**
+
+#### 6.1 Upload Service
+**Main orchestrator for upload workflows**
+
+**Methods:**
+- `initiateUpload(downloadedVideoId, channelId, metadata)` - Queue upload job
+- `getUploadStatus(uploadId)` - Query job status
+- `getUploadHistory(userId)` - Get user's uploads
+- `cancelUpload(uploadId)` - Abort job
+
+**Flow:**
+1. Validate channel access + downloaded video ownership
+2. Create UploadJob (status: PENDING)
+3. Queue BullMQ upload job
+4. Return uploadId
+5. Worker processes async (progress → Socket.IO)
+6. On success: create PublishedVideo record
+7. On failure: log error in UploadJob
+
+#### 6.2 Platform Uploaders
+
+**Pattern:** Strategy pattern for multi-platform uploading
+
+```typescript
+interface IPlatformUploader {
+  upload(
+    videoPath: string,
+    metadata: UploadMetadata,
+    accessToken: string,
+    progressCallback: (progress: number) => void
+  ): Promise<{ platformVideoId: string }>
+}
+```
+
+**YouTube Uploader:**
+- Uses googleapis/youtube client
+- Uploads via `/upload/youtube/v3/videos`
+- Sets title, description, tags, privacy level
+- Uploads thumbnail separately
+- Supports custom watermark
+
+**TikTok Uploader:**
+- Uses Inbox Upload (draft mode only)
+- Supports up to 10 videos/day per account
+- Returns draft video ID (requires manual publish)
+
+#### 6.3 Upload Queue & Worker
+
+**Framework:** BullMQ (Redis-backed)
+
+**Job: UploadJob**
+- Contains: downloadedVideoId, channelId, metadata
+- Progress tracking: emitted via Socket.IO
+- Retry: Exponential backoff (3 attempts)
+
+**Worker: UploadWorker**
+- Listens for UploadJob
+- Retrieves downloaded video from MinIO
+- Calls platform uploader
+- Emits progress events to Socket.IO room
+- Updates PostgreSQL status
+
+#### 6.4 Upload API Endpoints
+
+**POST /api/uploads**
+```
+Body:
+{
+  downloadedVideoId: string,
+  channelId: string,
+  title: string,
+  description?: string,
+  tags?: string[],
+  privacy: 'public' | 'unlisted' | 'private'
+}
+
+Response:
+{
+  success: true,
+  data: {
+    uploadId: string,
+    status: 'pending'
+  }
+}
+```
+
+**GET /api/uploads/{uploadId}**
+```
+Response:
+{
+  success: true,
+  data: {
+    uploadId: string,
+    downloadedVideoId: string,
+    channelId: string,
+    status: 'uploading' | 'completed' | 'failed',
+    progress: 0-100,
+    error?: string,
+    platformVideoId?: string
+  }
+}
+```
+
+**GET /api/uploads**
+```
+Query: page, limit
+Response: Paginated list of user's uploads with status
+```
+
+### 7. Authentication Module (Phase 1)
 
 **Location:** `apps/api/src/modules/auth/`
 
@@ -399,13 +595,13 @@ S3-compatible file storage
 - Returns 401 if invalid/expired
 - Allows public routes to bypass
 
-### 5. Data Layer
+### 8. Data Layer
 
-#### 5.1 PostgreSQL (17)
+#### 8.1 PostgreSQL (17)
 
 **Prisma Schema Location:** `apps/api/prisma/schema.prisma`
 
-**Current Entities (Phase 3):**
+**Current Entities (Phase 4):**
 
 **User**
 ```prisma
@@ -494,16 +690,73 @@ model DownloadedVideo {
 }
 ```
 
+**Channel** (Phase 4)
+```prisma
+model Channel {
+  id              String @id @default(uuid())
+  userId          String
+  connectedAccountId String
+  platform        Platform
+  platformChannelId String
+  channelName     String
+  subscribers     Int?
+  createdAt       DateTime @default(now())
+
+  @@unique([userId, platformChannelId])
+}
+```
+
+**UploadJob** (Phase 4)
+```prisma
+model UploadJob {
+  id              String @id @default(uuid())
+  userId          String
+  downloadedVideoId String
+  channelId       String
+  title           String
+  description     String?
+  tags            String[]
+  privacy         String  // public | unlisted | private
+  status          String  // pending | uploading | completed | failed
+  progress        Int @default(0)
+  platformVideoId String?
+  error           String?
+  bullmqJobId     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([downloadedVideoId])
+}
+```
+
+**PublishedVideo** (Phase 4)
+```prisma
+model PublishedVideo {
+  id              String @id @default(uuid())
+  userId          String
+  uploadJobId     String
+  platform        Platform
+  platformVideoId String
+  title           String
+  publishedAt     DateTime @default(now())
+
+  @@unique([uploadJobId])
+  @@index([userId, platform])
+}
+```
+
 **Migrations:**
 - `20260215075820_add_trending_video` - Adds Platform enum + TrendingVideo table
 - `20260215XXXXXX_add_downloaded_video` - Adds DownloadStatus enum + DownloadedVideo table (Phase 3)
+- `202602XXXXXX_add_upload_models` - Adds Channel, UploadJob, PublishedVideo tables (Phase 4)
 
-#### 5.2 Redis (7)
+#### 8.2 Redis (7)
 
-**Purpose:** Caching + session management + job queue
+**Purpose:** Caching + session management + job queue + OAuth state
 
 **Data Structures:**
-- String: Trending data (JSON serialized)
+- String: Trending data (JSON serialized), OAuth state
 - Counter: API quota tracking
 - Hash: Session storage (future)
 
@@ -511,8 +764,9 @@ model DownloadedVideo {
 - Trending (YouTube): 30 minutes
 - Trending (TikTok): 15 minutes
 - Daily quota counter: 24 hours
+- OAuth state: 10 minutes
 
-#### 5.3 MinIO (S3-Compatible)
+#### 8.3 MinIO (S3-Compatible)
 
 **Purpose:** Video file storage (for Phase 3+)
 
@@ -520,7 +774,7 @@ model DownloadedVideo {
 - `downloaded-videos` - User-downloaded videos
 - `published-videos` - Re-uploaded videos with metadata
 
-### 6. Shared Types Package
+### 9. Shared Types Package
 
 **Location:** `packages/shared-types/src/`
 
@@ -673,9 +927,10 @@ services:
 
 ### API Security
 - CORS: Whitelist origin in production
-- Rate limiting: 100 req/min per IP
+- Rate limiting: 100 req/min per IP (general), 10 req/min (downloads), 5 req/min (uploads)
 - Request validation: Zod schemas
-- Error handling: No sensitive leaks in responses
+- Error handling: No sensitive leaks in responses (sanitized OAuth error messages)
+- OAuth credential guards: Routes disabled when client credentials missing
 
 ### Data Protection
 - SQL injection: Prisma parameterized queries
@@ -757,9 +1012,8 @@ export const trendingService = new TrendingService(
 - Playwright: Full user flow
 - Trending discovery → Download → Publish
 
-## Next Steps (Phases 4-6)
+## Next Steps (Phases 5-6)
 
-**Phase 3:** Complete ✓ - Download engine with yt-dlp, BullMQ, MinIO, Socket.IO
-**Phase 4:** Add UploadJob + Channel entities, implement OAuth flows
+**Phase 4:** Complete ✓ - OAuth 2.0 flows, upload pipeline, channel management
 **Phase 5:** Add VideoStatsSnapshot + partitioning, analytics aggregation
 **Phase 6:** Security audit, performance testing, production deployment guide

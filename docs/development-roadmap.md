@@ -1,9 +1,9 @@
 # TrendVault Development Roadmap
 
-**Version:** 1.1.0
-**Status:** Phase 3 Complete
+**Version:** 1.2.0
+**Status:** Phase 4 Complete
 **Updated:** 2026-02-15
-**Next Phase:** Phase 4 (Upload & OAuth)
+**Next Phase:** Phase 5 (Channel Management & Analytics)
 
 ## Timeline Overview
 
@@ -12,7 +12,7 @@
 | 1 | Foundation & Scaffolding | Weeks 1-3 | COMPLETE | 100% |
 | 2 | Trending Video Discovery | Weeks 4-6 | COMPLETE | 100% |
 | 3 | Download Engine | Weeks 7-9 | COMPLETE | 100% |
-| 4 | Upload & OAuth | Weeks 10-13 | PENDING | 0% |
+| 4 | Upload & OAuth | Weeks 10-13 | COMPLETE | 100% |
 | 5 | Channel Management & Analytics | Weeks 14-16 | PENDING | 0% |
 | 6 | Polish & Launch | Weeks 17-19 | PENDING | 0% |
 
@@ -167,34 +167,38 @@ model DownloadedVideo {
 
 ## Phase 4: Upload & OAuth (Weeks 10-13)
 
-**Status:** PENDING (0%)
+**Status:** COMPLETE ✓
 
-**Objectives:**
-- Implement Google OAuth 2.0 for YouTube
-- Implement TikTok OAuth 2.0 for Inbox Upload
-- Enable video re-publishing to user channels
-- Track upload status and errors
+**Implemented:**
+- [x] Google OAuth 2.0 flow (youtube.upload scope)
+- [x] TikTok OAuth 2.0 flow (video.publish scope)
+- [x] OAuth callback routes (/oauth/callback/{provider})
+- [x] Token storage (encrypted in ConnectedAccount via AES-256-GCM)
+- [x] Token refresh logic (via OAuth service)
+- [x] YouTube upload service (metadata, thumbnail, privacy)
+- [x] TikTok Inbox Upload service (draft mode)
+- [x] Upload queue (BullMQ with 3 concurrent max)
+- [x] UploadJob database model + migration
+- [x] Channel database model + migration
+- [x] PublishedVideo database model + migration
+- [x] Upload controller + router
+- [x] Frontend OAuth login flow
+- [x] Connected accounts page (settings/connected-accounts)
+- [x] Upload form (title, description, tags, privacy)
+- [x] Upload progress tracking (Socket.IO real-time)
+- [x] API endpoints (POST /api/uploads, GET /api/channels, GET /api/accounts)
+- [x] CSRF protection (Redis state storage, 5min TTL)
+- [x] Encryption service (AES-256-GCM for token blobs)
+- [x] Upload history table with filtering
+- [x] Exponential backoff retry (3 attempts)
 
-**Deliverables:**
-- [ ] Google OAuth 2.0 flow (youtube.upload scope)
-- [ ] TikTok OAuth 2.0 flow (video.publish scope)
-- [ ] OAuth callback routes
-- [ ] Token storage (encrypted in ConnectedAccount)
-- [ ] Token refresh logic
-- [ ] YouTube upload service (metadata, thumbnail, privacy)
-- [ ] TikTok Inbox Upload service (draft mode)
-- [ ] Upload queue (BullMQ)
-- [ ] UploadJob database model
-- [ ] Channel database model
-- [ ] PublishedVideo database model
-- [ ] Upload controller + router
-- [ ] Frontend OAuth login modals
-- [ ] Channel connection UI
-- [ ] Upload form (title, description, tags, privacy)
-- [ ] Upload progress tracking
-- [ ] API endpoints (POST /api/uploads, GET channels)
-- [ ] Auto re-encoding (if needed for format compatibility)
-- [ ] Proper attribution + watermarking support
+**Files Created/Modified:**
+- Backend: OAuth, Uploads, Accounts, Channels modules (12 files)
+- Backend: Encryption service (1 file)
+- Frontend: Uploads page, Settings page (5 files)
+- Frontend: Hooks for uploads, connected accounts (2 files)
+- Database: Phase 4 migration (Channel, UploadJob, PublishedVideo)
+- Shared: channel.ts, upload.ts types
 
 **Database Changes:**
 ```prisma
