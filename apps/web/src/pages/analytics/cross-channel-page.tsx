@@ -23,19 +23,11 @@ export default function CrossChannelPage() {
     );
   }
 
-  const agg = aggregate as Record<string, unknown> | undefined;
-
   return (
     <div className="space-y-6 p-6">
       <h1 className="text-xl font-semibold">Cross-Channel Analytics</h1>
 
-      <AggregateStatsCards
-        data={
-          agg as
-            | { totalChannels: number; totalVideos: number; totalViews: number; totalLikes: number }
-            | undefined
-        }
-      />
+      <AggregateStatsCards data={aggregate} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
@@ -43,20 +35,7 @@ export default function CrossChannelPage() {
             <CardTitle className="text-base">Platform Comparison</CardTitle>
           </CardHeader>
           <CardContent>
-            <PlatformComparisonChart
-              data={
-                agg as
-                  | {
-                      platformBreakdown?: Array<{
-                        platform: string;
-                        views: number;
-                        likes: number;
-                        videos: number;
-                      }>;
-                    }
-                  | undefined
-              }
-            />
+            <PlatformComparisonChart data={aggregate} />
           </CardContent>
         </Card>
 
@@ -65,16 +44,16 @@ export default function CrossChannelPage() {
             <CardTitle className="text-base">Overview</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-gray-600">
-            {agg ? (
+            {aggregate ? (
               <div className="space-y-2">
                 <p>
-                  Total channels: <strong>{agg.totalChannels as number}</strong>
+                  Total channels: <strong>{aggregate.totalChannels}</strong>
                 </p>
                 <p>
-                  Total published videos: <strong>{agg.totalVideos as number}</strong>
+                  Total published videos: <strong>{aggregate.totalVideos}</strong>
                 </p>
                 <p>
-                  Total views: <strong>{(agg.totalViews as number)?.toLocaleString()}</strong>
+                  Total views: <strong>{aggregate.totalViews?.toLocaleString()}</strong>
                 </p>
               </div>
             ) : (
@@ -89,25 +68,7 @@ export default function CrossChannelPage() {
           <CardTitle className="text-base">Content Performance Comparison</CardTitle>
         </CardHeader>
         <CardContent>
-          <ContentComparisonTable
-            data={
-              comparison as
-                | Array<{
-                    sourceTitle: string;
-                    sourcePlatform: string;
-                    publishedVersions: Array<{
-                      publishedVideoId: string;
-                      channelName: string;
-                      platform: string;
-                      viewCount: number;
-                      likeCount: number;
-                      commentCount: number;
-                    }>;
-                  }>
-                | undefined
-            }
-            isLoading={compLoading}
-          />
+          <ContentComparisonTable data={comparison} isLoading={compLoading} />
         </CardContent>
       </Card>
     </div>

@@ -74,10 +74,10 @@ export function VideoLibraryGrid({ channelId }: VideoLibraryGridProps) {
             <Skeleton key={i} className="h-56 rounded-lg" />
           ))}
         </div>
-      ) : data?.data?.length > 0 ? (
+      ) : data?.data && data.data.length > 0 ? (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {data.data.map((video: Record<string, unknown>) => (
+            {data.data.map((video) => (
               <VideoLibraryCard
                 key={video.id as string}
                 id={video.id as string}

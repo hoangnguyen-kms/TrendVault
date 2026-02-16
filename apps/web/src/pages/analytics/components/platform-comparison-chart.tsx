@@ -38,7 +38,7 @@ export function PlatformComparisonChart({ data }: PlatformComparisonChartProps) 
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="platform" fontSize={12} />
         <YAxis tickFormatter={(v) => formatCompactNumber(v)} fontSize={12} />
-        <Tooltip formatter={(v: number) => formatCompactNumber(v)} />
+        <Tooltip formatter={(v: number | undefined) => formatCompactNumber(v ?? 0)} />
         <Legend />
         <Bar dataKey="views" fill="#3b82f6" name="Views" />
         <Bar dataKey="likes" fill="#ef4444" name="Likes" />

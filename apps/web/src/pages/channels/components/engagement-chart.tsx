@@ -57,7 +57,7 @@ export function EngagementChart({ data }: EngagementChartProps) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" fontSize={12} />
             <YAxis tickFormatter={(v) => formatCompactNumber(v)} fontSize={12} />
-            <Tooltip formatter={(v: number) => formatCompactNumber(v)} />
+            <Tooltip formatter={(v: number | undefined) => formatCompactNumber(v ?? 0)} />
             <Line type="monotone" dataKey="views" stroke="#3b82f6" strokeWidth={2} dot={false} />
             <Line type="monotone" dataKey="likes" stroke="#ef4444" strokeWidth={2} dot={false} />
           </LineChart>

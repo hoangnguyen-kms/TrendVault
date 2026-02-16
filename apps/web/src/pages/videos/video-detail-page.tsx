@@ -153,7 +153,7 @@ export default function VideoDetailPage() {
                   </Badge>
                 </div>
               )}
-              {video.tags?.length > 0 && (
+              {video.tags && video.tags.length > 0 && (
                 <div>
                   <p className="mb-1 text-xs text-gray-500">Tags</p>
                   <div className="flex flex-wrap gap-1">

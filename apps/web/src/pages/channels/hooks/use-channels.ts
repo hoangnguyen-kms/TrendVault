@@ -6,6 +6,23 @@ interface SuccessRes<T> {
   data: T;
 }
 
+export interface ChannelOverviewVideo {
+  id: string;
+  title: string;
+  thumbnailUrl: string | null;
+  viewCount: number;
+  likeCount: number;
+  publishedAt: string | null;
+}
+
+export interface ChannelOverviewData {
+  subscriberCount: number | null;
+  totalViews: number | null;
+  totalVideos: number;
+  avgEngagementRate: number | null;
+  recentVideos: ChannelOverviewVideo[];
+}
+
 export function useChannels() {
   return useQuery({
     queryKey: ['channels'],
@@ -20,7 +37,7 @@ export function useChannelOverview(channelId: string | undefined) {
   return useQuery({
     queryKey: ['channel-overview', channelId],
     queryFn: async () => {
-      const res = await apiClient.get<SuccessRes<Record<string, unknown>>>(
+      const res = await apiClient.get<SuccessRes<ChannelOverviewData>>(
         `/analytics/channels/${channelId}/overview`,
       );
       return res.data;
