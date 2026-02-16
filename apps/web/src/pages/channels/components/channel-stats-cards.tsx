@@ -5,7 +5,7 @@ import { formatCompactNumber } from '@/lib/format-utils';
 interface ChannelStatsCardsProps {
   subscriberCount: number | null;
   totalViews: number | null;
-  totalVideos: number;
+  totalVideos: number | null;
   avgEngagementRate: number | null;
 }
 
@@ -25,7 +25,7 @@ export function ChannelStatsCards({
   const values: Record<string, string> = {
     subscribers: formatCompactNumber(subscriberCount),
     views: formatCompactNumber(totalViews),
-    videos: String(totalVideos),
+    videos: String(totalVideos ?? 0),
     engagement: avgEngagementRate != null ? `${(avgEngagementRate * 100).toFixed(1)}%` : '-',
   };
 
