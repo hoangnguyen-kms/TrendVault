@@ -1,4 +1,4 @@
-import { Platform } from '@prisma/client';
+import { Platform } from '../../../lib/prisma-client.js';
 
 export interface TrendingVideoDTO {
   platform: Platform;

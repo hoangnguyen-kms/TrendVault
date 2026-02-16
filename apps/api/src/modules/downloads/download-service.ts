@@ -2,7 +2,7 @@ import { prisma } from '../../lib/prisma-client.js';
 import { getStorageService } from '../../services/storage/storage-factory.js';
 import { downloadQueue } from './jobs/download-queue.js';
 import { buildVideoUrl, serializeDownload, ConflictError } from './download-helpers.js';
-import type { DownloadStatus } from '@prisma/client';
+import type { DownloadStatus } from '../../lib/prisma-client.js';
 
 interface QueueResult {
   id: string;

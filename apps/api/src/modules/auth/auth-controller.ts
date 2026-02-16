@@ -2,28 +2,41 @@ import { Request, Response } from 'express';
 import { authService } from './auth-service.js';
 import { successResponse, errorResponse } from '../../lib/api-response.js';
 import { env } from '../../config/environment.js';
+import { parseDurationToMs } from '../../lib/duration-utils.js';
 import type { AuthRequest } from '../../middleware/auth-middleware.js';
 import type { LoginRequest, RegisterRequest } from '@trendvault/shared-types';
 
-function parseDurationToMs(duration: string): number {
-  const match = duration.match(/^(\d+)([dhms])$/);
-  if (!match) return 7 * 24 * 60 * 60 * 1000;
+/** Cookie options shared between access and refresh tokens */
+function baseCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    path: '/',
+  };
+}
 
-  const value = parseInt(match[1]);
-  const unit = match[2];
+/** Set both access + refresh token cookies on the response */
+async function setAuthCookies(res: Response, userId: string): Promise<void> {
+  const accessToken = authService.signToken(userId);
+  const refreshToken = await authService.createRefreshToken(userId);
 
-  switch (unit) {
-    case 'd':
-      return value * 24 * 60 * 60 * 1000;
-    case 'h':
-      return value * 60 * 60 * 1000;
-    case 'm':
-      return value * 60 * 1000;
-    case 's':
-      return value * 1000;
-    default:
-      return 7 * 24 * 60 * 60 * 1000;
-  }
+  res.cookie('token', accessToken, {
+    ...baseCookieOptions(),
+    maxAge: parseDurationToMs(env.JWT_EXPIRES_IN),
+  });
+
+  res.cookie('refresh_token', refreshToken, {
+    ...baseCookieOptions(),
+    maxAge: parseDurationToMs(env.JWT_REFRESH_EXPIRES_IN),
+  });
+}
+
+/** Clear both auth cookies */
+function clearAuthCookies(res: Response): void {
+  const opts = baseCookieOptions();
+  res.clearCookie('token', opts);
+  res.clearCookie('refresh_token', opts);
 }
 
 export const authController = {
@@ -31,16 +44,7 @@ export const authController = {
     try {
       const data = req.body as RegisterRequest;
       const user = await authService.register(data);
-      const token = authService.signToken(user.id);
-
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: parseDurationToMs(env.JWT_EXPIRES_IN),
-        path: '/',
-      });
-
+      await setAuthCookies(res, user.id);
       res.status(201).json(successResponse(user));
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Registration failed';
@@ -52,16 +56,7 @@ export const authController = {
     try {
       const data = req.body as LoginRequest;
       const user = await authService.login(data);
-      const token = authService.signToken(user.id);
-
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: parseDurationToMs(env.JWT_EXPIRES_IN),
-        path: '/',
-      });
-
+      await setAuthCookies(res, user.id);
       res.json(successResponse(user));
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';
@@ -69,14 +64,57 @@ export const authController = {
     }
   },
 
-  logout(req: Request, res: Response): void {
-    res.clearCookie('token', {
-      path: '/',
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    });
-    res.json(successResponse({ message: 'Logged out successfully' }));
+  async logout(req: Request, res: Response): Promise<void> {
+    try {
+      // Revoke the current refresh token if present
+      const refreshToken = req.cookies.refresh_token;
+      if (refreshToken) {
+        await authService.revokeRefreshToken(refreshToken);
+      }
+      clearAuthCookies(res);
+      res.json(successResponse({ message: 'Logged out successfully' }));
+    } catch (error) {
+      // Still clear cookies even if DB revocation fails
+      clearAuthCookies(res);
+      res.json(successResponse({ message: 'Logged out successfully' }));
+    }
+  },
+
+  async refresh(req: Request, res: Response): Promise<void> {
+    try {
+      const refreshToken = req.cookies.refresh_token;
+
+      if (!refreshToken) {
+        res.status(401).json(errorResponse('No refresh token'));
+        return;
+      }
+
+      const result = await authService.rotateRefreshToken(refreshToken);
+
+      if (!result) {
+        clearAuthCookies(res);
+        res.status(401).json(errorResponse('Invalid or expired refresh token'));
+        return;
+      }
+
+      // Issue new access token + rotated refresh token
+      const accessToken = authService.signToken(result.userId);
+
+      res.cookie('token', accessToken, {
+        ...baseCookieOptions(),
+        maxAge: parseDurationToMs(env.JWT_EXPIRES_IN),
+      });
+
+      res.cookie('refresh_token', result.newRefreshToken, {
+        ...baseCookieOptions(),
+        maxAge: parseDurationToMs(env.JWT_REFRESH_EXPIRES_IN),
+      });
+
+      res.json(successResponse({ message: 'Token refreshed' }));
+    } catch (error) {
+      clearAuthCookies(res);
+      res.status(401).json(errorResponse('Token refresh failed'));
+    }
   },
 
   async me(req: AuthRequest, res: Response): Promise<void> {

@@ -119,10 +119,14 @@ export function createUploadWorker(): Worker<UploadJobData> {
   worker.on('failed', async (job, err) => {
     if (job) {
       console.error(`[upload-worker] Job ${job.id} failed:`, err.message);
-      await prisma.uploadJob.update({
-        where: { id: job.data.uploadJobId },
-        data: { status: 'FAILED', errorMessage: err.message },
-      });
+      try {
+        await prisma.uploadJob.update({
+          where: { id: job.data.uploadJobId },
+          data: { status: 'FAILED', errorMessage: err.message },
+        });
+      } catch {
+        // Record may have been deleted — nothing to update
+      }
     }
   });
 

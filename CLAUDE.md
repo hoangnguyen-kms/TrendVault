@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## JIRA Workflow
+- Project Key: TV
+- JIRA MCP: claude-atlassian MCP
+- Workflow: ~/.claude/templates/jira-story-workflow.md
+
+We MUST ALWAYS follow jira story workflow to make sure all JIRA stories are created and aligned with a defined template.
+
 ## Role & Responsibilities
 
 Your role is to analyze user requirements, delegate tasks to appropriate sub-agents, and ensure cohesive delivery of features that meet specifications and architectural standards.

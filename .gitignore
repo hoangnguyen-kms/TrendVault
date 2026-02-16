@@ -29,6 +29,7 @@ coverage/
 
 # Prisma
 apps/api/prisma/migrations/*_migration_lock.toml
+apps/api/src/generated/
 
 # MinIO / storage data
 data/

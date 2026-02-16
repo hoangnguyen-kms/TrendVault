@@ -14,8 +14,11 @@
     "docker:down": "docker compose -f docker/docker-compose.yml down"
   },
   "devDependencies": {
-    "turbo": "^2.4",
-    "prettier": "^3.5"
+    "prettier": "^3.5",
+    "turbo": "^2.4"
   },
-  "packageManager": "pnpm@9.15.0"
+  "packageManager": "pnpm@9.15.0",
+  "dependencies": {
+    "mem0ai": "^2.2.2"
+  }
 }

@@ -1,7 +1,7 @@
 import { prisma } from '../../lib/prisma-client.js';
 import { encryptionService } from '../../services/encryption/encryption-service.js';
 import { env } from '../../config/environment.js';
-import type { Platform } from '@prisma/client';
+import type { Platform } from '../../lib/prisma-client.js';
 
 interface OAuthTokens {
   accessToken: string;

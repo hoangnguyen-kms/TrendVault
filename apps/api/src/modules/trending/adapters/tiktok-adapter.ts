@@ -1,4 +1,4 @@
-import { Platform } from '@prisma/client';
+import { Platform } from '../../../lib/prisma-client.js';
 import { env } from '../../../config/environment.js';
 import type {
   IPlatformAdapter,

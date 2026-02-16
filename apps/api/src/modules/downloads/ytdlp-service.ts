@@ -1,6 +1,7 @@
 import youtubedl from 'youtube-dl-exec';
 import path from 'path';
 import fs from 'fs';
+import { env } from '../../config/environment.js';
 
 export interface DownloadOptions {
   url: string;
@@ -25,7 +26,7 @@ export interface DownloadResult {
   title: string;
 }
 
-const DOWNLOAD_DIR = path.resolve(process.cwd(), '../../downloads');
+const DOWNLOAD_DIR = path.resolve(env.DOWNLOAD_DIR);
 
 /** Wraps youtube-dl-exec for video downloading with progress parsing */
 export class YtdlpService {
@@ -36,7 +37,7 @@ export class YtdlpService {
   }
 
   async download(options: DownloadOptions): Promise<DownloadResult> {
-    const { url, format = 'best', onProgress } = options;
+    const { url, format = 'bestvideo+bestaudio/best', onProgress } = options;
     const outputDir = options.outputDir ?? DOWNLOAD_DIR;
 
     if (!fs.existsSync(outputDir)) {
@@ -48,32 +49,43 @@ export class YtdlpService {
     // Get metadata first
     const metadata = await this.getVideoInfo(url);
     const videoId = metadata.id as string;
-    const ext = metadata.ext as string;
-    const expectedPath = path.join(outputDir, `${videoId}.${ext}`);
 
     // Download using subprocess for stderr progress tracking
     const subprocess = youtubedl.exec(url, {
       format,
+      mergeOutputFormat: 'mp4',
       output: outputTemplate,
       noPlaylist: true,
       restrictFilenames: true,
       newline: true,
     });
 
-    // Parse stderr for progress updates
+    // Parse stderr for progress updates (line-buffered to handle partial chunks)
     if (subprocess.stderr && onProgress) {
+      let stderrBuffer = '';
       subprocess.stderr.on('data', (chunk: Buffer) => {
-        const line = chunk.toString();
-        const progress = this.parseProgress(line);
-        if (progress) onProgress(progress);
+        stderrBuffer += chunk.toString();
+        const lines = stderrBuffer.split(/\r?\n|\r/);
+        stderrBuffer = lines.pop() ?? '';
+        for (const line of lines) {
+          const progress = this.parseProgress(line);
+          if (progress) onProgress(progress);
+        }
       });
     }
 
     await subprocess;
 
-    const stats = fs.statSync(expectedPath);
+    // Find actual output file (extension may differ from metadata due to format merging)
+    const actualPath = this.findDownloadedFile(outputDir, videoId);
+    if (!actualPath) {
+      throw new Error(`Download completed but output file not found for video ${videoId}`);
+    }
+
+    const ext = path.extname(actualPath).slice(1);
+    const stats = fs.statSync(actualPath);
     return {
-      filePath: expectedPath,
+      filePath: actualPath,
       fileSize: stats.size,
       mimeType: `video/${ext}`,
       duration: (metadata.duration as number) ?? null,
@@ -101,16 +113,29 @@ export class YtdlpService {
     return JSON.parse(stdout);
   }
 
-  /** Parse yt-dlp progress: [download]  45.2% of ~50.00MiB at 5.00MiB/s ETA 00:05 */
+  /** Find the actual downloaded file by video ID (handles extension mismatches) */
+  private findDownloadedFile(dir: string, videoId: string): string | null {
+    const prefix = videoId + '.';
+    const files = fs.readdirSync(dir)
+      .filter((f) => f.startsWith(prefix) && !f.endsWith('.part'));
+    if (files.length === 0) return null;
+    return path.join(dir, files[0]);
+  }
+
+  /**
+   * Parse yt-dlp progress lines. Handles modern formats:
+   *   [download]  45.2% of ~  50.00MiB at    5.00MiB/s ETA 00:05
+   *   [download]   0.0% of  100.00MiB at  Unknown B/s ETA Unknown
+   */
   private parseProgress(line: string): DownloadProgress | null {
     const match = line.match(
-      /\[download\]\s+([\d.]+)%\s+of\s+~?([\d.]+\w+)\s+at\s+([\d.]+\w+\/s)\s+ETA\s+(\S+)/,
+      /\[download\]\s+([\d.]+)%\s+of\s+~?\s*([\d.]+\s*\w+)\s+at\s+(.+?)\s+ETA\s+(\S+)/,
     );
     if (!match) return null;
     return {
       percent: parseFloat(match[1]),
-      totalSize: match[2],
-      speed: match[3],
+      totalSize: match[2].replace(/\s+/g, ''),
+      speed: match[3].trim(),
       eta: match[4],
     };
   }

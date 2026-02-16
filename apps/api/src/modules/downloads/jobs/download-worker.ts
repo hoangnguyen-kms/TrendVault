@@ -34,7 +34,20 @@ export function createDownloadWorker(): Worker<DownloadJobData> {
       let tempFilePath: string | undefined;
 
       try {
-        // 1. Mark as DOWNLOADING
+        // 1. Verify record still exists (may have been deleted by retry/dedup)
+        const record = await prisma.downloadedVideo.findUnique({
+          where: { id: downloadedVideoId },
+          select: { id: true, status: true },
+        });
+        if (!record) {
+          console.warn(`[download-worker] Record ${downloadedVideoId} no longer exists, skipping job`);
+          return { downloadedVideoId, skipped: true };
+        }
+        if (record.status === 'CANCELLED') {
+          return { downloadedVideoId, cancelled: true };
+        }
+
+        // 2. Mark as DOWNLOADING
         await prisma.downloadedVideo.update({
           where: { id: downloadedVideoId },
           data: { status: 'DOWNLOADING', bullmqJobId: job.id },
@@ -127,10 +140,14 @@ export function createDownloadWorker(): Worker<DownloadJobData> {
   worker.on('failed', async (job, err) => {
     if (job) {
       console.error(`[download-worker] Job ${job.id} failed:`, err.message);
-      await prisma.downloadedVideo.update({
-        where: { id: job.data.downloadedVideoId },
-        data: { status: 'FAILED', errorMessage: err.message },
-      });
+      try {
+        await prisma.downloadedVideo.update({
+          where: { id: job.data.downloadedVideoId },
+          data: { status: 'FAILED', errorMessage: err.message },
+        });
+      } catch {
+        // Record may have been deleted by retry/dedup — nothing to update
+      }
     }
   });
 

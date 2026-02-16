@@ -23,6 +23,8 @@ router.post(
 
 router.post('/logout', authController.logout);
 
+router.post('/refresh', authController.refresh);
+
 router.get('/me', authMiddleware, authController.me);
 
 export { router as authRouter };

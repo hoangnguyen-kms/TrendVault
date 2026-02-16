@@ -1,5 +1,5 @@
 import { Worker } from 'bullmq';
-import { Platform } from '@prisma/client';
+import { Platform } from '../../../lib/prisma-client.js';
 import { redisConfig } from '../../../config/redis.js';
 import { trendingService } from '../trending-service-instance.js';
 

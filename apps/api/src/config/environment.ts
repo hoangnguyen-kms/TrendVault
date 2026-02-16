@@ -7,6 +7,7 @@ const envSchema = z.object({
   REDIS_URL: z.string().url(),
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default('7d'),
+  JWT_REFRESH_EXPIRES_IN: z.string().default('30d'),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
   STORAGE_BACKEND: z.enum(['minio', 's3', 'local']).default('minio'),
   S3_ENDPOINT: z.string().optional(),
@@ -23,6 +24,7 @@ const envSchema = z.object({
   TIKTOK_CLIENT_SECRET: z.string().optional(),
   TIKTOK_REDIRECT_URI: z.string().optional(),
   APIFY_API_TOKEN: z.string().optional(),
+  DOWNLOAD_DIR: z.string().default('./downloads'),
   FRONTEND_URL: z.string().default('http://localhost:5173'),
 });
 

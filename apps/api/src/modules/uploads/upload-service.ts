@@ -1,6 +1,6 @@
 import { prisma } from '../../lib/prisma-client.js';
 import { uploadQueue } from './jobs/upload-queue.js';
-import type { UploadStatus } from '@prisma/client';
+import type { UploadStatus } from '../../lib/prisma-client.js';
 
 const MAX_YOUTUBE_UPLOADS_PER_DAY = 4;
 
