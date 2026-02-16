@@ -1,4 +1,4 @@
-import { Platform, Prisma } from '@prisma/client';
+import { Platform, Prisma } from '../../lib/prisma-client.js';
 import { prisma } from '../../lib/prisma-client.js';
 import { trendingCache } from './trending-cache.js';
 import type { IPlatformAdapter, TrendingVideoDTO } from './adapters/platform-adapter.interface.js';

@@ -1,7 +1,8 @@
 import { google, youtube_v3 } from 'googleapis';
-import { Platform } from '@prisma/client';
+import { Platform } from '../../../lib/prisma-client.js';
 import { redis } from '../../../lib/redis-client.js';
 import { env } from '../../../config/environment.js';
+import { YOUTUBE_CATEGORIES } from '@trendvault/shared-types';
 import type {
   IPlatformAdapter,
   FetchTrendingOptions,
@@ -9,8 +10,7 @@ import type {
   TrendingVideoDTO,
 } from './platform-adapter.interface.js';
 
-// YouTube category IDs that still work with mostPopular (post-July 2025)
-const MOSTPOPULAR_CATEGORY_IDS = ['10', '20', '30']; // Music, Gaming, Movies
+const ALL_CATEGORY_IDS = YOUTUBE_CATEGORIES.map((c) => c.id);
 
 const QUOTA_REDIS_KEY = 'trending:youtube:quota:daily';
 const DAILY_QUOTA_LIMIT = 5000; // reserved for trending only
@@ -26,11 +26,13 @@ export class YouTubeAdapter implements IPlatformAdapter {
   async fetchTrending(options: FetchTrendingOptions): Promise<FetchTrendingResult> {
     const { region, category, maxResults = 20, pageToken } = options;
 
-    // Use mostPopular for Music/Gaming/Movies; search.list for general
-    if (category && MOSTPOPULAR_CATEGORY_IDS.includes(category)) {
+    // Single category → direct mostPopular call
+    if (category) {
       return this.fetchMostPopular(region, category, maxResults, pageToken);
     }
-    return this.fetchSearchTrending(region, category, maxResults, pageToken);
+
+    // No category → fetch from all categories in parallel, merge by viewCount
+    return this.fetchMultiCategoryTrending(region, maxResults);
   }
 
   async isAvailable(): Promise<boolean> {
@@ -59,47 +61,45 @@ export class YouTubeAdapter implements IPlatformAdapter {
     return this.mapVideoListResponse(response.data, region);
   }
 
-  private async fetchSearchTrending(
+  /**
+   * Fetch mostPopular from all categories in parallel, merge & deduplicate.
+   * Each call costs 1 quota unit (vs 101 for search.list).
+   */
+  private async fetchMultiCategoryTrending(
     region: string,
-    category: string | undefined,
     maxResults: number,
-    pageToken?: string,
   ): Promise<FetchTrendingResult> {
-    // search.list costs 100 units
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const searchParams: youtube_v3.Params$Resource$Search$List = {
-      part: ['snippet'],
-      type: ['video'],
-      order: 'viewCount',
-      regionCode: region,
-      publishedAfter: sevenDaysAgo,
-      maxResults,
-      pageToken,
-    };
-    if (category) searchParams.videoCategoryId = category;
+    // Fetch a subset per category so we get variety without over-fetching
+    const perCategory = Math.max(3, Math.ceil(maxResults / ALL_CATEGORY_IDS.length));
 
-    const searchResponse = await this.youtube.search.list(searchParams);
-    await this.trackQuota(100);
+    const results = await Promise.allSettled(
+      ALL_CATEGORY_IDS.map((catId) =>
+        this.fetchMostPopular(region, catId, perCategory),
+      ),
+    );
 
-    const videoIds = searchResponse.data.items
-      ?.map((item) => item.id?.videoId)
-      .filter((id): id is string => Boolean(id));
+    // Merge all fulfilled results and deduplicate by platformVideoId
+    const seen = new Set<string>();
+    const allVideos: TrendingVideoDTO[] = [];
 
-    if (!videoIds?.length) {
-      return { videos: [], nextPageToken: null, totalResults: 0 };
+    for (const result of results) {
+      if (result.status !== 'fulfilled') continue;
+      for (const video of result.value.videos) {
+        if (!seen.has(video.platformVideoId)) {
+          seen.add(video.platformVideoId);
+          allVideos.push(video);
+        }
+      }
     }
 
-    // Batch fetch full details (1 unit)
-    const videosResponse = await this.youtube.videos.list({
-      part: ['snippet', 'statistics', 'contentDetails'],
-      id: videoIds,
-    });
-    await this.trackQuota(1);
+    // Sort by viewCount descending, reassign trendingRank
+    allVideos.sort((a, b) => Number(b.viewCount ?? 0n) - Number(a.viewCount ?? 0n));
+    allVideos.forEach((v, i) => { v.trendingRank = i + 1; });
 
     return {
-      ...this.mapVideoListResponse(videosResponse.data, region),
-      nextPageToken: searchResponse.data.nextPageToken ?? null,
-      totalResults: searchResponse.data.pageInfo?.totalResults ?? null,
+      videos: allVideos.slice(0, maxResults),
+      nextPageToken: null,
+      totalResults: allVideos.length,
     };
   }
 
