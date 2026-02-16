@@ -3,16 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { apiClient } from '@/lib/api-client';
 import { formatCompactNumber } from '@/lib/format-utils';
-
-interface SuccessRes<T> {
-  success: boolean;
-  data: T;
-}
-
-interface LifecycleData {
-  trending: { platform: string; viewCount: number | null } | null;
-  published: { platform: string; viewCount: number | null };
-}
+import type { ApiSuccess, ContentLifecycle } from '@trendvault/shared-types';
 
 interface PerformanceComparisonProps {
   videoId: string;
@@ -22,7 +13,7 @@ export function PerformanceComparison({ videoId }: PerformanceComparisonProps) {
   const { data } = useQuery({
     queryKey: ['video-lifecycle', videoId],
     queryFn: async () => {
-      const res = await apiClient.get<SuccessRes<LifecycleData>>(
+      const res = await apiClient.get<ApiSuccess<ContentLifecycle>>(
         `/analytics/videos/${videoId}/lifecycle`,
       );
       return res.data;
