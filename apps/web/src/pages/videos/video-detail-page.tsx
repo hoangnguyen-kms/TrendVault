@@ -127,10 +127,10 @@ export default function VideoDetailPage() {
               <CardTitle className="text-base">Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
-              {video.channelName && (
+              {video.channel?.name && (
                 <div>
                   <p className="text-xs text-gray-500">Channel</p>
-                  <p className="font-medium">{video.channelName}</p>
+                  <p className="font-medium">{video.channel.name}</p>
                 </div>
               )}
               {video.publishedAt && (

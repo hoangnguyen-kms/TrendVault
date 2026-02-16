@@ -20,7 +20,9 @@ interface VideoLibraryGridProps {
 export function VideoLibraryGrid({ channelId }: VideoLibraryGridProps) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('publishedAt');
+  const [sortBy, setSortBy] = useState<'publishedAt' | 'viewCount' | 'likeCount' | 'title'>(
+    'publishedAt',
+  );
   const [searchInput, setSearchInput] = useState('');
 
   const { data, isLoading } = useChannelVideos(channelId, {
@@ -52,7 +54,7 @@ export function VideoLibraryGrid({ channelId }: VideoLibraryGridProps) {
         <Select
           value={sortBy}
           onValueChange={(v) => {
-            setSortBy(v);
+            setSortBy(v as typeof sortBy);
             setPage(1);
           }}
         >
@@ -79,13 +81,13 @@ export function VideoLibraryGrid({ channelId }: VideoLibraryGridProps) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {data.data.map((video) => (
               <VideoLibraryCard
-                key={video.id as string}
-                id={video.id as string}
-                title={video.title as string}
-                thumbnailUrl={video.thumbnailUrl as string | null}
-                viewCount={video.viewCount as number}
-                likeCount={video.likeCount as number}
-                publishedAt={video.publishedAt as string | null}
+                key={video.id}
+                id={video.id}
+                title={video.title}
+                thumbnailUrl={video.thumbnailUrl}
+                viewCount={video.viewCount}
+                likeCount={video.likeCount}
+                publishedAt={video.publishedAt}
               />
             ))}
           </div>
