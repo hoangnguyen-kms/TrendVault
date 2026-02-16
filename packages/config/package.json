@@ -1,5 +1,13 @@
 {
   "name": "@trendvault/config",
   "version": "0.0.0",
-  "private": true
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "globals": "^16.0",
+    "@eslint/js": "^9.0",
+    "@typescript-eslint/eslint-plugin": "^8.0",
+    "@typescript-eslint/parser": "^8.0",
+    "eslint": "^9.0"
+  }
 }

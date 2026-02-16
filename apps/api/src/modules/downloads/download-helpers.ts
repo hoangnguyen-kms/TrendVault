@@ -1,6 +1,6 @@
-import type { DownloadedVideo } from '@prisma/client';
+import type { DownloadedVideo } from '../../lib/prisma-client.js';
 
-const SAFE_VIDEO_ID_PATTERN = /^[\w\-]+$/;
+const SAFE_VIDEO_ID_PATTERN = /^[\w-]+$/;
 
 /** Build platform-specific video URL with input validation */
 export function buildVideoUrl(
