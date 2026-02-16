@@ -40,10 +40,7 @@ export function AppHeader() {
 
         {isMenuOpen && (
           <>
-            <div
-              className="fixed inset-0 z-10"
-              onClick={() => setIsMenuOpen(false)}
-            />
+            <div className="fixed inset-0 z-10" onClick={() => setIsMenuOpen(false)} />
             <div className="absolute right-0 z-20 mt-2 w-56 rounded-lg border bg-white shadow-lg">
               <div className="p-2">
                 <button

@@ -41,9 +41,7 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
             loading="lazy"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-gray-400">
-            No thumbnail
-          </div>
+          <div className="flex h-full items-center justify-center text-gray-400">No thumbnail</div>
         )}
 
         {/* Duration badge */}
@@ -82,9 +80,7 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
 
       {/* Info */}
       <div className="p-3">
-        <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
-          {video.title}
-        </h3>
+        <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">{video.title}</h3>
         {video.channelName && (
           <p className="text-xs text-gray-500 mb-2 truncate">{video.channelName}</p>
         )}

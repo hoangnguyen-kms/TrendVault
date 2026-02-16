@@ -42,19 +42,14 @@ export function AppSidebar() {
               to={item.href}
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                item.disabled &&
-                  'cursor-not-allowed opacity-50 pointer-events-none',
-                isActive
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-100'
+                item.disabled && 'cursor-not-allowed opacity-50 pointer-events-none',
+                isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100',
               )}
               aria-disabled={item.disabled}
             >
               <Icon className="h-5 w-5" />
               {item.name}
-              {item.disabled && (
-                <span className="ml-auto text-xs text-gray-400">Soon</span>
-              )}
+              {item.disabled && <span className="ml-auto text-xs text-gray-400">Soon</span>}
             </Link>
           );
         })}

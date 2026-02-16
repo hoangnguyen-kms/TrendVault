@@ -7,14 +7,14 @@
 
 ## Timeline Overview
 
-| Phase | Title | Duration | Status | Completion |
-|-------|-------|----------|--------|------------|
-| 1 | Foundation & Scaffolding | Weeks 1-3 | COMPLETE | 100% |
-| 2 | Trending Video Discovery | Weeks 4-6 | COMPLETE | 100% |
-| 3 | Download Engine | Weeks 7-9 | COMPLETE | 100% |
-| 4 | Upload & OAuth | Weeks 10-13 | COMPLETE | 100% |
-| 5 | Channel Management & Analytics | Weeks 14-16 | COMPLETE | 100% |
-| 6 | Polish & Launch | Weeks 17-19 | PENDING | 0% |
+| Phase | Title                          | Duration    | Status   | Completion |
+| ----- | ------------------------------ | ----------- | -------- | ---------- |
+| 1     | Foundation & Scaffolding       | Weeks 1-3   | COMPLETE | 100%       |
+| 2     | Trending Video Discovery       | Weeks 4-6   | COMPLETE | 100%       |
+| 3     | Download Engine                | Weeks 7-9   | COMPLETE | 100%       |
+| 4     | Upload & OAuth                 | Weeks 10-13 | COMPLETE | 100%       |
+| 5     | Channel Management & Analytics | Weeks 14-16 | COMPLETE | 100%       |
+| 6     | Polish & Launch                | Weeks 17-19 | PENDING  | 0%         |
 
 **Total Project Duration:** 19 weeks (from start)
 **Estimated Completion:** Week 19 (early May 2026)
@@ -24,6 +24,7 @@
 **Status:** COMPLETE ✓
 
 **Deliverables:**
+
 - [x] Monorepo scaffold (Turborepo + pnpm workspaces)
 - [x] Database setup (PostgreSQL 17, Prisma 6)
 - [x] User model + migrations
@@ -42,11 +43,13 @@
 - [x] Environment configuration
 
 **Files Created:**
+
 - Backend: 8 files (auth module, config, middleware)
 - Frontend: 5 files (auth pages, layout, store, hooks)
 - Database: schema.prisma + seed.ts + migrations
 
 **Key Decisions Confirmed:**
+
 - Express 5 (stable since late 2025)
 - React 19 (use() hook, improved Suspense)
 - Incremental DB schema per phase
@@ -57,6 +60,7 @@
 **Status:** COMPLETE ✓
 
 **Deliverables:**
+
 - [x] YouTube adapter (Data API v3: mostPopular + search.list)
 - [x] TikTok adapter (Apify primary + Research API optional)
 - [x] Platform adapter interface (strategy pattern)
@@ -79,18 +83,21 @@
 - [x] Shared Zod schemas (trending.ts)
 
 **Files Created:**
+
 - Backend: 11 files (adapters, service, cache, jobs, controller, router, schemas)
 - Frontend: 5 files (page, 3 components, 2 hooks)
 - Database: migration for TrendingVideo
 - Shared: trending.ts schemas
 
 **Key Metrics:**
+
 - API response time (cached): < 500ms
 - YouTube quota allocation: ~5K units/day (out of 10K)
 - Cache TTL: YouTube 30min, TikTok 15min
 - Job frequency: Every 30 minutes
 
 **Key Decisions Confirmed:**
+
 - TikTok: Apify primary (not fallback) due to Research API uncertainty
 - YouTube: search.list as primary fallback for mostPopular limitation
 - Background jobs: Prevent cache cold starts on user requests
@@ -101,6 +108,7 @@
 **Status:** COMPLETE ✓
 
 **Implemented:**
+
 - [x] yt-dlp-wrap integration
 - [x] BullMQ download queue with concurrency control
 - [x] Socket.IO real-time progress tracking
@@ -128,6 +136,7 @@
 - [x] Cleanup worker (retention policy)
 
 **Database Model:**
+
 ```prisma
 model DownloadedVideo {
   id              String @id @default(uuid())
@@ -156,6 +165,7 @@ model DownloadedVideo {
 ```
 
 **Key Features Delivered:**
+
 - Real-time progress with Socket.IO rooms (by jobId)
 - 3 concurrent downloads per user, 10 global max
 - Pre-signed URLs for download (15min) and preview (1h)
@@ -170,6 +180,7 @@ model DownloadedVideo {
 **Status:** COMPLETE ✓
 
 **Implemented:**
+
 - [x] Google OAuth 2.0 flow (youtube.upload scope)
 - [x] TikTok OAuth 2.0 flow (video.publish scope)
 - [x] OAuth callback routes (/oauth/callback/{provider})
@@ -193,6 +204,7 @@ model DownloadedVideo {
 - [x] Exponential backoff retry (3 attempts)
 
 **Files Created/Modified:**
+
 - Backend: OAuth, Uploads, Accounts, Channels modules (12 files)
 - Backend: Encryption service (1 file)
 - Frontend: Uploads page, Settings page (5 files)
@@ -201,6 +213,7 @@ model DownloadedVideo {
 - Shared: channel.ts, upload.ts types
 
 **Database Changes:**
+
 ```prisma
 model Channel {
   id              String @id @default(uuid())
@@ -242,6 +255,7 @@ model PublishedVideo {
 ```
 
 **Key Decisions:**
+
 - TikTok: Inbox Upload ONLY (direct post deferred post audit approval)
 - YouTube: Full upload with metadata support
 - Token encryption: AES-256-GCM with master key
@@ -252,6 +266,7 @@ model PublishedVideo {
 **Status:** COMPLETE ✓
 
 **Implemented:**
+
 - [x] VideoStatsSnapshot model + stats fields on PublishedVideo
 - [x] @@unique(channelId, platformVideoId) for video-list upsert
 - [x] Platform stats fetcher interface (strategy pattern)
@@ -277,6 +292,7 @@ model PublishedVideo {
 - [x] Sidebar updated (Channels + Analytics nav items enabled)
 
 **Files Created:**
+
 - Backend sync: 10 files (scheduler, worker, 2 fetchers, interface, 5 handlers)
 - Backend analytics: 4 files (service, router, schemas, videos-router)
 - Frontend: 15 files (3 hooks, 4 channel components, 4 video components, 3 analytics components, 1 page each)
@@ -284,6 +300,7 @@ model PublishedVideo {
 - Schema: VideoStatsSnapshot model + PublishedVideo stats fields
 
 **Key Decisions:**
+
 - Strategy pattern for platform fetchers (YouTube/TikTok swappable)
 - BullMQ repeatable jobs for background sync (not cron)
 - Stats aggregation: 90d+ daily snapshots → weekly summaries for storage efficiency
@@ -295,6 +312,7 @@ model PublishedVideo {
 **Status:** PENDING (0%)
 
 **Objectives:**
+
 - Complete security hardening
 - Optimize performance
 - Add comprehensive test coverage
@@ -302,6 +320,7 @@ model PublishedVideo {
 - Launch publicly
 
 **Deliverables:**
+
 - [ ] Security audit (OWASP Top 10)
 - [ ] CORS hardening (whitelist origins)
 - [ ] Rate limiting tuning
@@ -322,6 +341,7 @@ model PublishedVideo {
 - [ ] Marketing materials
 
 **Deployment Target:**
+
 ```
 Single Server (Docker Compose):
 - Nginx reverse proxy (API + Web)
@@ -332,6 +352,7 @@ Single Server (Docker Compose):
 ```
 
 **Testing Coverage:**
+
 - Unit tests: > 80% for services
 - Integration tests: Core APIs
 - E2E tests: Critical user flows
@@ -346,6 +367,7 @@ Single Server (Docker Compose):
 6. **Phase 6 Complete** → Production deployment ready
 
 **Risk Items:**
+
 - YouTube API quota management (mitigation: 4 uploads/day cap)
 - TikTok audit approval (mitigation: Apify fallback + Inbox mode)
 - Video format compatibility (mitigation: FFmpeg re-encoding available)
@@ -353,12 +375,14 @@ Single Server (Docker Compose):
 ## Success Metrics (by Phase)
 
 ### Phase 1 ✓
+
 - [x] Monorepo builds successfully
 - [x] Auth flows work (register → login → token refresh)
 - [x] Base UI renders without errors
 - [x] CI/CD passes for all apps
 
 ### Phase 2 ✓
+
 - [x] Trending API returns videos < 500ms (cached)
 - [x] YouTube quota usage < 5K units/day
 - [x] TikTok data flows (Apify or Research API)
@@ -366,24 +390,28 @@ Single Server (Docker Compose):
 - [x] Background jobs refresh cache proactively
 
 ### Phase 3 ✓
+
 - [x] Download completes successfully for popular formats
 - [x] Progress tracking updates in real-time
 - [x] Can cancel/resume downloads
 - [x] Downloaded videos stored in MinIO
 
 ### Phase 4 ✓
+
 - [x] YouTube OAuth flow completes
 - [x] TikTok OAuth flow completes
 - [x] Video uploads with metadata
 - [x] Published videos tracked in DB
 
 ### Phase 5 ✓
+
 - [x] Analytics dashboard displays stats
 - [x] Time-series charts show trends
 - [x] Background sync jobs run on schedule
 - [x] Cross-channel comparison works
 
 ### Phase 6
+
 - [ ] Security audit passed
 - [ ] Load test handles 100+ concurrent users
 - [ ] E2E tests > 80% coverage
@@ -391,15 +419,15 @@ Single Server (Docker Compose):
 
 ## Known Dependencies
 
-| Dependency | Phase | Status | Risk |
-|-----------|-------|--------|------|
-| YouTube Data API key | 2 | Obtained | Quota mgmt (mitigated) |
-| TikTok Research API | 2 | Optional | Apify fallback in place |
-| Google OAuth 2.0 creds | 4 | Needed | TBD |
-| TikTok OAuth 2.0 creds | 4 | Needed | Audit required |
-| Apify account | 2 | Needed | ~$0.001/100 results |
-| FFmpeg binary | 3+ | System | Auto-install needed |
-| yt-dlp binary | 3+ | System | Wrapper auto-installs |
+| Dependency             | Phase | Status   | Risk                    |
+| ---------------------- | ----- | -------- | ----------------------- |
+| YouTube Data API key   | 2     | Obtained | Quota mgmt (mitigated)  |
+| TikTok Research API    | 2     | Optional | Apify fallback in place |
+| Google OAuth 2.0 creds | 4     | Needed   | TBD                     |
+| TikTok OAuth 2.0 creds | 4     | Needed   | Audit required          |
+| Apify account          | 2     | Needed   | ~$0.001/100 results     |
+| FFmpeg binary          | 3+    | System   | Auto-install needed     |
+| yt-dlp binary          | 3+    | System   | Wrapper auto-installs   |
 
 ## Assumptions
 
@@ -415,6 +443,7 @@ Single Server (Docker Compose):
 See `/plans/260214-2218-trendvault-implementation/plan.md` for detailed validation sessions.
 
 **Key Decisions:**
+
 - MVP includes all 6 phases (no reduced scope)
 - TikTok: Apify primary source (safe, no approval needed)
 - YouTube: 4 uploads/day cap, trending gets remaining quota
@@ -424,6 +453,7 @@ See `/plans/260214-2218-trendvault-implementation/plan.md` for detailed validati
 ## Next Actions
 
 **Immediate (Phase 6 Start):**
+
 1. Security audit (OWASP Top 10 review)
 2. Error handling hardening across all modules
 3. UI/UX polish + dark mode support
@@ -432,6 +462,7 @@ See `/plans/260214-2218-trendvault-implementation/plan.md` for detailed validati
 6. Staging deployment + UAT
 
 **Ongoing:**
+
 1. Monitor YouTube API quota usage
 2. Test sync jobs with real connected accounts
 3. Verify stats aggregation performance at scale

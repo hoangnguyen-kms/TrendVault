@@ -3,13 +3,15 @@ import { Users, Video, Eye, ThumbsUp } from 'lucide-react';
 import { formatCompactNumber } from '@/lib/format-utils';
 
 interface AggregateStatsCardsProps {
-  data: {
-    totalChannels: number;
-    totalVideos: number;
-    totalViews: number;
-    totalLikes: number;
-    platforms?: string[];
-  } | undefined;
+  data:
+    | {
+        totalChannels: number;
+        totalVideos: number;
+        totalViews: number;
+        totalLikes: number;
+        platforms?: string[];
+      }
+    | undefined;
 }
 
 const cards = [
@@ -24,7 +26,7 @@ export function AggregateStatsCards({ data }: AggregateStatsCardsProps) {
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
-        const value = data ? (data as Record<string, number>)[card.key] : 0;
+        const value = data ? data[card.key] : 0;
         return (
           <Card key={card.key}>
             <CardContent className="flex items-center gap-4 pt-6">

@@ -44,7 +44,9 @@ export default function ChannelDashboardPage() {
           <h2 className="text-lg font-semibold text-gray-700">No Channels Connected</h2>
           <p className="mt-1 text-sm text-gray-500">
             Connect a YouTube or TikTok account in{' '}
-            <a href="/settings" className="text-blue-600 underline">Settings</a>{' '}
+            <a href="/settings" className="text-blue-600 underline">
+              Settings
+            </a>{' '}
             to get started.
           </p>
         </div>
@@ -54,11 +56,7 @@ export default function ChannelDashboardPage() {
 
   return (
     <div className="flex h-full">
-      <ChannelSidebar
-        channels={channelList}
-        selectedId={activeId}
-        onSelect={setSelectedId}
-      />
+      <ChannelSidebar channels={channelList} selectedId={activeId} onSelect={setSelectedId} />
       <div className="flex-1 overflow-y-auto">
         {activeId && (
           <Tabs defaultValue="overview" className="w-full">

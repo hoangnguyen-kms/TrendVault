@@ -5,7 +5,10 @@ import { initSocketIO } from './config/socket-io.js';
 import pino from 'pino';
 import { scheduleTrendingRefreshJobs } from './modules/trending/jobs/trending-refresh-job.js';
 import { createTrendingRefreshWorker } from './modules/trending/jobs/trending-refresh-worker.js';
-import { createDownloadWorker, initDownloadQueueEvents } from './modules/downloads/jobs/download-worker.js';
+import {
+  createDownloadWorker,
+  initDownloadQueueEvents,
+} from './modules/downloads/jobs/download-worker.js';
 import { createUploadWorker, initUploadQueueEvents } from './modules/uploads/jobs/upload-worker.js';
 import { scheduleSyncJobs } from './modules/sync/sync-scheduler.js';
 import { createSyncWorker } from './modules/sync/sync-worker.js';

@@ -11,11 +11,7 @@ interface JwtPayload {
   userId: string;
 }
 
-export function authMiddleware(
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void {
+export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
   try {
     const token = req.cookies.token;
 

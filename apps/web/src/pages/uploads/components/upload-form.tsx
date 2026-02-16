@@ -56,7 +56,12 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
       channelId: selectedChannelId,
       title,
       description: description || null,
-      tags: tags ? tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+      tags: tags
+        ? tags
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean)
+        : [],
       privacyStatus: isTikTok ? 'private' : privacyStatus,
       uploadMode: isTikTok ? 'inbox' : null,
     });
@@ -78,9 +83,7 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
       <div className="space-y-4">
         {/* Video selection */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Select Video
-          </label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Select Video</label>
           <select
             value={selectedVideoId}
             onChange={(e) => handleVideoSelect(e.target.value)}
@@ -98,9 +101,7 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
 
         {/* Channel selection */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Target Channel
-          </label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Target Channel</label>
           <select
             value={selectedChannelId}
             onChange={(e) => setSelectedChannelId(e.target.value)}
@@ -127,8 +128,8 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
             <div className="flex items-start gap-2">
               <AlertCircle className="mt-0.5 h-4 w-4 text-yellow-600" />
               <p className="text-xs text-yellow-700">
-                TikTok: Video will be sent to your inbox as a draft.
-                Privacy is set to private (unaudited app limitation).
+                TikTok: Video will be sent to your inbox as a draft. Privacy is set to private
+                (unaudited app limitation).
               </p>
             </div>
           </div>
@@ -180,7 +181,9 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
             <label className="mb-1 block text-sm font-medium text-gray-700">Privacy</label>
             <select
               value={privacyStatus}
-              onChange={(e) => setPrivacyStatus(e.target.value as 'public' | 'private' | 'unlisted')}
+              onChange={(e) =>
+                setPrivacyStatus(e.target.value as 'public' | 'private' | 'unlisted')
+              }
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             >
               <option value="private">Private</option>

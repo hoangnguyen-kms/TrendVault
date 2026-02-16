@@ -19,9 +19,7 @@ export function TrendingAutoRefresh() {
         onClick={toggleAutoRefresh}
         className={cn(
           'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-          autoRefresh
-            ? 'bg-blue-100 text-blue-700'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+          autoRefresh ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
         )}
       >
         <RefreshCw className={cn('h-3.5 w-3.5', autoRefresh && 'animate-spin')} />

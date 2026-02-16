@@ -7,7 +7,7 @@ class ApiClient {
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
-    isRetry = false
+    isRetry = false,
   ): Promise<T> {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,

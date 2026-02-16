@@ -41,15 +41,15 @@ export function ChannelOverview({ channelId }: ChannelOverviewProps) {
         <div>
           <h3 className="mb-3 text-sm font-semibold text-gray-500 uppercase">Recent Videos</h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {data.recentVideos.map((video: Record<string, unknown>) => (
+            {data.recentVideos.map((video) => (
               <VideoLibraryCard
-                key={video.id as string}
-                id={video.id as string}
-                title={video.title as string}
-                thumbnailUrl={video.thumbnailUrl as string | null}
-                viewCount={video.viewCount as number}
-                likeCount={video.likeCount as number}
-                publishedAt={video.publishedAt as string | null}
+                key={video.id}
+                id={video.id}
+                title={video.title}
+                thumbnailUrl={video.thumbnailUrl}
+                viewCount={video.viewCount}
+                likeCount={video.likeCount}
+                publishedAt={video.publishedAt}
               />
             ))}
           </div>

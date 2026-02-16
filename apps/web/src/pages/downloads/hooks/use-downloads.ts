@@ -71,10 +71,9 @@ export function useBatchDownload() {
 
   return useMutation({
     mutationFn: async (trendingVideoIds: string[]) => {
-      const response = await apiClient.post<ApiSuccess<unknown[]>>(
-        '/downloads/batch',
-        { trendingVideoIds },
-      );
+      const response = await apiClient.post<ApiSuccess<unknown[]>>('/downloads/batch', {
+        trendingVideoIds,
+      });
       return response.data;
     },
     onSuccess: () => {
@@ -88,9 +87,7 @@ export function useRetryDownload() {
 
   return useMutation({
     mutationFn: async (downloadId: string) => {
-      const response = await apiClient.post<ApiSuccess<unknown>>(
-        `/downloads/${downloadId}/retry`,
-      );
+      const response = await apiClient.post<ApiSuccess<unknown>>(`/downloads/${downloadId}/retry`);
       return response.data;
     },
     onSuccess: () => {

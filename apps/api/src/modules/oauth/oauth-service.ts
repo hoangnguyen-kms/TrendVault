@@ -24,9 +24,17 @@ interface TokenBlob {
 
 export class OAuthService {
   /** Store encrypted OAuth tokens and upsert connected account */
-  async connectAccount(userId: string, platform: Platform, tokens: OAuthTokens, profile: PlatformProfile) {
+  async connectAccount(
+    userId: string,
+    platform: Platform,
+    tokens: OAuthTokens,
+    profile: PlatformProfile,
+  ) {
     // Encrypt both tokens as a single blob — single IV/authTag covers both
-    const blob: TokenBlob = { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken ?? null };
+    const blob: TokenBlob = {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken ?? null,
+    };
     const encrypted = await encryptionService.encrypt(JSON.stringify(blob), userId);
 
     const account = await prisma.connectedAccount.upsert({
@@ -104,7 +112,11 @@ export class OAuthService {
 
   /** Decrypt the encrypted token blob into its components */
   private async decryptTokenBlob(
-    account: { accessTokenEncrypted: Uint8Array<ArrayBuffer>; tokenIv: Uint8Array<ArrayBuffer>; tokenAuthTag: Uint8Array<ArrayBuffer> },
+    account: {
+      accessTokenEncrypted: Uint8Array<ArrayBuffer>;
+      tokenIv: Uint8Array<ArrayBuffer>;
+      tokenAuthTag: Uint8Array<ArrayBuffer>;
+    },
     userId: string,
   ): Promise<TokenBlob> {
     const raw = await encryptionService.decrypt(
@@ -118,7 +130,13 @@ export class OAuthService {
 
   /** Refresh expired token, re-encrypt blob, and return decrypted access token */
   private async refreshAndDecrypt(
-    account: { id: string; platform: Platform; accessTokenEncrypted: Uint8Array<ArrayBuffer>; tokenIv: Uint8Array<ArrayBuffer>; tokenAuthTag: Uint8Array<ArrayBuffer> },
+    account: {
+      id: string;
+      platform: Platform;
+      accessTokenEncrypted: Uint8Array<ArrayBuffer>;
+      tokenIv: Uint8Array<ArrayBuffer>;
+      tokenAuthTag: Uint8Array<ArrayBuffer>;
+    },
     userId: string,
   ): Promise<string> {
     const blob = await this.decryptTokenBlob(account, userId);
@@ -140,7 +158,7 @@ export class OAuthService {
           grant_type: 'refresh_token',
         }),
       });
-      const data = await res.json() as { access_token: string; expires_in: number };
+      const data = (await res.json()) as { access_token: string; expires_in: number };
       if (!data.access_token) throw new Error('Google token refresh failed');
       newAccessToken = data.access_token;
       newExpiresAt = new Date(Date.now() + data.expires_in * 1000);
@@ -155,7 +173,7 @@ export class OAuthService {
           grant_type: 'refresh_token',
         }),
       });
-      const data = await res.json() as { access_token: string; expires_in: number };
+      const data = (await res.json()) as { access_token: string; expires_in: number };
       if (!data.access_token) throw new Error('TikTok token refresh failed');
       newAccessToken = data.access_token;
       newExpiresAt = new Date(Date.now() + data.expires_in * 1000);
@@ -200,7 +218,7 @@ export class OAuthService {
       'https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true',
       { headers: { Authorization: `Bearer ${accessToken}` } },
     );
-    const data = await res.json() as {
+    const data = (await res.json()) as {
       items?: Array<{
         id: string;
         snippet: { title: string; thumbnails?: { default?: { url: string } }; country?: string };
@@ -210,12 +228,19 @@ export class OAuthService {
 
     for (const ch of data.items ?? []) {
       await prisma.channel.upsert({
-        where: { connectedAccountId_platformChannelId: { connectedAccountId: accountId, platformChannelId: ch.id } },
+        where: {
+          connectedAccountId_platformChannelId: {
+            connectedAccountId: accountId,
+            platformChannelId: ch.id,
+          },
+        },
         update: {
           name: ch.snippet.title,
           avatarUrl: ch.snippet.thumbnails?.default?.url ?? null,
           region: ch.snippet.country ?? null,
-          subscriberCount: ch.statistics.subscriberCount ? BigInt(ch.statistics.subscriberCount) : null,
+          subscriberCount: ch.statistics.subscriberCount
+            ? BigInt(ch.statistics.subscriberCount)
+            : null,
           totalViews: ch.statistics.viewCount ? BigInt(ch.statistics.viewCount) : null,
           videoCount: ch.statistics.videoCount ? Number(ch.statistics.videoCount) : null,
           lastSyncedAt: new Date(),
@@ -227,7 +252,9 @@ export class OAuthService {
           name: ch.snippet.title,
           avatarUrl: ch.snippet.thumbnails?.default?.url ?? null,
           region: ch.snippet.country ?? null,
-          subscriberCount: ch.statistics.subscriberCount ? BigInt(ch.statistics.subscriberCount) : null,
+          subscriberCount: ch.statistics.subscriberCount
+            ? BigInt(ch.statistics.subscriberCount)
+            : null,
           totalViews: ch.statistics.viewCount ? BigInt(ch.statistics.viewCount) : null,
           videoCount: ch.statistics.videoCount ? Number(ch.statistics.videoCount) : null,
           lastSyncedAt: new Date(),
@@ -241,7 +268,7 @@ export class OAuthService {
       'https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url',
       { headers: { Authorization: `Bearer ${accessToken}` } },
     );
-    const data = await res.json() as {
+    const data = (await res.json()) as {
       data?: { user?: { open_id: string; display_name: string; avatar_url?: string } };
     };
 
@@ -249,7 +276,12 @@ export class OAuthService {
     if (!user) return;
 
     await prisma.channel.upsert({
-      where: { connectedAccountId_platformChannelId: { connectedAccountId: accountId, platformChannelId: user.open_id } },
+      where: {
+        connectedAccountId_platformChannelId: {
+          connectedAccountId: accountId,
+          platformChannelId: user.open_id,
+        },
+      },
       update: {
         name: user.display_name,
         avatarUrl: user.avatar_url ?? null,

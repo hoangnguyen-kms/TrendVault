@@ -30,8 +30,13 @@ class EncryptionService {
     if (cached && cached.expiresAt > Date.now()) return cached.key;
 
     const key = await new Promise<Buffer>((resolve, reject) => {
-      crypto.pbkdf2(this.masterKey, userId, PBKDF2_ITERATIONS, KEY_LENGTH, 'sha256', (err, derivedKey) =>
-        err ? reject(err) : resolve(derivedKey),
+      crypto.pbkdf2(
+        this.masterKey,
+        userId,
+        PBKDF2_ITERATIONS,
+        KEY_LENGTH,
+        'sha256',
+        (err, derivedKey) => (err ? reject(err) : resolve(derivedKey)),
       );
     });
     this.keyCache.set(userId, { key, expiresAt: Date.now() + KEY_CACHE_TTL_MS });
@@ -46,18 +51,33 @@ class EncryptionService {
     const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
     const authTag = cipher.getAuthTag();
     return {
-      encrypted: new Uint8Array(encrypted.buffer, encrypted.byteOffset, encrypted.byteLength) as Uint8Array<ArrayBuffer>,
+      encrypted: new Uint8Array(
+        encrypted.buffer,
+        encrypted.byteOffset,
+        encrypted.byteLength,
+      ) as Uint8Array<ArrayBuffer>,
       iv: new Uint8Array(iv.buffer, iv.byteOffset, iv.byteLength) as Uint8Array<ArrayBuffer>,
-      authTag: new Uint8Array(authTag.buffer, authTag.byteOffset, authTag.byteLength) as Uint8Array<ArrayBuffer>,
+      authTag: new Uint8Array(
+        authTag.buffer,
+        authTag.byteOffset,
+        authTag.byteLength,
+      ) as Uint8Array<ArrayBuffer>,
     };
   }
 
   /** Decrypt ciphertext for a specific user */
-  async decrypt(encrypted: Uint8Array<ArrayBuffer>, iv: Uint8Array<ArrayBuffer>, authTag: Uint8Array<ArrayBuffer>, userId: string): Promise<string> {
+  async decrypt(
+    encrypted: Uint8Array<ArrayBuffer>,
+    iv: Uint8Array<ArrayBuffer>,
+    authTag: Uint8Array<ArrayBuffer>,
+    userId: string,
+  ): Promise<string> {
     const key = await this.deriveKey(userId);
     const decipher = crypto.createDecipheriv(ALGORITHM, key, Buffer.from(iv));
     decipher.setAuthTag(Buffer.from(authTag));
-    return Buffer.concat([decipher.update(Buffer.from(encrypted)), decipher.final()]).toString('utf8');
+    return Buffer.concat([decipher.update(Buffer.from(encrypted)), decipher.final()]).toString(
+      'utf8',
+    );
   }
 }
 

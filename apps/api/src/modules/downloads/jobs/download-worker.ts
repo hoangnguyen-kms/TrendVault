@@ -21,7 +21,11 @@ const ytdlp = new YtdlpService();
 /** Best-effort delete of a temp file */
 function cleanupTempFile(filePath: string | undefined): void {
   if (!filePath) return;
-  try { fs.unlinkSync(filePath); } catch { /* ignore */ }
+  try {
+    fs.unlinkSync(filePath);
+  } catch {
+    /* ignore */
+  }
 }
 
 export function createDownloadWorker(): Worker<DownloadJobData> {
@@ -40,7 +44,9 @@ export function createDownloadWorker(): Worker<DownloadJobData> {
           select: { id: true, status: true },
         });
         if (!record) {
-          console.warn(`[download-worker] Record ${downloadedVideoId} no longer exists, skipping job`);
+          console.warn(
+            `[download-worker] Record ${downloadedVideoId} no longer exists, skipping job`,
+          );
           return { downloadedVideoId, skipped: true };
         }
         if (record.status === 'CANCELLED') {
@@ -73,7 +79,9 @@ export function createDownloadWorker(): Worker<DownloadJobData> {
         // 2b. File size guard
         if (result.fileSize > MAX_FILE_SIZE) {
           cleanupTempFile(tempFilePath);
-          throw new Error(`File too large (${Math.round(result.fileSize / 1024 / 1024)}MB, max 500MB)`);
+          throw new Error(
+            `File too large (${Math.round(result.fileSize / 1024 / 1024)}MB, max 500MB)`,
+          );
         }
 
         // 2c. Check if download was cancelled while downloading
@@ -102,9 +110,10 @@ export function createDownloadWorker(): Worker<DownloadJobData> {
         await job.updateProgress({ percent: 95, phase: 'finalizing', downloadedVideoId });
 
         // 4. Update DB record as COMPLETED
-        const fileSize = Number.isFinite(result.fileSize) && result.fileSize >= 0
-          ? BigInt(Math.floor(result.fileSize))
-          : BigInt(0);
+        const fileSize =
+          Number.isFinite(result.fileSize) && result.fileSize >= 0
+            ? BigInt(Math.floor(result.fileSize))
+            : BigInt(0);
 
         await prisma.downloadedVideo.update({
           where: { id: downloadedVideoId },

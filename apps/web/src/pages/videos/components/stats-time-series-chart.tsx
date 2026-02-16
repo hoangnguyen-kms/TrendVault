@@ -12,13 +12,15 @@ import { format } from 'date-fns';
 import { formatCompactNumber } from '@/lib/format-utils';
 
 interface StatsTimeSeriesChartProps {
-  data: {
-    labels: string[];
-    views: number[];
-    likes: number[];
-    comments: number[];
-    shares: number[];
-  } | undefined;
+  data:
+    | {
+        labels: string[];
+        views: number[];
+        likes: number[];
+        comments: number[];
+        shares: number[];
+      }
+    | undefined;
   metric: 'views' | 'likes' | 'comments' | 'all';
   dateRange: string;
 }
@@ -56,7 +58,7 @@ export function StatsTimeSeriesChart({ data, metric, dateRange }: StatsTimeSerie
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" fontSize={12} />
         <YAxis tickFormatter={(v) => formatCompactNumber(v)} fontSize={12} />
-        <Tooltip formatter={(v: number) => formatCompactNumber(v)} />
+        <Tooltip formatter={(v: number | undefined) => formatCompactNumber(v ?? 0)} />
         <Legend />
         {showLine('views') && (
           <Line type="monotone" dataKey="views" stroke={COLORS.views} strokeWidth={2} dot={false} />
@@ -65,7 +67,13 @@ export function StatsTimeSeriesChart({ data, metric, dateRange }: StatsTimeSerie
           <Line type="monotone" dataKey="likes" stroke={COLORS.likes} strokeWidth={2} dot={false} />
         )}
         {showLine('comments') && (
-          <Line type="monotone" dataKey="comments" stroke={COLORS.comments} strokeWidth={2} dot={false} />
+          <Line
+            type="monotone"
+            dataKey="comments"
+            stroke={COLORS.comments}
+            strokeWidth={2}
+            dot={false}
+          />
         )}
       </LineChart>
     </ResponsiveContainer>

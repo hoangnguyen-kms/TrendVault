@@ -107,9 +107,7 @@ export const authService = {
   async createRefreshToken(userId: string): Promise<string> {
     const token = this.generateRefreshToken();
     const tokenHash = this.hashToken(token);
-    const expiresAt = new Date(
-      Date.now() + parseDurationToMs(env.JWT_REFRESH_EXPIRES_IN)
-    );
+    const expiresAt = new Date(Date.now() + parseDurationToMs(env.JWT_REFRESH_EXPIRES_IN));
 
     await prisma.refreshToken.create({
       data: { userId, tokenHash, expiresAt },
@@ -124,7 +122,7 @@ export const authService = {
    * Returns null if token is invalid or expired.
    */
   async rotateRefreshToken(
-    oldToken: string
+    oldToken: string,
   ): Promise<{ userId: string; newRefreshToken: string } | null> {
     const tokenHash = this.hashToken(oldToken);
 

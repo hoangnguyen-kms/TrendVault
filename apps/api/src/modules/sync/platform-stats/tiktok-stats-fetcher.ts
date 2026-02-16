@@ -8,7 +8,10 @@ import type {
 const TT_BASE = 'https://open.tiktokapis.com/v2';
 
 export class TikTokStatsFetcher implements IPlatformStatsFetcher {
-  async fetchChannelMetadata(accessToken: string, _platformChannelId: string): Promise<ChannelMetadata> {
+  async fetchChannelMetadata(
+    accessToken: string,
+    _platformChannelId: string,
+  ): Promise<ChannelMetadata> {
     const res = await fetch(
       `${TT_BASE}/user/info/?fields=open_id,display_name,avatar_url,follower_count,video_count`,
       { headers: { Authorization: `Bearer ${accessToken}` } },
@@ -42,14 +45,17 @@ export class TikTokStatsFetcher implements IPlatformStatsFetcher {
     const body: Record<string, unknown> = { max_count: 20 };
     if (pageToken) body.cursor = parseInt(pageToken, 10);
 
-    const res = await fetch(`${TT_BASE}/video/list/?fields=id,title,cover_image_url,duration,create_time`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+    const res = await fetch(
+      `${TT_BASE}/video/list/?fields=id,title,cover_image_url,duration,create_time`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
       },
-      body: JSON.stringify(body),
-    });
+    );
     const data = (await res.json()) as {
       data?: {
         videos?: Array<{
@@ -75,9 +81,8 @@ export class TikTokStatsFetcher implements IPlatformStatsFetcher {
       privacyStatus: null,
     }));
 
-    const nextPageToken = data.data?.has_more && data.data.cursor
-      ? String(data.data.cursor)
-      : undefined;
+    const nextPageToken =
+      data.data?.has_more && data.data.cursor ? String(data.data.cursor) : undefined;
 
     return { videos, nextPageToken };
   }

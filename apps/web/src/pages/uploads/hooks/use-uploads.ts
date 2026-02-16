@@ -1,7 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { useState } from 'react';
-import type { PaginatedUploadsResponse, CreateUploadRequest, YouTubeQuotaInfo } from '@trendvault/shared-types';
+import type {
+  PaginatedUploadsResponse,
+  CreateUploadRequest,
+  YouTubeQuotaInfo,
+} from '@trendvault/shared-types';
 
 interface ApiSuccess<T> {
   success: true;

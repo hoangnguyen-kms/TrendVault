@@ -43,14 +43,16 @@ export const ChannelOverviewSchema = z.object({
   totalLikes: z.number(),
   totalComments: z.number(),
   avgEngagementRate: z.number().nullable(),
-  recentVideos: z.array(z.object({
-    id: z.string().uuid(),
-    title: z.string(),
-    thumbnailUrl: z.string().nullable(),
-    viewCount: z.number(),
-    likeCount: z.number(),
-    publishedAt: z.string().nullable(),
-  })),
+  recentVideos: z.array(
+    z.object({
+      id: z.string().uuid(),
+      title: z.string(),
+      thumbnailUrl: z.string().nullable(),
+      viewCount: z.number(),
+      likeCount: z.number(),
+      publishedAt: z.string().nullable(),
+    }),
+  ),
 });
 
 export type ChannelOverview = z.infer<typeof ChannelOverviewSchema>;
@@ -63,13 +65,15 @@ export const CrossChannelAggregateSchema = z.object({
   totalViews: z.number(),
   totalLikes: z.number(),
   totalComments: z.number(),
-  platformBreakdown: z.array(z.object({
-    platform: PlatformSchema,
-    channels: z.number().int(),
-    videos: z.number().int(),
-    views: z.number(),
-    likes: z.number(),
-  })),
+  platformBreakdown: z.array(
+    z.object({
+      platform: PlatformSchema,
+      channels: z.number().int(),
+      videos: z.number().int(),
+      views: z.number(),
+      likes: z.number(),
+    }),
+  ),
 });
 
 export type CrossChannelAggregate = z.infer<typeof CrossChannelAggregateSchema>;
@@ -79,14 +83,16 @@ export type CrossChannelAggregate = z.infer<typeof CrossChannelAggregateSchema>;
 export const ContentComparisonSchema = z.object({
   sourceTitle: z.string(),
   sourcePlatform: PlatformSchema,
-  publishedVersions: z.array(z.object({
-    publishedVideoId: z.string().uuid(),
-    channelName: z.string(),
-    platform: PlatformSchema,
-    viewCount: z.number(),
-    likeCount: z.number(),
-    commentCount: z.number(),
-  })),
+  publishedVersions: z.array(
+    z.object({
+      publishedVideoId: z.string().uuid(),
+      channelName: z.string(),
+      platform: PlatformSchema,
+      viewCount: z.number(),
+      likeCount: z.number(),
+      commentCount: z.number(),
+    }),
+  ),
 });
 
 export type ContentComparison = z.infer<typeof ContentComparisonSchema>;
@@ -94,24 +100,30 @@ export type ContentComparison = z.infer<typeof ContentComparisonSchema>;
 // --- Content lifecycle ---
 
 export const ContentLifecycleSchema = z.object({
-  trending: z.object({
-    id: z.string().uuid(),
-    platform: PlatformSchema,
-    title: z.string(),
-    viewCount: z.number().nullable(),
-    region: z.string(),
-    fetchedAt: z.string(),
-  }).nullable(),
-  download: z.object({
-    id: z.string().uuid(),
-    status: z.string(),
-    downloadedAt: z.string().nullable(),
-  }).nullable(),
-  upload: z.object({
-    id: z.string().uuid(),
-    status: z.string(),
-    uploadedAt: z.string().nullable(),
-  }).nullable(),
+  trending: z
+    .object({
+      id: z.string().uuid(),
+      platform: PlatformSchema,
+      title: z.string(),
+      viewCount: z.number().nullable(),
+      region: z.string(),
+      fetchedAt: z.string(),
+    })
+    .nullable(),
+  download: z
+    .object({
+      id: z.string().uuid(),
+      status: z.string(),
+      downloadedAt: z.string().nullable(),
+    })
+    .nullable(),
+  upload: z
+    .object({
+      id: z.string().uuid(),
+      status: z.string(),
+      uploadedAt: z.string().nullable(),
+    })
+    .nullable(),
   published: z.object({
     id: z.string().uuid(),
     platform: PlatformSchema,
@@ -139,7 +151,9 @@ export const VideoLibraryQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
   search: z.string().optional(),
-  sortBy: z.enum(['publishedAt', 'viewCount', 'likeCount', 'title', 'duration']).default('publishedAt'),
+  sortBy: z
+    .enum(['publishedAt', 'viewCount', 'likeCount', 'title', 'duration'])
+    .default('publishedAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 

@@ -1,9 +1,22 @@
 import { google } from 'googleapis';
-import type { IPlatformUploader, UploadOptions, UploadResult } from './platform-uploader-interface.js';
+import type {
+  IPlatformUploader,
+  UploadOptions,
+  UploadResult,
+} from './platform-uploader-interface.js';
 
 export class YouTubeUploader implements IPlatformUploader {
   async upload(options: UploadOptions): Promise<UploadResult> {
-    const { accessToken, videoStream, title, description, tags, privacyStatus, totalBytes, onProgress } = options;
+    const {
+      accessToken,
+      videoStream,
+      title,
+      description,
+      tags,
+      privacyStatus,
+      totalBytes,
+      onProgress,
+    } = options;
 
     const oauth2Client = new google.auth.OAuth2();
     oauth2Client.setCredentials({ access_token: accessToken });

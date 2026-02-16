@@ -18,12 +18,12 @@ Cross-platform trending video discovery, download & re-upload web app.
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
+| Layer    | Technology                                                              |
+| -------- | ----------------------------------------------------------------------- |
 | Frontend | React 19, Vite 6, TailwindCSS 4, shadcn/ui, TanStack Query 5, Zustand 5 |
-| Backend | Node.js 22, Express 5, Prisma 6, BullMQ 5, Socket.IO 4 |
-| Storage | PostgreSQL 17, Redis 7, MinIO (S3-compatible) |
-| Monorepo | Turborepo, pnpm workspaces |
+| Backend  | Node.js 22, Express 5, Prisma 6, BullMQ 5, Socket.IO 4                  |
+| Storage  | PostgreSQL 17, Redis 7, MinIO (S3-compatible)                           |
+| Monorepo | Turborepo, pnpm workspaces                                              |
 
 ## Prerequisites
 
@@ -89,30 +89,30 @@ pnpm dev
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start all apps in dev mode |
-| `pnpm build` | Build all packages |
-| `pnpm type-check` | TypeScript type-check all packages |
-| `pnpm lint` | Lint all packages |
-| `pnpm test` | Run tests |
-| `pnpm docker:up` | Start Docker services |
-| `pnpm docker:down` | Stop Docker services |
-| `pnpm db:migrate` | Run Prisma migrations |
-| `pnpm db:seed` | Seed database |
-| `pnpm db:studio` | Open Prisma Studio |
+| Command            | Description                        |
+| ------------------ | ---------------------------------- |
+| `pnpm dev`         | Start all apps in dev mode         |
+| `pnpm build`       | Build all packages                 |
+| `pnpm type-check`  | TypeScript type-check all packages |
+| `pnpm lint`        | Lint all packages                  |
+| `pnpm test`        | Run tests                          |
+| `pnpm docker:up`   | Start Docker services              |
+| `pnpm docker:down` | Stop Docker services               |
+| `pnpm db:migrate`  | Run Prisma migrations              |
+| `pnpm db:seed`     | Seed database                      |
+| `pnpm db:studio`   | Open Prisma Studio                 |
 
 ## API Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/auth/register` | Register new user |
-| POST | `/api/auth/login` | Login (sets httpOnly cookie) |
-| POST | `/api/auth/logout` | Logout (clears cookie) |
-| GET | `/api/auth/me` | Current user profile |
-| GET | `/api/trending` | List trending videos (query: platform, region, category, page, limit) |
-| GET | `/api/trending/regions` | Supported regions & YouTube categories |
-| GET | `/api/trending/:id` | Single trending video details |
+| Method | Path                    | Description                                                           |
+| ------ | ----------------------- | --------------------------------------------------------------------- |
+| POST   | `/api/auth/register`    | Register new user                                                     |
+| POST   | `/api/auth/login`       | Login (sets httpOnly cookie)                                          |
+| POST   | `/api/auth/logout`      | Logout (clears cookie)                                                |
+| GET    | `/api/auth/me`          | Current user profile                                                  |
+| GET    | `/api/trending`         | List trending videos (query: platform, region, category, page, limit) |
+| GET    | `/api/trending/regions` | Supported regions & YouTube categories                                |
+| GET    | `/api/trending/:id`     | Single trending video details                                         |
 
 ## Project Structure
 
@@ -138,11 +138,11 @@ TrendVault/
 
 See `.env.example` for all available configuration. Key variables:
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `REDIS_URL` | Yes | Redis connection string |
-| `JWT_SECRET` | Yes | JWT signing secret (min 32 chars) |
-| `ENCRYPTION_MASTER_KEY` | Yes | AES-256 key for OAuth tokens (64 hex chars) |
-| `YOUTUBE_API_KEY` | No | YouTube Data API v3 key (for trending) |
-| `APIFY_API_TOKEN` | No | Apify token (for TikTok trending) |
+| Variable                | Required | Description                                 |
+| ----------------------- | -------- | ------------------------------------------- |
+| `DATABASE_URL`          | Yes      | PostgreSQL connection string                |
+| `REDIS_URL`             | Yes      | Redis connection string                     |
+| `JWT_SECRET`            | Yes      | JWT signing secret (min 32 chars)           |
+| `ENCRYPTION_MASTER_KEY` | Yes      | AES-256 key for OAuth tokens (64 hex chars) |
+| `YOUTUBE_API_KEY`       | No       | YouTube Data API v3 key (for trending)      |
+| `APIFY_API_TOKEN`       | No       | Apify token (for TikTok trending)           |

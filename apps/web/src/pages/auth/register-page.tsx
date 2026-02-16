@@ -36,9 +36,7 @@ export default function RegisterPage() {
             <TrendingUp className="h-8 w-8 text-blue-600" />
             <span className="text-2xl font-bold">TrendVault</span>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900">
-            Create your account
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-900">Create your account</h2>
         </div>
 
         <div className="rounded-lg border bg-white p-8 shadow-sm">
@@ -50,10 +48,7 @@ export default function RegisterPage() {
             )}
 
             <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Full Name
               </label>
               <input
@@ -68,10 +63,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email
               </label>
               <input
@@ -86,10 +78,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <input
@@ -102,9 +91,7 @@ export default function RegisterPage() {
                 className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="••••••••"
               />
-              <p className="mt-1 text-xs text-gray-500">
-                Must be at least 8 characters
-              </p>
+              <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
             </div>
 
             <button
@@ -119,10 +106,7 @@ export default function RegisterPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
-              <Link
-                to="/login"
-                className="font-medium text-blue-600 hover:text-blue-700"
-              >
+              <Link to="/login" className="font-medium text-blue-600 hover:text-blue-700">
                 Sign in
               </Link>
             </p>

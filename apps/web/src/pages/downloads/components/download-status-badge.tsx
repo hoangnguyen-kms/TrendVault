@@ -1,18 +1,6 @@
-import {
-  Loader2,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  AlertCircle,
-} from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react';
 
-export function DownloadStatusBadge({
-  status,
-  progress,
-}: {
-  status: string;
-  progress: number;
-}) {
+export function DownloadStatusBadge({ status, progress }: { status: string; progress: number }) {
   switch (status) {
     case 'PENDING':
       return (

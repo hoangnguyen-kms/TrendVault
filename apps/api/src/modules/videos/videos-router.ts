@@ -28,13 +28,15 @@ router.get('/:videoId', authMiddleware, async (req: AuthRequest, res: Response) 
       return;
     }
 
-    res.json(successResponse({
-      ...video,
-      viewCount: Number(video.viewCount ?? 0),
-      likeCount: Number(video.likeCount ?? 0),
-      commentCount: Number(video.commentCount ?? 0),
-      shareCount: Number(video.shareCount ?? 0),
-    }));
+    res.json(
+      successResponse({
+        ...video,
+        viewCount: Number(video.viewCount ?? 0),
+        likeCount: Number(video.likeCount ?? 0),
+        commentCount: Number(video.commentCount ?? 0),
+        shareCount: Number(video.shareCount ?? 0),
+      }),
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to get video';
     res.status(500).json(errorResponse(message));

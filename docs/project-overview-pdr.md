@@ -12,29 +12,30 @@ TrendVault is a cross-platform trending video discovery, download, and re-upload
 
 ## Project Goals
 
-| Goal | Priority | Status |
-|------|----------|--------|
-| Enable cross-platform video discovery | P0 | Complete (Phase 2) |
-| Provide robust download engine | P0 | In Progress (Phase 3) |
-| Simplify multi-platform publishing | P0 | In Progress (Phase 4) |
-| Deliver comprehensive analytics | P1 | Planned (Phase 5) |
-| Production-ready deployment | P1 | Planned (Phase 6) |
+| Goal                                  | Priority | Status                |
+| ------------------------------------- | -------- | --------------------- |
+| Enable cross-platform video discovery | P0       | Complete (Phase 2)    |
+| Provide robust download engine        | P0       | In Progress (Phase 3) |
+| Simplify multi-platform publishing    | P0       | In Progress (Phase 4) |
+| Deliver comprehensive analytics       | P1       | Planned (Phase 5)     |
+| Production-ready deployment           | P1       | Planned (Phase 6)     |
 
 ## Technology Stack
 
-| Layer | Technology | Version |
-|-------|-----------|---------|
+| Layer        | Technology                 | Version  |
+| ------------ | -------------------------- | -------- |
 | **Frontend** | React + Vite + TailwindCSS | 19, 6, 4 |
-| **State** | TanStack Query + Zustand | 5, 5 |
-| **Backend** | Node.js + Express | 22, 5 |
-| **Database** | PostgreSQL + Prisma | 17, 6 |
-| **Cache** | Redis + BullMQ | 7, 5 |
-| **Storage** | MinIO (S3-compatible) | Latest |
-| **Monorepo** | Turborepo + pnpm | Latest |
+| **State**    | TanStack Query + Zustand   | 5, 5     |
+| **Backend**  | Node.js + Express          | 22, 5    |
+| **Database** | PostgreSQL + Prisma        | 17, 6    |
+| **Cache**    | Redis + BullMQ             | 7, 5     |
+| **Storage**  | MinIO (S3-compatible)      | Latest   |
+| **Monorepo** | Turborepo + pnpm           | Latest   |
 
 ## Phase Breakdown
 
 ### Phase 1: Foundation & Scaffolding (Weeks 1-3) — COMPLETE
+
 - Monorepo structure (Turborepo + pnpm workspaces)
 - Database schema & Prisma setup (User, ConnectedAccount)
 - Authentication system (JWT + bcrypt)
@@ -44,6 +45,7 @@ TrendVault is a cross-platform trending video discovery, download, and re-upload
 **Deliverables:** Monorepo scaffold, auth system, base UI, deployable Docker setup
 
 ### Phase 2: Trending Video Discovery (Weeks 4-6) — COMPLETE
+
 - Platform adapters (YouTube Data API, TikTok Research API, Apify fallback)
 - Trending service with Redis caching (TTL: 30min YouTube, 15min TikTok)
 - BullMQ background refresh jobs (every 30 minutes per region/platform)
@@ -54,6 +56,7 @@ TrendVault is a cross-platform trending video discovery, download, and re-upload
 **Deliverables:** Trending discovery fully functional, trending cache layer, background jobs
 
 ### Phase 3: Download Engine (Weeks 7-9) — IN PROGRESS
+
 - yt-dlp-wrap integration for video download
 - Format selection & quality preferences
 - Progress tracking with Socket.IO
@@ -63,6 +66,7 @@ TrendVault is a cross-platform trending video discovery, download, and re-upload
 **Deliverables:** End-to-end download flow, quality/format selection, progress tracking
 
 ### Phase 4: Upload & OAuth (Weeks 10-13) — PENDING
+
 - Google OAuth 2.0 for YouTube publishing
 - TikTok OAuth 2.0 for Inbox Upload (direct post deferred post-audit)
 - YouTube upload with metadata (title, description, tags, thumbnail)
@@ -72,6 +76,7 @@ TrendVault is a cross-platform trending video discovery, download, and re-upload
 **Deliverables:** Multi-platform publishing, OAuth flows, upload tracking
 
 ### Phase 5: Channel Management & Analytics (Weeks 14-16) — PENDING
+
 - Channel dashboard (connected accounts, video stats)
 - Video analytics (views, likes, engagement over time)
 - Analytics aggregation with VideoStatsSnapshot
@@ -80,6 +85,7 @@ TrendVault is a cross-platform trending video discovery, download, and re-upload
 **Deliverables:** Channel management UI, analytics dashboard, stats aggregation
 
 ### Phase 6: Polish & Launch (Weeks 17-19) — PENDING
+
 - Security hardening (CORS, rate limiting, input validation)
 - Performance optimization (CDN, query optimization)
 - E2E testing with Playwright
@@ -91,12 +97,14 @@ TrendVault is a cross-platform trending video discovery, download, and re-upload
 ## Functional Requirements (by Phase)
 
 ### FR1: Authentication & Base UI (Phase 1) — COMPLETE
+
 - User registration with email/password
 - JWT-based authentication
 - Protected API routes & pages
 - Base layout (header, sidebar, auth pages)
 
 ### FR2: Trending Discovery (Phase 2) — COMPLETE
+
 - Fetch trending videos (YouTube mostPopular + search.list, TikTok Research API / Apify)
 - Filter by: platform (YouTube, TikTok), region (12+ supported), category (YouTube only)
 - Display videos with: thumbnail, title, views, likes, creator, platform badge, duration
@@ -106,6 +114,7 @@ TrendVault is a cross-platform trending video discovery, download, and re-upload
 - Background refresh jobs (BullMQ, every 30min per region/platform)
 
 ### FR3: Download Engine (Phase 3) — IN PROGRESS
+
 - Select format/quality from available options
 - Download with progress tracking
 - Cancel/pause downloads
@@ -113,18 +122,21 @@ TrendVault is a cross-platform trending video discovery, download, and re-upload
 - Store metadata in DownloadedVideo table
 
 ### FR4: Multi-Platform Publishing (Phase 4) — PENDING
+
 - YouTube: Publish with title, description, tags, thumbnail, privacy (public/unlisted/private)
 - TikTok: Inbox Upload (draft mode, user finalizes before publishing)
 - Automatic video re-encoding if needed (format/codec compatibility)
 - Publishing queue with retry logic
 
 ### FR5: Channel Analytics (Phase 5) — PENDING
+
 - Dashboard showing all connected channels
 - Per-video stats: views, likes, comments, engagement rate
 - Time-series analytics for engagement trends
 - Channel-level aggregations (total views, average engagement)
 
 ### FR6: Deployment & Operations (Phase 6) — PENDING
+
 - Single-server Docker Compose deployment
 - Environment-based config (development, staging, production)
 - Database backup strategy
@@ -133,20 +145,21 @@ TrendVault is a cross-platform trending video discovery, download, and re-upload
 
 ## Non-Functional Requirements
 
-| Requirement | Target |
-|-------------|--------|
-| API response time (cached) | < 500ms |
-| API response time (cold cache) | < 3s |
-| YouTube quota usage | < 5K units/day for trending |
-| Upload success rate | > 95% |
-| Download resume support | Required |
-| Database availability | 99.5% uptime |
-| Session timeout | 24 hours |
-| Token refresh | 1 hour |
+| Requirement                    | Target                      |
+| ------------------------------ | --------------------------- |
+| API response time (cached)     | < 500ms                     |
+| API response time (cold cache) | < 3s                        |
+| YouTube quota usage            | < 5K units/day for trending |
+| Upload success rate            | > 95%                       |
+| Download resume support        | Required                    |
+| Database availability          | 99.5% uptime                |
+| Session timeout                | 24 hours                    |
+| Token refresh                  | 1 hour                      |
 
 ## Data Models (Current)
 
 ### User (Phase 1)
+
 ```prisma
 model User {
   id            String @id @default(uuid())
@@ -160,6 +173,7 @@ model User {
 ```
 
 ### ConnectedAccount (Phase 1)
+
 ```prisma
 model ConnectedAccount {
   id                String @id @default(uuid())
@@ -176,6 +190,7 @@ model ConnectedAccount {
 ```
 
 ### TrendingVideo (Phase 2)
+
 ```prisma
 model TrendingVideo {
   id                String @id @default(uuid())
@@ -202,12 +217,14 @@ model TrendingVideo {
 ## API Endpoints (Phase 2 Complete)
 
 ### Authentication
+
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - Login
 - `POST /api/auth/refresh` - Token refresh
 - `POST /api/auth/logout` - Logout
 
 ### Trending
+
 - `GET /api/trending` - Fetch trending videos with filters
   - Query: `platform`, `region`, `category`, `page`, `limit`
   - Returns: paginated video list with cache status
@@ -217,11 +234,13 @@ model TrendingVideo {
 ## Deployment Architecture
 
 **Current (Development):**
+
 - Docker Compose: PostgreSQL (5433), Redis (6379), MinIO (9000/9001)
 - Express API: http://localhost:3001
 - React Web: http://localhost:5173
 
 **Target (Production):**
+
 - Single-server deployment with Docker Compose
 - Nginx reverse proxy (API + Web)
 - PostgreSQL with automated backups
@@ -230,29 +249,30 @@ model TrendingVideo {
 
 ## Critical Dependencies
 
-| Service | Impact | Status |
-|---------|--------|--------|
-| YouTube Data API v3 | Trending discovery, publishing | Required, quota: 10K units/day |
-| TikTok Research API | Trending discovery (Research API) | Optional (Apify fallback available) |
-| Apify | TikTok trending (primary) | Required, ~$0.001/100 results |
-| Google OAuth 2.0 | YouTube publishing | Required (Phase 4) |
-| TikTok OAuth 2.0 | TikTok publishing | Required (Phase 4) |
-| yt-dlp binary | Video download | Auto-installed by wrapper |
-| FFmpeg | Video re-encoding | Required for format conversion (Phase 3+) |
+| Service             | Impact                            | Status                                    |
+| ------------------- | --------------------------------- | ----------------------------------------- |
+| YouTube Data API v3 | Trending discovery, publishing    | Required, quota: 10K units/day            |
+| TikTok Research API | Trending discovery (Research API) | Optional (Apify fallback available)       |
+| Apify               | TikTok trending (primary)         | Required, ~$0.001/100 results             |
+| Google OAuth 2.0    | YouTube publishing                | Required (Phase 4)                        |
+| TikTok OAuth 2.0    | TikTok publishing                 | Required (Phase 4)                        |
+| yt-dlp binary       | Video download                    | Auto-installed by wrapper                 |
+| FFmpeg              | Video re-encoding                 | Required for format conversion (Phase 3+) |
 
 ## Risk Assessment
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|-----------|
-| YouTube API quota exhaustion | Medium | High | Cap uploads to 4/day, prioritize trending queries |
-| TikTok Research API approval | Medium | Medium | Use Apify as primary, Research API as enhancement |
-| Video copyright detection | High | Medium | Add content ID awareness, document attribution requirements |
-| Platform OAuth flow failures | Low | High | Implement robust retry logic, clear error messages |
-| Database performance degradation | Low | High | Index trending queries, implement caching, partition VideoStatsSnapshot |
+| Risk                             | Probability | Impact | Mitigation                                                              |
+| -------------------------------- | ----------- | ------ | ----------------------------------------------------------------------- |
+| YouTube API quota exhaustion     | Medium      | High   | Cap uploads to 4/day, prioritize trending queries                       |
+| TikTok Research API approval     | Medium      | Medium | Use Apify as primary, Research API as enhancement                       |
+| Video copyright detection        | High        | Medium | Add content ID awareness, document attribution requirements             |
+| Platform OAuth flow failures     | Low         | High   | Implement robust retry logic, clear error messages                      |
+| Database performance degradation | Low         | High   | Index trending queries, implement caching, partition VideoStatsSnapshot |
 
 ## Success Criteria
 
 ### Phase 2 Completion (Current)
+
 - [x] YouTube trending discovery with mostPopular + search.list
 - [x] TikTok trending with Apify (primary) + Research API (optional)
 - [x] Redis caching layer (TTL per platform)
@@ -263,6 +283,7 @@ model TrendingVideo {
 - [x] Database persistence in TrendingVideo table
 
 ### MVP Completion (All 6 Phases)
+
 - [ ] End-to-end video download with progress tracking
 - [ ] Multi-platform publishing (YouTube + TikTok Inbox)
 - [ ] OAuth flows for both platforms
@@ -281,6 +302,7 @@ See `/docs/development-roadmap.md` for detailed timeline and milestones.
 ## Questions & Decisions Log
 
 See `/plans/260214-2218-trendvault-implementation/plan.md` for validation decisions:
+
 - TikTok upload: Inbox/Draft mode only (deferred direct post)
 - YouTube quota: Cap uploads to 4/day
 - MVP: All 6 phases, no phased launch

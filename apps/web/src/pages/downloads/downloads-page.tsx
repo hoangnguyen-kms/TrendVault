@@ -20,9 +20,7 @@ export default function DownloadsPage() {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Downloads</h1>
-          <p className="text-sm text-gray-500">
-            Manage your downloaded videos
-          </p>
+          <p className="text-sm text-gray-500">Manage your downloaded videos</p>
         </div>
         <div className="flex items-center gap-3">
           {data && (

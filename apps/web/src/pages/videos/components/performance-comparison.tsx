@@ -4,7 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { apiClient } from '@/lib/api-client';
 import { formatCompactNumber } from '@/lib/format-utils';
 
-interface SuccessRes<T> { success: boolean; data: T }
+interface SuccessRes<T> {
+  success: boolean;
+  data: T;
+}
 
 interface LifecycleData {
   trending: { platform: string; viewCount: number | null } | null;
@@ -19,7 +22,9 @@ export function PerformanceComparison({ videoId }: PerformanceComparisonProps) {
   const { data } = useQuery({
     queryKey: ['video-lifecycle', videoId],
     queryFn: async () => {
-      const res = await apiClient.get<SuccessRes<LifecycleData>>(`/analytics/videos/${videoId}/lifecycle`);
+      const res = await apiClient.get<SuccessRes<LifecycleData>>(
+        `/analytics/videos/${videoId}/lifecycle`,
+      );
       return res.data;
     },
     enabled: !!videoId,
@@ -62,8 +67,13 @@ export function PerformanceComparison({ videoId }: PerformanceComparisonProps) {
           {viewDelta !== null && (
             <div className="flex items-center justify-between">
               <span className="text-gray-500">View Delta</span>
-              <span className={viewDelta >= 0 ? 'font-medium text-green-600' : 'font-medium text-red-500'}>
-                {viewDelta >= 0 ? '+' : ''}{formatCompactNumber(viewDelta)}
+              <span
+                className={
+                  viewDelta >= 0 ? 'font-medium text-green-600' : 'font-medium text-red-500'
+                }
+              >
+                {viewDelta >= 0 ? '+' : ''}
+                {formatCompactNumber(viewDelta)}
               </span>
             </div>
           )}

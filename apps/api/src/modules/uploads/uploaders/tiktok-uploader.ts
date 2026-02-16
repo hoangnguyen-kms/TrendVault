@@ -1,4 +1,8 @@
-import type { IPlatformUploader, UploadOptions, UploadResult } from './platform-uploader-interface.js';
+import type {
+  IPlatformUploader,
+  UploadOptions,
+  UploadResult,
+} from './platform-uploader-interface.js';
 
 /**
  * TikTok Content Posting API — Inbox Upload only (unaudited apps).
@@ -41,7 +45,7 @@ export class TikTokUploader implements IPlatformUploader {
       }),
     });
 
-    const initData = await initRes.json() as {
+    const initData = (await initRes.json()) as {
       data?: { publish_id: string; upload_url: string };
       error?: { code: string; message: string };
     };
@@ -57,7 +61,9 @@ export class TikTokUploader implements IPlatformUploader {
     // 2. Buffer video into memory (guard against OOM for large files)
     const MAX_BUFFER_SIZE = 50 * 1024 * 1024; // 50MB
     if (totalBytes > MAX_BUFFER_SIZE) {
-      throw new Error(`Video too large for single-chunk upload (${Math.round(totalBytes / 1024 / 1024)}MB > ${MAX_BUFFER_SIZE / 1024 / 1024}MB limit)`);
+      throw new Error(
+        `Video too large for single-chunk upload (${Math.round(totalBytes / 1024 / 1024)}MB > ${MAX_BUFFER_SIZE / 1024 / 1024}MB limit)`,
+      );
     }
 
     const chunks: Buffer[] = [];
@@ -113,7 +119,7 @@ export class TikTokUploader implements IPlatformUploader {
         body: JSON.stringify({ publish_id: publishId }),
       });
 
-      const data = await res.json() as {
+      const data = (await res.json()) as {
         data?: { status: string; publicaly_available_post_id?: string[] };
       };
 

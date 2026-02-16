@@ -9,8 +9,7 @@ interface ApiSuccess<T> {
 }
 
 export function useTrendingVideos() {
-  const { platform, region, category, autoRefresh, refreshInterval } =
-    useTrendingFilters();
+  const { platform, region, category, autoRefresh, refreshInterval } = useTrendingFilters();
 
   return useInfiniteQuery({
     queryKey: ['trending', platform, region, category],
@@ -29,8 +28,7 @@ export function useTrendingVideos() {
       return response.data;
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
-      lastPage.hasMore ? lastPage.page + 1 : undefined,
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.page + 1 : undefined),
     refetchInterval: autoRefresh ? refreshInterval : false,
     staleTime: 2 * 60 * 1000, // 2 min
   });
@@ -45,9 +43,7 @@ export function useSupportedRegions() {
   return useQuery({
     queryKey: ['trending-regions'],
     queryFn: async () => {
-      const response = await apiClient.get<ApiSuccess<RegionsResponse>>(
-        '/trending/regions',
-      );
+      const response = await apiClient.get<ApiSuccess<RegionsResponse>>('/trending/regions');
       return response.data;
     },
     staleTime: Infinity, // static data

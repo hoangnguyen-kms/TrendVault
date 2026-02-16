@@ -73,9 +73,7 @@ export class YouTubeAdapter implements IPlatformAdapter {
     const perCategory = Math.max(3, Math.ceil(maxResults / ALL_CATEGORY_IDS.length));
 
     const results = await Promise.allSettled(
-      ALL_CATEGORY_IDS.map((catId) =>
-        this.fetchMostPopular(region, catId, perCategory),
-      ),
+      ALL_CATEGORY_IDS.map((catId) => this.fetchMostPopular(region, catId, perCategory)),
     );
 
     // Merge all fulfilled results and deduplicate by platformVideoId
@@ -94,7 +92,9 @@ export class YouTubeAdapter implements IPlatformAdapter {
 
     // Sort by viewCount descending, reassign trendingRank
     allVideos.sort((a, b) => Number(b.viewCount ?? 0n) - Number(a.viewCount ?? 0n));
-    allVideos.forEach((v, i) => { v.trendingRank = i + 1; });
+    allVideos.forEach((v, i) => {
+      v.trendingRank = i + 1;
+    });
 
     return {
       videos: allVideos.slice(0, maxResults),
@@ -114,9 +114,7 @@ export class YouTubeAdapter implements IPlatformAdapter {
       title: item.snippet?.title ?? '',
       description: item.snippet?.description ?? null,
       thumbnailUrl:
-        item.snippet?.thumbnails?.high?.url ??
-        item.snippet?.thumbnails?.default?.url ??
-        null,
+        item.snippet?.thumbnails?.high?.url ?? item.snippet?.thumbnails?.default?.url ?? null,
       channelName: item.snippet?.channelTitle ?? null,
       channelId: item.snippet?.channelId ?? null,
       duration: this.parseDuration(item.contentDetails?.duration),
@@ -124,9 +122,7 @@ export class YouTubeAdapter implements IPlatformAdapter {
       likeCount: this.toBigInt(item.statistics?.likeCount),
       commentCount: this.toBigInt(item.statistics?.commentCount),
       shareCount: null, // YouTube doesn't expose share count
-      publishedAt: item.snippet?.publishedAt
-        ? new Date(item.snippet.publishedAt)
-        : null,
+      publishedAt: item.snippet?.publishedAt ? new Date(item.snippet.publishedAt) : null,
       trendingRank: index + 1,
       category: item.snippet?.categoryId ?? null,
       tags: item.snippet?.tags ?? [],

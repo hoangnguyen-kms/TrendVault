@@ -11,15 +11,10 @@ router.post(
   '/register',
   registerLimiter,
   validateRequest(RegisterRequestSchema),
-  authController.register
+  authController.register,
 );
 
-router.post(
-  '/login',
-  loginLimiter,
-  validateRequest(LoginRequestSchema),
-  authController.login
-);
+router.post('/login', loginLimiter, validateRequest(LoginRequestSchema), authController.login);
 
 router.post('/logout', authController.logout);
 

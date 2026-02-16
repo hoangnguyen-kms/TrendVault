@@ -17,7 +17,10 @@ interface PaginatedResult {
   hasMore: boolean;
 }
 
-interface SuccessRes<T> { success: boolean; data: T }
+interface SuccessRes<T> {
+  success: boolean;
+  data: T;
+}
 
 export function useChannelVideos(channelId: string | undefined, query: VideoListQuery) {
   return useQuery({
@@ -30,7 +33,9 @@ export function useChannelVideos(channelId: string | undefined, query: VideoList
         sortOrder: query.sortOrder,
       });
       if (query.search) params.set('search', query.search);
-      const res = await apiClient.get<SuccessRes<PaginatedResult>>(`/analytics/channels/${channelId}/videos?${params}`);
+      const res = await apiClient.get<SuccessRes<PaginatedResult>>(
+        `/analytics/channels/${channelId}/videos?${params}`,
+      );
       return res.data;
     },
     enabled: !!channelId,

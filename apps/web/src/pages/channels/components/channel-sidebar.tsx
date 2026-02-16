@@ -41,9 +41,7 @@ export function ChannelSidebar({ channels, selectedId, onSelect }: ChannelSideba
             onClick={() => onSelect(ch.id)}
             className={cn(
               'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors',
-              selectedId === ch.id
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-100',
+              selectedId === ch.id ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100',
             )}
           >
             {ch.avatarUrl ? (
