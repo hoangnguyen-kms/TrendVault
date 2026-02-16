@@ -6,7 +6,9 @@ export async function handleStatsAggregation(): Promise<void> {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - AGGREGATION_THRESHOLD_DAYS);
 
-  console.log(`[sync:stats-aggregation] Aggregating snapshots older than ${cutoffDate.toISOString()}`);
+  console.log(
+    `[sync:stats-aggregation] Aggregating snapshots older than ${cutoffDate.toISOString()}`,
+  );
 
   // Find daily snapshots older than threshold that haven't been aggregated
   const oldSnapshots = await prisma.videoStatsSnapshot.findMany({
@@ -46,7 +48,8 @@ export async function handleStatsAggregation(): Promise<void> {
     const avgLikes = avgBigInt(snapshots.map((s) => s.likeCount));
     const avgComments = avgBigInt(snapshots.map((s) => s.commentCount));
     const avgShares = avgBigInt(snapshots.map((s) => s.shareCount));
-    const avgEngagement = snapshots.reduce((sum, s) => sum + (s.engagementRate ?? 0), 0) / snapshots.length;
+    const avgEngagement =
+      snapshots.reduce((sum, s) => sum + (s.engagementRate ?? 0), 0) / snapshots.length;
 
     // Insert weekly summary
     await prisma.videoStatsSnapshot.create({
@@ -69,7 +72,9 @@ export async function handleStatsAggregation(): Promise<void> {
     deleted += ids.length;
   }
 
-  console.log(`[sync:stats-aggregation] Created ${aggregated} weekly summaries, deleted ${deleted} daily snapshots`);
+  console.log(
+    `[sync:stats-aggregation] Created ${aggregated} weekly summaries, deleted ${deleted} daily snapshots`,
+  );
 }
 
 function getISOWeekStart(date: Date): Date {

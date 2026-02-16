@@ -81,7 +81,9 @@ export async function handleStatsSnapshotSync(recentOnly: boolean): Promise<void
         });
       }
 
-      console.log(`[sync:stats-snapshot:${label}] Synced ${videos.length} videos for: ${channel.name}`);
+      console.log(
+        `[sync:stats-snapshot:${label}] Synced ${videos.length} videos for: ${channel.name}`,
+      );
     } catch (err) {
       console.error(`[sync:stats-snapshot:${label}] Failed for channel ${channel.id}:`, err);
     }

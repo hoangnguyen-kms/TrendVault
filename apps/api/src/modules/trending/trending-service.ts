@@ -28,15 +28,13 @@ export class TrendingService {
     const adaptersToUse =
       platform === 'ALL'
         ? [...this.adapters.values()]
-        : [this.adapters.get(platform as Platform)].filter(
-            (a): a is IPlatformAdapter => Boolean(a),
+        : [this.adapters.get(platform as Platform)].filter((a): a is IPlatformAdapter =>
+            Boolean(a),
           );
 
     // 3. Check adapter availability, then fetch (parallel, graceful on failure)
     const availableAdapters = (
-      await Promise.all(
-        adaptersToUse.map(async (a) => ((await a.isAvailable()) ? a : null)),
-      )
+      await Promise.all(adaptersToUse.map(async (a) => ((await a.isAvailable()) ? a : null)))
     ).filter((a): a is IPlatformAdapter => a !== null);
 
     const results = await Promise.allSettled(
@@ -175,9 +173,7 @@ export class TrendingService {
             trendingRank: v.trendingRank,
             category: v.category,
             tags: v.tags,
-            rawMetadata: v.rawMetadata
-              ? (v.rawMetadata as Prisma.InputJsonValue)
-              : Prisma.JsonNull,
+            rawMetadata: v.rawMetadata ? (v.rawMetadata as Prisma.InputJsonValue) : Prisma.JsonNull,
           },
         }),
       ),

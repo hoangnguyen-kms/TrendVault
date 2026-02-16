@@ -104,11 +104,7 @@ function DownloadRow({
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
           {download.thumbnailUrl && (
-            <img
-              src={download.thumbnailUrl}
-              alt=""
-              className="h-10 w-16 rounded object-cover"
-            />
+            <img src={download.thumbnailUrl} alt="" className="h-10 w-16 rounded object-cover" />
           )}
           <span className="text-sm font-medium text-gray-900 line-clamp-1 max-w-[240px]">
             {download.title}
@@ -138,9 +134,7 @@ function DownloadRow({
       </td>
 
       {/* Date */}
-      <td className="px-4 py-3 text-sm text-gray-500">
-        {formatDate(download.createdAt)}
-      </td>
+      <td className="px-4 py-3 text-sm text-gray-500">{formatDate(download.createdAt)}</td>
 
       {/* Actions */}
       <td className="px-4 py-3">
@@ -186,4 +180,3 @@ function DownloadRow({
     </tr>
   );
 }
-

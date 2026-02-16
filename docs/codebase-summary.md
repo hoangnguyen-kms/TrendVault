@@ -103,54 +103,55 @@ TrendVault/
 
 ### Configuration Layer (`src/config/`)
 
-| File | Purpose |
-|------|---------|
-| `environment.ts` | Validates & exports environment variables |
-| `database.ts` | Prisma client instance |
-| `redis.ts` | Redis client instance |
-| `cors.ts` | CORS policy configuration |
-| `socket-io.ts` | Socket.IO server setup with JWT auth middleware (Phase 3) |
+| File             | Purpose                                                   |
+| ---------------- | --------------------------------------------------------- |
+| `environment.ts` | Validates & exports environment variables                 |
+| `database.ts`    | Prisma client instance                                    |
+| `redis.ts`       | Redis client instance                                     |
+| `cors.ts`        | CORS policy configuration                                 |
+| `socket-io.ts`   | Socket.IO server setup with JWT auth middleware (Phase 3) |
 
 ### Storage Services (`src/services/storage/`)
 
 **Phase 3 Complete**
 
-| File | Purpose |
-|------|---------|
-| `storage-service.interface.ts` | Abstraction for storage operations |
-| `minio-storage-service.ts` | MinIO implementation (S3-compatible) |
-| `storage-factory.ts` | Factory pattern for service instantiation |
+| File                           | Purpose                                   |
+| ------------------------------ | ----------------------------------------- |
+| `storage-service.interface.ts` | Abstraction for storage operations        |
+| `minio-storage-service.ts`     | MinIO implementation (S3-compatible)      |
+| `storage-factory.ts`           | Factory pattern for service instantiation |
 
 ### Library Layer (`src/lib/`)
 
-| File | Purpose |
-|------|---------|
-| `prisma-client.ts` | Prisma singleton |
-| `redis-client.ts` | Redis singleton |
-| `api-response.ts` | Standard response wrapper |
+| File               | Purpose                   |
+| ------------------ | ------------------------- |
+| `prisma-client.ts` | Prisma singleton          |
+| `redis-client.ts`  | Redis singleton           |
+| `api-response.ts`  | Standard response wrapper |
 
 ### Middleware (`src/middleware/`)
 
-| File | Purpose |
-|------|---------|
-| `auth-middleware.ts` | JWT validation & user extraction |
-| `error-handler.ts` | Centralized error handling |
-| `rate-limiter.ts` | Express rate limiting + downloadLimiter (Phase 3) + uploadLimiter (Phase 4) |
-| `request-logger.ts` | Request/response logging (Morgan) |
-| `validate-request.ts` | Zod schema validation wrapper |
+| File                  | Purpose                                                                     |
+| --------------------- | --------------------------------------------------------------------------- |
+| `auth-middleware.ts`  | JWT validation & user extraction                                            |
+| `error-handler.ts`    | Centralized error handling                                                  |
+| `rate-limiter.ts`     | Express rate limiting + downloadLimiter (Phase 3) + uploadLimiter (Phase 4) |
+| `request-logger.ts`   | Request/response logging (Morgan)                                           |
+| `validate-request.ts` | Zod schema validation wrapper                                               |
 
 ### Auth Module (`src/modules/auth/`)
 
 **Phase 1 Complete**
 
-| File | Purpose | Key Exports |
-|------|---------|-------------|
-| `auth-schemas.ts` | Zod validation schemas | `RegisterSchema`, `LoginSchema` |
-| `auth-service.ts` | Business logic | `AuthService` class methods |
-| `auth-controller.ts` | HTTP handlers | `register()`, `login()`, `refresh()`, `logout()` |
-| `auth-router.ts` | Route definitions | Router with `/register`, `/login`, etc. |
+| File                 | Purpose                | Key Exports                                      |
+| -------------------- | ---------------------- | ------------------------------------------------ |
+| `auth-schemas.ts`    | Zod validation schemas | `RegisterSchema`, `LoginSchema`                  |
+| `auth-service.ts`    | Business logic         | `AuthService` class methods                      |
+| `auth-controller.ts` | HTTP handlers          | `register()`, `login()`, `refresh()`, `logout()` |
+| `auth-router.ts`     | Route definitions      | Router with `/register`, `/login`, etc.          |
 
 **Key Methods:**
+
 - `register(email, password, name)` - Create user with hashed password
 - `login(email, password)` - Validate + issue JWT tokens
 - `refresh(refreshToken)` - Extend session
@@ -174,6 +175,7 @@ downloads/
 ```
 
 **Key Responsibilities:**
+
 - Extract video formats/qualities via yt-dlp
 - Manage download queue with BullMQ
 - Emit real-time progress via Socket.IO
@@ -181,6 +183,7 @@ downloads/
 - Track download status in PostgreSQL
 
 **Key Methods:**
+
 - `initiateDownload(videoUrl, format)` - Queue download job
 - `getFormats(videoUrl)` - Fetch available formats
 - `getDownloadProgress(downloadId)` - Query job status
@@ -211,10 +214,7 @@ trending/
 
 ```typescript
 interface IPlatformAdapter {
-  fetchTrending(
-    region: string,
-    category?: string
-  ): Promise<TrendingVideoDTO[]>
+  fetchTrending(region: string, category?: string): Promise<TrendingVideoDTO[]>;
 }
 
 class YouTubeAdapter implements IPlatformAdapter {
@@ -247,6 +247,7 @@ class TrendingService {
 ```
 
 **Key Files:**
+
 - `trending-schemas.ts` - Zod schemas for request/response validation
 - `trending-cache.ts` - Redis get/set/del + quota tracking
 - `trending-service.ts` - Main orchestrator (~1700 LOC)
@@ -258,12 +259,13 @@ class TrendingService {
 
 **Phase 4 Complete**
 
-| File | Purpose |
-|------|---------|
+| File               | Purpose                                        |
+| ------------------ | ---------------------------------------------- |
 | `oauth-service.ts` | OAuth 2.0 flow orchestration (Google + TikTok) |
-| `oauth-router.ts` | OAuth callback routes (/callback/{provider}) |
+| `oauth-router.ts`  | OAuth callback routes (/callback/{provider})   |
 
 **Features:**
+
 - Google OAuth 2.0 (youtube.upload scope)
 - TikTok OAuth 2.0 (video.publish scope)
 - CSRF protection via Redis state storage
@@ -290,6 +292,7 @@ uploads/
 ```
 
 **Key Methods:**
+
 - `initiateUpload(downloadedVideoId, channelId, metadata)` - Queue upload job
 - `getUploadStatus(uploadId)` - Query job status
 - `cancelUpload(uploadId)` - Abort job
@@ -298,11 +301,12 @@ uploads/
 
 **Phase 4 Complete**
 
-| File | Purpose |
-|------|---------|
+| File                 | Purpose                       |
+| -------------------- | ----------------------------- |
 | `accounts-router.ts` | Connected accounts API routes |
 
 **Endpoints:**
+
 - GET `/api/accounts` - List connected accounts per user
 - POST `/api/accounts/{accountId}/refresh` - Force token refresh
 - DELETE `/api/accounts/{accountId}` - Disconnect account
@@ -311,11 +315,12 @@ uploads/
 
 **Phase 4 Complete**
 
-| File | Purpose |
-|------|---------|
+| File                 | Purpose                  |
+| -------------------- | ------------------------ |
 | `channels-router.ts` | User channels API routes |
 
 **Endpoints:**
+
 - GET `/api/channels` - List channels per user
 - GET `/api/channels/{channelId}` - Get channel details
 
@@ -323,11 +328,12 @@ uploads/
 
 **Phase 4 Complete**
 
-| File | Purpose |
-|------|---------|
+| File                    | Purpose                           |
+| ----------------------- | --------------------------------- |
 | `encryption-service.ts` | AES-256-GCM token blob encryption |
 
 **Usage:**
+
 - Encrypts OAuth access/refresh tokens as single JSON blob before DB storage
 - Async PBKDF2 key derivation per user (cached 5min)
 - Decrypts on retrieval for API calls
@@ -354,6 +360,7 @@ sync/
 ```
 
 **Sync Schedule:**
+
 - Channel metadata: every 6 hours
 - Video list: every 12 hours
 - Stats (recent <7d): every 6 hours
@@ -365,13 +372,14 @@ sync/
 
 **Phase 5 Complete**
 
-| File | Purpose |
-|------|---------|
+| File                   | Purpose                                                           |
+| ---------------------- | ----------------------------------------------------------------- |
 | `analytics-service.ts` | 6 methods: overview, videos, stats, lifecycle, aggregate, compare |
-| `analytics-router.ts` | 6 GET routes (all auth-protected) |
-| `analytics-schemas.ts` | Zod schemas + date range helper |
+| `analytics-router.ts`  | 6 GET routes (all auth-protected)                                 |
+| `analytics-schemas.ts` | Zod schemas + date range helper                                   |
 
 **Endpoints:**
+
 - GET `/api/analytics/channels/:channelId/overview` - Channel KPIs + recent videos
 - GET `/api/analytics/channels/:channelId/videos` - Paginated video list
 - GET `/api/analytics/videos/:videoId/stats` - Time-series stats
@@ -383,26 +391,27 @@ sync/
 
 **Phase 5 Complete**
 
-| File | Purpose |
-|------|---------|
+| File               | Purpose                                                                 |
+| ------------------ | ----------------------------------------------------------------------- |
 | `videos-router.ts` | GET `/api/videos/:videoId` - Video detail with BigInt→Number conversion |
 
 ### Root Entry Points
 
-| File | Purpose |
-|------|---------|
-| `app.ts` | Express app initialization (middleware, routes) |
-| `server.ts` | HTTP server startup, listener initialization |
+| File        | Purpose                                         |
+| ----------- | ----------------------------------------------- |
+| `app.ts`    | Express app initialization (middleware, routes) |
+| `server.ts` | HTTP server startup, listener initialization    |
 
 ### Database (`prisma/`)
 
-| File | Purpose |
-|------|---------|
+| File            | Purpose                                                   |
+| --------------- | --------------------------------------------------------- |
 | `schema.prisma` | Prisma data model (User, ConnectedAccount, TrendingVideo) |
-| `seed.ts` | Test data seeding script |
-| `migrations/` | Database migration history |
+| `seed.ts`       | Test data seeding script                                  |
+| `migrations/`   | Database migration history                                |
 
 **Current Schema (Phase 5):**
+
 ```prisma
 model User { ... }                    # Phase 1
 model ConnectedAccount { ... }        # Phase 1 (updated Phase 4: encrypted tokens)
@@ -417,6 +426,7 @@ model VideoStatsSnapshot { ... }     # Phase 5
 ```
 
 **Migrations:**
+
 - `20260215075820_add_trending_video/` - Platform enum + TrendingVideo table
 - `20260215XXXXXX_add_downloaded_video/` - DownloadStatus enum + DownloadedVideo table (Phase 3)
 - `202602XXXXXX_add_upload_models/` - Channel, UploadJob, PublishedVideo tables (Phase 4)
@@ -425,17 +435,17 @@ model VideoStatsSnapshot { ... }     # Phase 5
 
 ### Pages
 
-| Directory | Files | Phase | Status |
-|-----------|-------|-------|--------|
-| `pages/auth/` | `login-page.tsx`, `register-page.tsx` | 1 | Complete |
-| `pages/trending/` | `trending-page.tsx` + 3 components + 2 hooks | 2 | Complete |
-| `pages/downloads/` | `downloads-page.tsx` + components + hooks | 3 | Complete |
-| `pages/uploads/` | `uploads-page.tsx`, `upload-form.tsx`, `upload-history-table.tsx`, 1 hook | 4 | Complete |
-| `pages/settings/` | `connected-accounts-page.tsx`, `connected-account-card.tsx`, 1 hook | 4 | Complete |
-| `pages/channels/` | `channel-dashboard-page.tsx` + 6 components + 2 hooks | 5 | Complete |
-| `pages/videos/` | `video-detail-page.tsx` + 4 components + 1 hook | 5 | Complete |
-| `pages/analytics/` | `cross-channel-page.tsx` + 3 components + 1 hook | 5 | Complete |
-| `pages/` | `dashboard-page.tsx` | 1 | Scaffolded |
+| Directory          | Files                                                                     | Phase | Status     |
+| ------------------ | ------------------------------------------------------------------------- | ----- | ---------- |
+| `pages/auth/`      | `login-page.tsx`, `register-page.tsx`                                     | 1     | Complete   |
+| `pages/trending/`  | `trending-page.tsx` + 3 components + 2 hooks                              | 2     | Complete   |
+| `pages/downloads/` | `downloads-page.tsx` + components + hooks                                 | 3     | Complete   |
+| `pages/uploads/`   | `uploads-page.tsx`, `upload-form.tsx`, `upload-history-table.tsx`, 1 hook | 4     | Complete   |
+| `pages/settings/`  | `connected-accounts-page.tsx`, `connected-account-card.tsx`, 1 hook       | 4     | Complete   |
+| `pages/channels/`  | `channel-dashboard-page.tsx` + 6 components + 2 hooks                     | 5     | Complete   |
+| `pages/videos/`    | `video-detail-page.tsx` + 4 components + 1 hook                           | 5     | Complete   |
+| `pages/analytics/` | `cross-channel-page.tsx` + 3 components + 1 hook                          | 5     | Complete   |
+| `pages/`           | `dashboard-page.tsx`                                                      | 1     | Scaffolded |
 
 ### Trending Page (`pages/trending/`)
 
@@ -449,35 +459,38 @@ trending-page.tsx (main page component)
 ```
 
 **Hooks:**
+
 - `use-trending-filters.ts` - Filter state (platform, region, category)
 - `use-trending-videos.ts` - Data fetching (TanStack Query useInfiniteQuery)
 
 **Components:**
+
 - `trending-filters.tsx` - Filter UI (dropdowns, buttons)
 - `trending-video-card.tsx` - Video card (thumbnail, title, stats, creator)
 - `trending-auto-refresh.tsx` - Refresh toggle + interval selector
 
 ### Layout Components (`components/layout/`)
 
-| File | Purpose |
-|------|---------|
-| `root-layout.tsx` | Main app wrapper (sidebar, header) |
-| `app-header.tsx` | Top navigation bar |
+| File              | Purpose                               |
+| ----------------- | ------------------------------------- |
+| `root-layout.tsx` | Main app wrapper (sidebar, header)    |
+| `app-header.tsx`  | Top navigation bar                    |
 | `app-sidebar.tsx` | Navigation sidebar (links, user info) |
 
 ### Hooks
 
-| File | Purpose |
-|------|---------|
+| File          | Purpose                                    |
+| ------------- | ------------------------------------------ |
 | `use-auth.ts` | Auth context hook (check logged-in status) |
 
 ### Stores (`stores/`)
 
-| File | Purpose | Library |
-|------|---------|---------|
+| File            | Purpose                   | Library |
+| --------------- | ------------------------- | ------- |
 | `auth-store.ts` | User authentication state | Zustand |
 
 **State:**
+
 ```typescript
 {
   user: User | null,
@@ -489,14 +502,15 @@ trending-page.tsx (main page component)
 
 ### Library Utilities (`lib/`)
 
-| File | Purpose |
-|------|---------|
-| `api-client.ts` | HTTP client + TanStack Query integration |
-| `query-client.ts` | TanStack Query configuration |
+| File               | Purpose                                          |
+| ------------------ | ------------------------------------------------ |
+| `api-client.ts`    | HTTP client + TanStack Query integration         |
+| `query-client.ts`  | TanStack Query configuration                     |
 | `socket-client.ts` | Socket.IO client for real-time updates (Phase 3) |
-| `utils.ts` | Helper functions (formatting, etc.) |
+| `utils.ts`         | Helper functions (formatting, etc.)              |
 
 **API Client:**
+
 ```typescript
 // Configured with base URL, interceptors
 // Used by hooks via TanStack Query
@@ -509,31 +523,32 @@ export const apiClient = {
 
 ### Configuration Files
 
-| File | Purpose |
-|------|---------|
+| File              | Purpose                   |
+| ----------------- | ------------------------- |
 | `components.json` | shadcn/ui components list |
-| `vite.config.ts` | Vite bundler config |
-| `tsconfig*.json` | TypeScript configs |
-| `package.json` | Dependencies + scripts |
+| `vite.config.ts`  | Vite bundler config       |
+| `tsconfig*.json`  | TypeScript configs        |
+| `package.json`    | Dependencies + scripts    |
 
 ## Shared Packages (`packages/`)
 
 ### Shared Types (`packages/shared-types/src/`)
 
-| File | Purpose | Exports |
-|------|---------|---------|
-| `auth.ts` | Auth schemas + types | `UserSchema`, `LoginSchema`, `UserDTO` |
-| `trending.ts` | Trending schemas + types | `TrendingVideoSchema`, `TrendingQuerySchema` |
-| `platform.ts` | Platform enums + types | `Platform`, `PlatformType` |
-| `connected-account.ts` | OAuth account types | `ConnectedAccountDTO` |
-| `channel.ts` | Channel entity types (Phase 4) | `ChannelDTO`, `ChannelSchema` |
-| `upload.ts` | Upload job types (Phase 4) | `UploadJobDTO`, `PublishedVideoDTO` |
-| `analytics.ts` | Analytics schemas (Phase 5) | `VideoStatsSnapshot`, `StatsTimeSeries`, `ChannelOverview` |
-| `api-response.ts` | Standard response shape | `ApiResponse<T>` |
-| `user.ts` | User entity types | `User`, `UserProfile` |
-| `index.ts` | Package exports | All types |
+| File                   | Purpose                        | Exports                                                    |
+| ---------------------- | ------------------------------ | ---------------------------------------------------------- |
+| `auth.ts`              | Auth schemas + types           | `UserSchema`, `LoginSchema`, `UserDTO`                     |
+| `trending.ts`          | Trending schemas + types       | `TrendingVideoSchema`, `TrendingQuerySchema`               |
+| `platform.ts`          | Platform enums + types         | `Platform`, `PlatformType`                                 |
+| `connected-account.ts` | OAuth account types            | `ConnectedAccountDTO`                                      |
+| `channel.ts`           | Channel entity types (Phase 4) | `ChannelDTO`, `ChannelSchema`                              |
+| `upload.ts`            | Upload job types (Phase 4)     | `UploadJobDTO`, `PublishedVideoDTO`                        |
+| `analytics.ts`         | Analytics schemas (Phase 5)    | `VideoStatsSnapshot`, `StatsTimeSeries`, `ChannelOverview` |
+| `api-response.ts`      | Standard response shape        | `ApiResponse<T>`                                           |
+| `user.ts`              | User entity types              | `User`, `UserProfile`                                      |
+| `index.ts`             | Package exports                | All types                                                  |
 
 **Pattern:** Zod schema + TypeScript type inference
+
 ```typescript
 export const UserSchema = z.object({ ... })
 export type User = z.infer<typeof UserSchema>
@@ -541,18 +556,19 @@ export type User = z.infer<typeof UserSchema>
 
 ### Config Package (`packages/config/`)
 
-| Directory | Files | Purpose |
-|-----------|-------|---------|
+| Directory   | Files                                  | Purpose            |
+| ----------- | -------------------------------------- | ------------------ |
 | `tsconfig/` | `base.json`, `react.json`, `node.json` | TypeScript presets |
-| `eslint/` | `base.js` | ESLint base config |
+| `eslint/`   | `base.js`                              | ESLint base config |
 
 ## Docker Configuration (`docker/`)
 
-| File | Purpose |
-|------|---------|
+| File                 | Purpose                          |
+| -------------------- | -------------------------------- |
 | `docker-compose.yml` | PostgreSQL + Redis + MinIO stack |
 
 **Services:**
+
 - PostgreSQL 17 (port 5433)
 - Redis 7 (port 6379)
 - MinIO (ports 9000/9001)
@@ -561,52 +577,53 @@ export type User = z.infer<typeof UserSchema>
 
 ### Backend (`apps/api/package.json`)
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `express` | ^5.0.0 | HTTP server framework |
-| `prisma` | ^6.0.0 | ORM database access |
-| `@prisma/client` | ^6.0.0 | Prisma runtime client |
-| `redis` | ^4.6.0 | Redis client |
-| `bullmq` | ^5.0.0 | Job queue (Redis-backed) |
-| `socket.io` | ^4.7.0 | Real-time communication (Phase 3) |
-| `yt-dlp-wrap` | Latest | Video format extraction (Phase 3) |
-| `minio` | ^7.0.0 | S3-compatible storage (Phase 3) |
-| `jsonwebtoken` | ^9.0.0 | JWT token handling |
-| `bcryptjs` | ^2.4.0 | Password hashing |
-| `axios` | ^1.0.0 | HTTP requests (adapters) |
-| `zod` | ^3.0.0 | Schema validation |
-| `cors` | ^2.8.0 | CORS middleware |
-| `helmet` | ^7.0.0 | Security headers |
-| `express-rate-limit` | ^6.0.0 | Rate limiting |
-| `morgan` | ^1.10.0 | Request logging |
+| Package              | Version | Purpose                           |
+| -------------------- | ------- | --------------------------------- |
+| `express`            | ^5.0.0  | HTTP server framework             |
+| `prisma`             | ^6.0.0  | ORM database access               |
+| `@prisma/client`     | ^6.0.0  | Prisma runtime client             |
+| `redis`              | ^4.6.0  | Redis client                      |
+| `bullmq`             | ^5.0.0  | Job queue (Redis-backed)          |
+| `socket.io`          | ^4.7.0  | Real-time communication (Phase 3) |
+| `yt-dlp-wrap`        | Latest  | Video format extraction (Phase 3) |
+| `minio`              | ^7.0.0  | S3-compatible storage (Phase 3)   |
+| `jsonwebtoken`       | ^9.0.0  | JWT token handling                |
+| `bcryptjs`           | ^2.4.0  | Password hashing                  |
+| `axios`              | ^1.0.0  | HTTP requests (adapters)          |
+| `zod`                | ^3.0.0  | Schema validation                 |
+| `cors`               | ^2.8.0  | CORS middleware                   |
+| `helmet`             | ^7.0.0  | Security headers                  |
+| `express-rate-limit` | ^6.0.0  | Rate limiting                     |
+| `morgan`             | ^1.10.0 | Request logging                   |
 
 ### Frontend (`apps/web/package.json`)
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `react` | ^19.0.0 | UI library |
-| `react-router-dom` | ^7.0.0 | Client routing |
-| `@tanstack/react-query` | ^5.0.0 | Server state management |
-| `zustand` | ^5.0.0 | Client state (Zustand) |
-| `socket.io-client` | ^4.7.0 | Real-time client (Phase 3) |
-| `tailwindcss` | ^4.0.0 | Utility CSS |
-| `shadcn/ui` | Latest | Component library |
-| `recharts` | ^2.0.0 | Charts & data visualization (Phase 5) |
-| `date-fns` | ^4.0.0 | Date formatting utilities (Phase 5) |
-| `vite` | ^6.0.0 | Build tool |
-| `typescript` | ^5.3.0 | Type checking |
-| `zod` | ^3.0.0 | Schema validation |
+| Package                 | Version | Purpose                               |
+| ----------------------- | ------- | ------------------------------------- |
+| `react`                 | ^19.0.0 | UI library                            |
+| `react-router-dom`      | ^7.0.0  | Client routing                        |
+| `@tanstack/react-query` | ^5.0.0  | Server state management               |
+| `zustand`               | ^5.0.0  | Client state (Zustand)                |
+| `socket.io-client`      | ^4.7.0  | Real-time client (Phase 3)            |
+| `tailwindcss`           | ^4.0.0  | Utility CSS                           |
+| `shadcn/ui`             | Latest  | Component library                     |
+| `recharts`              | ^2.0.0  | Charts & data visualization (Phase 5) |
+| `date-fns`              | ^4.0.0  | Date formatting utilities (Phase 5)   |
+| `vite`                  | ^6.0.0  | Build tool                            |
+| `typescript`            | ^5.3.0  | Type checking                         |
+| `zod`                   | ^3.0.0  | Schema validation                     |
 
 ### Shared (`packages/shared-types/package.json`)
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `zod` | ^3.0.0 | Schema definitions |
-| `typescript` | ^5.3.0 | Type definitions |
+| Package      | Version | Purpose            |
+| ------------ | ------- | ------------------ |
+| `zod`        | ^3.0.0  | Schema definitions |
+| `typescript` | ^5.3.0  | Type definitions   |
 
 ## Development Scripts
 
 **Root (`package.json`):**
+
 ```bash
 pnpm dev              # Start all apps (API + Web)
 pnpm build            # Build all packages
@@ -621,6 +638,7 @@ pnpm db:studio        # Open Prisma Studio
 ```
 
 **Per-workspace:**
+
 ```bash
 pnpm -F api dev       # Start API only
 pnpm -F web dev       # Start Web only
@@ -629,6 +647,7 @@ pnpm -F web dev       # Start Web only
 ## Phase 4 Implementation Summary
 
 **Completed Features:**
+
 - OAuth 2.0 integration (Google + TikTok)
 - Token encryption (AES-256-GCM)
 - CSRF protection (Redis state storage)
@@ -645,6 +664,7 @@ pnpm -F web dev       # Start Web only
 - Shared upload/channel types
 
 **Files Added/Modified:**
+
 - Backend Modules: `oauth/`, `uploads/`, `accounts/`, `channels/`
 - Backend Services: `encryption/`
 - Frontend Pages: `uploads/`, `settings/`
@@ -655,6 +675,7 @@ pnpm -F web dev       # Start Web only
 ## Phase 5 Implementation Summary
 
 **Completed Features:**
+
 - Background sync jobs (BullMQ repeatable: 6 job types)
 - Platform stats fetchers (YouTube Data API v3, TikTok Video Query API)
 - Channel metadata, video list, and stats snapshot syncing
@@ -668,6 +689,7 @@ pnpm -F web dev       # Start Web only
 - Format utilities (compact numbers, dates, duration)
 
 **Files Added/Modified:**
+
 - Backend Modules: `sync/` (10 files), `analytics/` (3 files), `videos/` (1 file)
 - Frontend Pages: `channels/` (7 files), `videos/` (5 files), `analytics/` (4 files)
 - Frontend Hooks: 4 new hooks
@@ -680,20 +702,24 @@ pnpm -F web dev       # Start Web only
 ## Code Quality Standards
 
 ### TypeScript
+
 - Strict mode enabled
 - Target: ES2020
 - Module: ESNext
 
 ### Linting
+
 - ESLint with @typescript-eslint
 - Prettier for formatting
 - No console.log in production (warning)
 
 ### Testing
+
 - Framework: Vitest (unit tests)
 - E2E: Planned Playwright (Phase 6)
 
 ### Git Workflow
+
 - Conventional commits
 - Branch protection on main
 - CI/CD via GitHub Actions
@@ -709,28 +735,28 @@ pnpm -F web dev       # Start Web only
 
 ## Known Limitations & Future Work
 
-| Item | Phase | Notes |
-|------|-------|-------|
-| E2E tests | Phase 6 | Playwright test suite |
-| Deployment guide | Phase 6 | Docker, Nginx, backup strategy |
-| Dark mode | Phase 6 | UI/UX polish |
-| API docs (Swagger) | Phase 6 | OpenAPI spec generation |
-| Direct TikTok posting | Future | Currently Inbox Upload only; requires audit approval |
+| Item                  | Phase   | Notes                                                |
+| --------------------- | ------- | ---------------------------------------------------- |
+| E2E tests             | Phase 6 | Playwright test suite                                |
+| Deployment guide      | Phase 6 | Docker, Nginx, backup strategy                       |
+| Dark mode             | Phase 6 | UI/UX polish                                         |
+| API docs (Swagger)    | Phase 6 | OpenAPI spec generation                              |
+| Direct TikTok posting | Future  | Currently Inbox Upload only; requires audit approval |
 
 ## Statistics
 
-| Metric | Value |
-|--------|-------|
-| Total Files | 180+ |
-| Backend Source Files | ~55 (excl. migrations) |
-| Frontend Source Files | ~40 |
-| Shared Package Files | 10 |
-| Database Entities | 8 (User, ConnectedAccount, TrendingVideo, DownloadedVideo, Channel, UploadJob, PublishedVideo, VideoStatsSnapshot) |
-| API Endpoints | 30+ (auth: 4, trending: 3, downloads: 3, uploads: 4, accounts: 3, channels: 2, analytics: 6, videos: 1) |
-| OAuth Providers | 2 (Google, TikTok) |
-| Upload Uploaders | 2 (YouTube, TikTok) |
-| Redis Cache Keys | 5+ patterns |
-| Socket.IO Events | 6+ (download:*, upload:*, OAuth:*) |
+| Metric                | Value                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Total Files           | 180+                                                                                                               |
+| Backend Source Files  | ~55 (excl. migrations)                                                                                             |
+| Frontend Source Files | ~40                                                                                                                |
+| Shared Package Files  | 10                                                                                                                 |
+| Database Entities     | 8 (User, ConnectedAccount, TrendingVideo, DownloadedVideo, Channel, UploadJob, PublishedVideo, VideoStatsSnapshot) |
+| API Endpoints         | 30+ (auth: 4, trending: 3, downloads: 3, uploads: 4, accounts: 3, channels: 2, analytics: 6, videos: 1)            |
+| OAuth Providers       | 2 (Google, TikTok)                                                                                                 |
+| Upload Uploaders      | 2 (YouTube, TikTok)                                                                                                |
+| Redis Cache Keys      | 5+ patterns                                                                                                        |
+| Socket.IO Events      | 6+ (download:_, upload:_, OAuth:\*)                                                                                |
 
 ## Documentation Map
 

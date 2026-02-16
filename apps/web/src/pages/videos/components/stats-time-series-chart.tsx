@@ -12,13 +12,15 @@ import { format } from 'date-fns';
 import { formatCompactNumber } from '@/lib/format-utils';
 
 interface StatsTimeSeriesChartProps {
-  data: {
-    labels: string[];
-    views: number[];
-    likes: number[];
-    comments: number[];
-    shares: number[];
-  } | undefined;
+  data:
+    | {
+        labels: string[];
+        views: number[];
+        likes: number[];
+        comments: number[];
+        shares: number[];
+      }
+    | undefined;
   metric: 'views' | 'likes' | 'comments' | 'all';
   dateRange: string;
 }
@@ -65,7 +67,13 @@ export function StatsTimeSeriesChart({ data, metric, dateRange }: StatsTimeSerie
           <Line type="monotone" dataKey="likes" stroke={COLORS.likes} strokeWidth={2} dot={false} />
         )}
         {showLine('comments') && (
-          <Line type="monotone" dataKey="comments" stroke={COLORS.comments} strokeWidth={2} dot={false} />
+          <Line
+            type="monotone"
+            dataKey="comments"
+            stroke={COLORS.comments}
+            strokeWidth={2}
+            dot={false}
+          />
         )}
       </LineChart>
     </ResponsiveContainer>

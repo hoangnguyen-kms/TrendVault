@@ -19,7 +19,10 @@ function serializeUploadJob(job: Record<string, unknown>) {
     ...job,
     createdAt: job.createdAt instanceof Date ? job.createdAt.toISOString() : job.createdAt,
     updatedAt: job.updatedAt instanceof Date ? job.updatedAt.toISOString() : job.updatedAt,
-    uploadedAt: job.uploadedAt instanceof Date ? (job.uploadedAt as Date).toISOString() : job.uploadedAt ?? null,
+    uploadedAt:
+      job.uploadedAt instanceof Date
+        ? (job.uploadedAt as Date).toISOString()
+        : (job.uploadedAt ?? null),
   };
 }
 
@@ -55,7 +58,9 @@ export class UploadService {
         },
       });
       if (uploadsToday >= MAX_YOUTUBE_UPLOADS_PER_DAY) {
-        throw new Error(`YouTube upload limit reached (${MAX_YOUTUBE_UPLOADS_PER_DAY}/day). Try again tomorrow.`);
+        throw new Error(
+          `YouTube upload limit reached (${MAX_YOUTUBE_UPLOADS_PER_DAY}/day). Try again tomorrow.`,
+        );
       }
     }
 
@@ -113,7 +118,14 @@ export class UploadService {
 
   async getUploads(
     userId: string,
-    params: { platform?: string; status?: string; page: number; limit: number; sortBy: string; sortOrder: string },
+    params: {
+      platform?: string;
+      status?: string;
+      page: number;
+      limit: number;
+      sortBy: string;
+      sortOrder: string;
+    },
   ) {
     const where: Record<string, unknown> = { userId };
     if (params.platform && params.platform !== 'ALL') {

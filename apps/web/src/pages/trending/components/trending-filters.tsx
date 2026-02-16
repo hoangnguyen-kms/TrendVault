@@ -9,8 +9,7 @@ const PLATFORM_TABS = [
 ];
 
 export function TrendingFilters() {
-  const { platform, region, category, setPlatform, setRegion, setCategory } =
-    useTrendingFilters();
+  const { platform, region, category, setPlatform, setRegion, setCategory } = useTrendingFilters();
   const { data: regionsData } = useSupportedRegions();
 
   return (

@@ -11,9 +11,16 @@ import {
 import { formatCompactNumber } from '@/lib/format-utils';
 
 interface PlatformComparisonChartProps {
-  data: {
-    platformBreakdown?: Array<{ platform: string; views: number; likes: number; videos: number }>;
-  } | undefined;
+  data:
+    | {
+        platformBreakdown?: Array<{
+          platform: string;
+          views: number;
+          likes: number;
+          videos: number;
+        }>;
+      }
+    | undefined;
 }
 
 export function PlatformComparisonChart({ data }: PlatformComparisonChartProps) {

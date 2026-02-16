@@ -49,6 +49,7 @@ TrendVault is a full-stack monorepo web application with clear separation of con
 **Location:** `apps/web/src/`
 
 **Key Directories:**
+
 ```
 web/src/
 ├── pages/
@@ -82,6 +83,7 @@ web/src/
 ```
 
 **Key Libraries:**
+
 - **State Management:** Zustand (auth), TanStack Query (server state)
 - **Routing:** React Router 7 (SPA mode)
 - **UI Components:** shadcn/ui
@@ -89,6 +91,7 @@ web/src/
 - **HTTP:** Fetch API (wrapped by api-client)
 
 **Data Flow:**
+
 1. User interacts with trending page
 2. `use-trending-videos` hook calls API via TanStack Query
 3. Server response cached in Query cache
@@ -178,6 +181,7 @@ api/src/
 ```
 
 **Request Lifecycle:**
+
 ```
 Request → CORS → Logger → RateLimit → Auth → Route Handler
                                           ↓
@@ -197,6 +201,7 @@ Response ← Error Handler ← API Response Wrapper
 **Location:** `apps/api/src/modules/trending/`
 
 **Responsibilities:**
+
 - Fetch trending videos from multiple platforms
 - Cache results in Redis with TTL
 - Persist to PostgreSQL (dedup + upsert)
@@ -206,31 +211,36 @@ Response ← Error Handler ← API Response Wrapper
 **Components:**
 
 #### 3.1 Platform Adapters
+
 **Pattern:** Strategy pattern for multi-platform support
 
 ```typescript
 interface IPlatformAdapter {
-  fetchTrending(region: string, category?: string): Promise<TrendingVideoDTO[]>
+  fetchTrending(region: string, category?: string): Promise<TrendingVideoDTO[]>;
 }
 ```
 
 **YouTube Adapter:**
+
 - Uses YouTube Data API v3
 - Queries: `mostPopular` (limited post-July 2025) + `search.list` fallback
 - Normalizes response to `TrendingVideoDTO`
 - Tracks API quota usage
 
 **TikTok Adapter:**
+
 - Primary: Apify (HTTP request to proxy + scraping)
 - Optional: TikTok Research API (if approved)
 - Normalizes response to `TrendingVideoDTO`
 
 #### 3.2 Trending Cache
+
 **Location:** `trending-cache.ts`
 
 **Responsibility:** Redis key-value store abstraction
 
 **Cache Keys:**
+
 ```
 trending:youtube:{region}:{category}:{page}    → TTL 30min
 trending:tiktok:{region}:{page}                → TTL 15min
@@ -238,23 +248,27 @@ trending:youtube:quota:daily                   → TTL 24h
 ```
 
 **Operations:**
+
 - `get(key)` - Retrieve cached data
 - `set(key, value, ttl)` - Cache data
 - `del(key)` - Invalidate cache
 - `trackQuota(units)` - Increment daily quota counter
 
 #### 3.3 Trending Service
+
 **Location:** `trending-service.ts`
 
 **Main orchestrator for trending discovery**
 
 **Methods:**
+
 - `fetchTrending(platform, region, category, page)` - Fetch with cache
 - `upsertTrendingVideos(videos, region)` - Persist to DB
 - `getAdapters()` - Return active adapters
 - `getQuotaStatus()` - Check YouTube quota
 
 **Flow:**
+
 1. Check Redis cache
 2. If HIT: return cached data
 3. If MISS: call platform adapter
@@ -264,29 +278,36 @@ trending:youtube:quota:daily                   → TTL 24h
 7. Return response
 
 #### 3.4 Background Jobs
+
 **Framework:** BullMQ (Redis-backed job queue)
 
 **Job: TrendingRefreshJob**
+
 - Trigger: Every 30 minutes (repeatable job)
 - Action: Refresh trending cache for all regions/platforms
 - Purpose: Warm cache before user requests
 
 **Worker: TrendingRefreshWorker**
+
 - Listens for TrendingRefreshJob
 - Calls TrendingService.fetchTrending()
 - Updates PostgreSQL & Redis
 - Logs job progress
 
 **BullMQ Setup:**
+
 ```typescript
-const queue = new Queue('trending-refresh', { connection: redis })
-queue.add('refresh', {}, { repeat: { pattern: '0 */30 * * * *' } })
-queue.process(async (job) => { /* refresh logic */ })
+const queue = new Queue('trending-refresh', { connection: redis });
+queue.add('refresh', {}, { repeat: { pattern: '0 */30 * * * *' } });
+queue.process(async (job) => {
+  /* refresh logic */
+});
 ```
 
 #### 3.5 API Endpoints
 
 **GET /api/trending**
+
 ```
 Query Parameters:
 - platform: 'youtube' | 'tiktok' | 'all' (default: 'all')
@@ -309,6 +330,7 @@ Response:
 ```
 
 **GET /api/trending/regions**
+
 ```
 Response:
 {
@@ -318,6 +340,7 @@ Response:
 ```
 
 **GET /api/trending/categories**
+
 ```
 Response:
 {
@@ -331,6 +354,7 @@ Response:
 **Location:** `apps/api/src/modules/downloads/`
 
 **Responsibilities:**
+
 - Extract available video formats/qualities from URLs
 - Manage download queue with BullMQ
 - Emit real-time progress via Socket.IO
@@ -340,17 +364,21 @@ Response:
 **Components:**
 
 #### 4.1 yt-dlp Service
+
 Wrapper around yt-dlp binary for video format extraction
 
 **Methods:**
+
 - `getFormats(videoUrl)` - Extract available formats
 - `download(videoUrl, format, progressCallback)` - Download video
 - `abort()` - Cancel ongoing download
 
 #### 4.2 Download Service
+
 Main orchestrator for download workflows
 
 **Methods:**
+
 - `initiateDownload(videoUrl, format, userId)` - Queue download job
 - `getFormats(videoUrl)` - Fetch available formats
 - `getDownloadProgress(downloadId)` - Query job status
@@ -358,23 +386,28 @@ Main orchestrator for download workflows
 - `getDownloadHistory(userId)` - Get user's downloads
 
 #### 4.3 Download Queue & Worker
+
 **Framework:** BullMQ (Redis-backed job queue)
 
 **Job: DownloadJob**
+
 - Contains: videoUrl, format, userId, downloadId
 - Progress tracking: emitted via Socket.IO
 - Storage: Files saved to MinIO bucket
 
 **Worker: DownloadWorker**
+
 - Listens for DownloadJob
 - Calls yt-dlp-service
 - Emits progress events to Socket.IO room
 - Updates PostgreSQL status
 
 #### 4.4 Socket.IO Integration
+
 Real-time progress tracking via WebSocket
 
 **Events:**
+
 - `download:start` - Download initiated
 - `download:progress` - Progress update (percentage, speed, ETA)
 - `download:complete` - Download finished
@@ -386,9 +419,11 @@ Real-time progress tracking via WebSocket
 **Authentication:** JWT validation middleware
 
 #### 4.5 MinIO Storage
+
 S3-compatible file storage
 
 **Buckets:**
+
 - `downloaded-videos` - User-downloaded videos (organized by userId/downloadId)
 
 ### 5. OAuth Module (Phase 4)
@@ -396,6 +431,7 @@ S3-compatible file storage
 **Location:** `apps/api/src/modules/oauth/`
 
 **Responsibilities:**
+
 - OAuth 2.0 authorization flows (Google + TikTok)
 - CSRF token management via Redis state storage
 - Authorization code exchange for access tokens
@@ -404,13 +440,16 @@ S3-compatible file storage
 **Components:**
 
 #### 5.1 OAuth Service
+
 **Key Methods:**
+
 - `generateAuthorizationUrl(provider)` - Create OAuth consent URL with state
 - `exchangeCodeForTokens(provider, code, state)` - Exchange code for tokens
 - `storeTokens(userId, provider, tokens)` - Encrypt + save tokens
 - `getDecryptedTokens(userId, provider)` - Retrieve + decrypt tokens
 
 **CSRF Flow:**
+
 ```
 1. Generate random state: crypto.randomBytes(32).toString('hex')
 2. Store in Redis: oauth:state:{state} → userId (10min TTL)
@@ -421,6 +460,7 @@ S3-compatible file storage
 ```
 
 **Token Blob Encryption:**
+
 ```
 Algorithm: AES-256-GCM
 Master Key: process.env.ENCRYPTION_KEY
@@ -433,11 +473,13 @@ Auth Tag: Integrity verification (stored in ConnectedAccount)
 #### 5.2 OAuth Endpoints
 
 **GET /oauth/authorize?provider=google**
+
 ```
 Response: Redirect to Google OAuth consent screen
 ```
 
 **GET /oauth/callback?code=...&state=...**
+
 ```
 1. Validate state (CSRF)
 2. Exchange code for tokens
@@ -451,6 +493,7 @@ Response: Redirect to Google OAuth consent screen
 **Location:** `apps/api/src/modules/uploads/`
 
 **Responsibilities:**
+
 - Queue video upload jobs
 - Manage upload lifecycle (pending → uploading → completed)
 - Emit real-time progress via Socket.IO
@@ -460,15 +503,18 @@ Response: Redirect to Google OAuth consent screen
 **Components:**
 
 #### 6.1 Upload Service
+
 **Main orchestrator for upload workflows**
 
 **Methods:**
+
 - `initiateUpload(downloadedVideoId, channelId, metadata)` - Queue upload job
 - `getUploadStatus(uploadId)` - Query job status
 - `getUploadHistory(userId)` - Get user's uploads
 - `cancelUpload(uploadId)` - Abort job
 
 **Flow:**
+
 1. Validate channel access + downloaded video ownership
 2. Create UploadJob (status: PENDING)
 3. Queue BullMQ upload job
@@ -487,12 +533,13 @@ interface IPlatformUploader {
     videoPath: string,
     metadata: UploadMetadata,
     accessToken: string,
-    progressCallback: (progress: number) => void
-  ): Promise<{ platformVideoId: string }>
+    progressCallback: (progress: number) => void,
+  ): Promise<{ platformVideoId: string }>;
 }
 ```
 
 **YouTube Uploader:**
+
 - Uses googleapis/youtube client
 - Uploads via `/upload/youtube/v3/videos`
 - Sets title, description, tags, privacy level
@@ -500,6 +547,7 @@ interface IPlatformUploader {
 - Supports custom watermark
 
 **TikTok Uploader:**
+
 - Uses Inbox Upload (draft mode only)
 - Supports up to 10 videos/day per account
 - Returns draft video ID (requires manual publish)
@@ -509,11 +557,13 @@ interface IPlatformUploader {
 **Framework:** BullMQ (Redis-backed)
 
 **Job: UploadJob**
+
 - Contains: downloadedVideoId, channelId, metadata
 - Progress tracking: emitted via Socket.IO
 - Retry: Exponential backoff (3 attempts)
 
 **Worker: UploadWorker**
+
 - Listens for UploadJob
 - Retrieves downloaded video from MinIO
 - Calls platform uploader
@@ -523,6 +573,7 @@ interface IPlatformUploader {
 #### 6.4 Upload API Endpoints
 
 **POST /api/uploads**
+
 ```
 Body:
 {
@@ -545,6 +596,7 @@ Response:
 ```
 
 **GET /api/uploads/{uploadId}**
+
 ```
 Response:
 {
@@ -562,6 +614,7 @@ Response:
 ```
 
 **GET /api/uploads**
+
 ```
 Query: page, limit
 Response: Paginated list of user's uploads with status
@@ -574,12 +627,14 @@ Response: Paginated list of user's uploads with status
 **Components:**
 
 **Auth Service:**
+
 - User registration (email + password)
 - Login (JWT token generation)
 - Token refresh (extend session)
 - Password hashing (bcrypt)
 
 **JWT Structure:**
+
 ```typescript
 {
   sub: userId,        // Subject
@@ -590,6 +645,7 @@ Response: Paginated list of user's uploads with status
 ```
 
 **Middleware: AuthMiddleware**
+
 - Validates JWT from Authorization header
 - Extracts user context
 - Returns 401 if invalid/expired
@@ -604,6 +660,7 @@ Response: Paginated list of user's uploads with status
 **Current Entities (Phase 4):**
 
 **User**
+
 ```prisma
 model User {
   id            String @id @default(uuid())
@@ -617,6 +674,7 @@ model User {
 ```
 
 **ConnectedAccount**
+
 ```prisma
 model ConnectedAccount {
   id                String @id @default(uuid())
@@ -635,6 +693,7 @@ model ConnectedAccount {
 ```
 
 **TrendingVideo**
+
 ```prisma
 model TrendingVideo {
   id                String @id @default(uuid())
@@ -661,6 +720,7 @@ model TrendingVideo {
 ```
 
 **DownloadedVideo** (Phase 3)
+
 ```prisma
 enum DownloadStatus {
   PENDING
@@ -691,6 +751,7 @@ model DownloadedVideo {
 ```
 
 **Channel** (Phase 4)
+
 ```prisma
 model Channel {
   id              String @id @default(uuid())
@@ -707,6 +768,7 @@ model Channel {
 ```
 
 **UploadJob** (Phase 4)
+
 ```prisma
 model UploadJob {
   id              String @id @default(uuid())
@@ -731,6 +793,7 @@ model UploadJob {
 ```
 
 **PublishedVideo** (Phase 4)
+
 ```prisma
 model PublishedVideo {
   id              String @id @default(uuid())
@@ -747,6 +810,7 @@ model PublishedVideo {
 ```
 
 **Migrations:**
+
 - `20260215075820_add_trending_video` - Adds Platform enum + TrendingVideo table
 - `20260215XXXXXX_add_downloaded_video` - Adds DownloadStatus enum + DownloadedVideo table (Phase 3)
 - `202602XXXXXX_add_upload_models` - Adds Channel, UploadJob, PublishedVideo tables (Phase 4)
@@ -756,11 +820,13 @@ model PublishedVideo {
 **Purpose:** Caching + session management + job queue + OAuth state
 
 **Data Structures:**
+
 - String: Trending data (JSON serialized), OAuth state
 - Counter: API quota tracking
 - Hash: Session storage (future)
 
 **TTLs:**
+
 - Trending (YouTube): 30 minutes
 - Trending (TikTok): 15 minutes
 - Daily quota counter: 24 hours
@@ -771,6 +837,7 @@ model PublishedVideo {
 **Purpose:** Video file storage (for Phase 3+)
 
 **Buckets:**
+
 - `downloaded-videos` - User-downloaded videos
 - `published-videos` - Re-uploaded videos with metadata
 
@@ -781,6 +848,7 @@ model PublishedVideo {
 **Exports:** Zod schemas + TypeScript types for frontend/backend
 
 **Trending Types:**
+
 ```typescript
 // trending.ts
 export const TrendingVideoDTOSchema = z.object({
@@ -796,9 +864,9 @@ export const TrendingVideoDTOSchema = z.object({
   creatorUrl: z.string().url().optional(),
   duration: z.number().min(0).optional(),
   videoUrl: z.string().url(),
-})
+});
 
-export type TrendingVideoDTO = z.infer<typeof TrendingVideoDTOSchema>
+export type TrendingVideoDTO = z.infer<typeof TrendingVideoDTOSchema>;
 ```
 
 ## Data Flow Diagrams
@@ -860,6 +928,7 @@ Cache Warm
 ### Development Environment
 
 **Docker Compose Stack:**
+
 ```yaml
 services:
   postgres:
@@ -874,6 +943,7 @@ services:
 ```
 
 **Services:**
+
 - API: http://localhost:3001
 - Web: http://localhost:5173
 - MinIO Console: http://localhost:9001
@@ -906,6 +976,7 @@ services:
 ```
 
 **Configuration via Environment Variables:**
+
 - `NODE_ENV` - development | production
 - `DATABASE_URL` - PostgreSQL connection
 - `REDIS_URL` - Redis connection
@@ -916,16 +987,19 @@ services:
 ## Security Architecture
 
 ### Authentication
+
 - Password hashing: bcrypt (12 salt rounds)
 - JWT tokens: HS256 signature
 - Token expiry: 1h access, 24h refresh
 - HTTPS only in production
 
 ### Encryption
+
 - Sensitive data (OAuth tokens): AES-256-GCM
 - Master key: Hybrid strategy (env + HSM in production)
 
 ### API Security
+
 - CORS: Whitelist origin in production
 - Rate limiting: 100 req/min per IP (general), 10 req/min (downloads), 5 req/min (uploads)
 - Request validation: Zod schemas
@@ -933,6 +1007,7 @@ services:
 - OAuth credential guards: Routes disabled when client credentials missing
 
 ### Data Protection
+
 - SQL injection: Prisma parameterized queries
 - XSS: React auto-escaping + CSP headers
 - CSRF: SameSite cookies (future, when auth uses cookies)
@@ -940,16 +1015,19 @@ services:
 ## Performance Optimization
 
 ### Caching Strategy
+
 - **Redis:** Trending data (30min YouTube, 15min TikTok)
 - **Browser:** TanStack Query cache (configurable)
 - **Static:** React build artifacts served by Nginx
 
 ### Database Optimization
+
 - **Indexes:** `TrendingVideo(region, platform)`, `TrendingVideo(fetchedAt)`
 - **Pagination:** Limit results to 50 max
 - **Partitioning:** `VideoStatsSnapshot` (planned Phase 5)
 
 ### API Response Time Targets
+
 - **Cached request:** < 500ms
 - **Cold cache:** < 3s (depends on platform API)
 - **Infinite scroll:** 100ms per page load (cached)
@@ -957,11 +1035,13 @@ services:
 ## Monitoring & Observability
 
 ### Logging
+
 - Request/response logging (Morgan)
 - Error stack traces
 - Job execution logs (BullMQ)
 
 ### Metrics (Future)
+
 - API endpoint latency
 - Cache hit/miss rate
 - Platform API quota usage
@@ -971,44 +1051,49 @@ services:
 ## Dependency Injection & Configuration
 
 **Express App Initialization:**
+
 ```typescript
 // app.ts
-const app = express()
+const app = express();
 // Middleware setup (CORS, logger, rate limit)
 // Route mounting (auth, trending)
 // Error handler
-export default app
+export default app;
 
 // server.ts
-import app from './app'
-const server = http.createServer(app)
-server.listen(process.env.PORT || 3001)
+import app from './app';
+const server = http.createServer(app);
+server.listen(process.env.PORT || 3001);
 ```
 
 **Service Instantiation:**
+
 ```typescript
 // trending-service-instance.ts
 export const trendingService = new TrendingService(
   prisma,
   redis,
   new YouTubeAdapter(/* config */),
-  new TikTokAdapter(/* config */)
-)
+  new TikTokAdapter(/* config */),
+);
 ```
 
 ## Testing Strategy
 
 ### Unit Tests
+
 - Service methods (mocked DB/cache)
 - Controller handlers
 - Schema validation
 
 ### Integration Tests
+
 - API endpoints with test database
 - Cache behavior
 - Adapter platform API mocks
 
 ### E2E Tests (Planned Phase 6)
+
 - Playwright: Full user flow
 - Trending discovery → Download → Publish
 

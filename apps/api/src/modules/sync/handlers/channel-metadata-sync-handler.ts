@@ -28,10 +28,7 @@ export async function handleChannelMetadataSync(): Promise<void> {
         connectedAccount.userId,
       );
 
-      const metadata = await fetcher.fetchChannelMetadata(
-        accessToken,
-        channel.platformChannelId,
-      );
+      const metadata = await fetcher.fetchChannelMetadata(accessToken, channel.platformChannelId);
 
       await prisma.channel.update({
         where: { id: channel.id },

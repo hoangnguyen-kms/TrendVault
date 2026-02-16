@@ -1,4 +1,14 @@
-import { RotateCcw, Trash2, ExternalLink, Loader2, CheckCircle2, XCircle, Clock, AlertCircle, Upload } from 'lucide-react';
+import {
+  RotateCcw,
+  Trash2,
+  ExternalLink,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  AlertCircle,
+  Upload,
+} from 'lucide-react';
 import type { UploadJob } from '@trendvault/shared-types';
 
 interface UploadHistoryTableProps {
@@ -64,9 +74,7 @@ export function UploadHistoryTable({
       <div className="flex flex-col items-center justify-center rounded-lg border bg-white px-6 py-16">
         <Upload className="mb-3 h-10 w-10 text-gray-300" />
         <p className="mb-1 text-lg font-medium text-gray-900">No uploads yet</p>
-        <p className="text-sm text-gray-500">
-          Use the form above to upload a downloaded video
-        </p>
+        <p className="text-sm text-gray-500">Use the form above to upload a downloaded video</p>
       </div>
     );
   }
@@ -76,12 +84,24 @@ export function UploadHistoryTable({
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Title</th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Platform</th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Privacy</th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Date</th>
-            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">Actions</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+              Title
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+              Platform
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+              Status
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+              Privacy
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+              Date
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
@@ -104,9 +124,7 @@ export function UploadHistoryTable({
               <td className="px-4 py-3">
                 <UploadStatusBadge status={ul.status} progress={ul.progress} />
               </td>
-              <td className="px-4 py-3 text-sm text-gray-500 capitalize">
-                {ul.privacyStatus}
-              </td>
+              <td className="px-4 py-3 text-sm text-gray-500 capitalize">{ul.privacyStatus}</td>
               <td className="px-4 py-3 text-sm text-gray-500">
                 {new Date(ul.createdAt).toLocaleDateString('en-US', {
                   month: 'short',

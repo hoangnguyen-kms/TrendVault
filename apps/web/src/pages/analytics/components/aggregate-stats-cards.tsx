@@ -3,13 +3,15 @@ import { Users, Video, Eye, ThumbsUp } from 'lucide-react';
 import { formatCompactNumber } from '@/lib/format-utils';
 
 interface AggregateStatsCardsProps {
-  data: {
-    totalChannels: number;
-    totalVideos: number;
-    totalViews: number;
-    totalLikes: number;
-    platforms?: string[];
-  } | undefined;
+  data:
+    | {
+        totalChannels: number;
+        totalVideos: number;
+        totalViews: number;
+        totalLikes: number;
+        platforms?: string[];
+      }
+    | undefined;
 }
 
 const cards = [

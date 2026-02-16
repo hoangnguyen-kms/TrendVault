@@ -5,7 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { VideoPlayer } from './components/video-player';
 import { StatsTimeSeriesChart } from './components/stats-time-series-chart';
 import { ContentLifecycleView } from './components/content-lifecycle-view';
@@ -142,7 +148,9 @@ export default function VideoDetailPage() {
               {video.privacyStatus && (
                 <div>
                   <p className="text-xs text-gray-500">Privacy</p>
-                  <Badge variant="outline" className="capitalize">{video.privacyStatus}</Badge>
+                  <Badge variant="outline" className="capitalize">
+                    {video.privacyStatus}
+                  </Badge>
                 </div>
               )}
               {video.tags?.length > 0 && (
@@ -150,7 +158,9 @@ export default function VideoDetailPage() {
                   <p className="mb-1 text-xs text-gray-500">Tags</p>
                   <div className="flex flex-wrap gap-1">
                     {video.tags.slice(0, 8).map((tag: string) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                      <Badge key={tag} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
                     ))}
                     {video.tags.length > 8 && (
                       <span className="text-xs text-gray-400">+{video.tags.length - 8}</span>
@@ -161,7 +171,9 @@ export default function VideoDetailPage() {
               {video.description && (
                 <div>
                   <p className="text-xs text-gray-500">Description</p>
-                  <p className="line-clamp-6 whitespace-pre-wrap text-gray-700">{video.description}</p>
+                  <p className="line-clamp-6 whitespace-pre-wrap text-gray-700">
+                    {video.description}
+                  </p>
                 </div>
               )}
               {video.platformVideoId && (

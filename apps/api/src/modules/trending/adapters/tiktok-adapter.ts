@@ -69,11 +69,7 @@ export class TikTokAdapter implements IPlatformAdapter {
     };
   }
 
-  private mapApifyItem(
-    item: ApifyTikTokItem,
-    region: string,
-    index: number,
-  ): TrendingVideoDTO {
+  private mapApifyItem(item: ApifyTikTokItem, region: string, index: number): TrendingVideoDTO {
     return {
       platform: Platform.TIKTOK,
       platformVideoId: item.id ?? String(item.webVideoUrl?.split('/').pop() ?? ''),

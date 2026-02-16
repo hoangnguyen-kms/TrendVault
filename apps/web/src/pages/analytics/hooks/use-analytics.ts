@@ -1,13 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 
-interface SuccessRes<T> { success: boolean; data: T }
+interface SuccessRes<T> {
+  success: boolean;
+  data: T;
+}
 
 export function useCrossChannelAggregate() {
   return useQuery({
     queryKey: ['cross-channel-aggregate'],
     queryFn: async () => {
-      const res = await apiClient.get<SuccessRes<Record<string, unknown>>>('/analytics/cross-channel');
+      const res = await apiClient.get<SuccessRes<Record<string, unknown>>>(
+        '/analytics/cross-channel',
+      );
       return res.data;
     },
   });

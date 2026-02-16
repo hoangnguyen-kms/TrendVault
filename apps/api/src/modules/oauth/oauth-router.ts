@@ -21,7 +21,8 @@ router.get('/google', authMiddleware, async (req: AuthRequest, res: Response) =>
   const state = crypto.randomBytes(32).toString('hex');
   await redis.set(`oauth:state:${state}`, req.userId!, 'EX', OAUTH_STATE_TTL);
 
-  const redirectUri = env.GOOGLE_REDIRECT_URI || `http://localhost:${env.PORT}/api/oauth/google/callback`;
+  const redirectUri =
+    env.GOOGLE_REDIRECT_URI || `http://localhost:${env.PORT}/api/oauth/google/callback`;
 
   const params = new URLSearchParams({
     client_id: env.GOOGLE_CLIENT_ID,
@@ -59,7 +60,8 @@ router.get('/google/callback', async (req: Request, res: Response) => {
     }
     await redis.del(`oauth:state:${state as string}`);
 
-    const redirectUri = env.GOOGLE_REDIRECT_URI || `http://localhost:${env.PORT}/api/oauth/google/callback`;
+    const redirectUri =
+      env.GOOGLE_REDIRECT_URI || `http://localhost:${env.PORT}/api/oauth/google/callback`;
 
     // Exchange code for tokens
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
@@ -74,7 +76,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
       }),
     });
 
-    const tokenData = await tokenRes.json() as {
+    const tokenData = (await tokenRes.json()) as {
       access_token: string;
       refresh_token?: string;
       expires_in: number;
@@ -87,26 +89,30 @@ router.get('/google/callback', async (req: Request, res: Response) => {
     }
 
     // Get user profile
-    const profileRes = await fetch(
-      'https://www.googleapis.com/oauth2/v2/userinfo',
-      { headers: { Authorization: `Bearer ${tokenData.access_token}` } },
-    );
-    const profile = await profileRes.json() as {
+    const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+    const profile = (await profileRes.json()) as {
       id: string;
       name: string;
       picture?: string;
     };
 
-    await oauthService.connectAccount(userId, 'YOUTUBE', {
-      accessToken: tokenData.access_token,
-      refreshToken: tokenData.refresh_token,
-      expiresAt: new Date(Date.now() + tokenData.expires_in * 1000),
-      scopes: tokenData.scope.split(' '),
-    }, {
-      platformUserId: profile.id,
-      displayName: profile.name,
-      avatarUrl: profile.picture,
-    });
+    await oauthService.connectAccount(
+      userId,
+      'YOUTUBE',
+      {
+        accessToken: tokenData.access_token,
+        refreshToken: tokenData.refresh_token,
+        expiresAt: new Date(Date.now() + tokenData.expires_in * 1000),
+        scopes: tokenData.scope.split(' '),
+      },
+      {
+        platformUserId: profile.id,
+        displayName: profile.name,
+        avatarUrl: profile.picture,
+      },
+    );
 
     // Redirect back to frontend settings page
     res.redirect(`${env.FRONTEND_URL}/settings?connected=youtube`);
@@ -130,7 +136,8 @@ router.get('/tiktok', authMiddleware, async (req: AuthRequest, res: Response) =>
   const state = crypto.randomBytes(32).toString('hex');
   await redis.set(`oauth:state:${state}`, req.userId!, 'EX', OAUTH_STATE_TTL);
 
-  const redirectUri = env.TIKTOK_REDIRECT_URI || `http://localhost:${env.PORT}/api/oauth/tiktok/callback`;
+  const redirectUri =
+    env.TIKTOK_REDIRECT_URI || `http://localhost:${env.PORT}/api/oauth/tiktok/callback`;
 
   const params = new URLSearchParams({
     client_key: env.TIKTOK_CLIENT_KEY,
@@ -160,7 +167,8 @@ router.get('/tiktok/callback', async (req: Request, res: Response) => {
     }
     await redis.del(`oauth:state:${state as string}`);
 
-    const redirectUri = env.TIKTOK_REDIRECT_URI || `http://localhost:${env.PORT}/api/oauth/tiktok/callback`;
+    const redirectUri =
+      env.TIKTOK_REDIRECT_URI || `http://localhost:${env.PORT}/api/oauth/tiktok/callback`;
 
     // Exchange code for tokens
     const tokenRes = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
@@ -175,7 +183,7 @@ router.get('/tiktok/callback', async (req: Request, res: Response) => {
       }),
     });
 
-    const tokenData = await tokenRes.json() as {
+    const tokenData = (await tokenRes.json()) as {
       access_token: string;
       refresh_token?: string;
       open_id: string;
@@ -193,22 +201,27 @@ router.get('/tiktok/callback', async (req: Request, res: Response) => {
       'https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url',
       { headers: { Authorization: `Bearer ${tokenData.access_token}` } },
     );
-    const profileData = await profileRes.json() as {
+    const profileData = (await profileRes.json()) as {
       data?: { user?: { open_id: string; display_name: string; avatar_url?: string } };
     };
 
     const user = profileData.data?.user;
 
-    await oauthService.connectAccount(userId, 'TIKTOK', {
-      accessToken: tokenData.access_token,
-      refreshToken: tokenData.refresh_token,
-      expiresAt: new Date(Date.now() + tokenData.expires_in * 1000),
-      scopes: tokenData.scope.split(','),
-    }, {
-      platformUserId: user?.open_id ?? tokenData.open_id,
-      displayName: user?.display_name ?? 'TikTok User',
-      avatarUrl: user?.avatar_url,
-    });
+    await oauthService.connectAccount(
+      userId,
+      'TIKTOK',
+      {
+        accessToken: tokenData.access_token,
+        refreshToken: tokenData.refresh_token,
+        expiresAt: new Date(Date.now() + tokenData.expires_in * 1000),
+        scopes: tokenData.scope.split(','),
+      },
+      {
+        platformUserId: user?.open_id ?? tokenData.open_id,
+        displayName: user?.display_name ?? 'TikTok User',
+        avatarUrl: user?.avatar_url,
+      },
+    );
 
     res.redirect(`${env.FRONTEND_URL}/settings?connected=tiktok`);
   } catch (error) {

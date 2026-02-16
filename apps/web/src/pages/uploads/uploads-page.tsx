@@ -15,9 +15,7 @@ export default function UploadsPage() {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Uploads</h1>
-          <p className="text-sm text-gray-500">
-            Upload downloaded videos to YouTube or TikTok
-          </p>
+          <p className="text-sm text-gray-500">Upload downloaded videos to YouTube or TikTok</p>
         </div>
         <div className="flex items-center gap-3">
           {data && (
@@ -41,8 +39,8 @@ export default function UploadsPage() {
           <div className="flex items-start gap-2">
             <AlertCircle className="mt-0.5 h-4 w-4 text-yellow-600" />
             <p className="text-sm text-yellow-700">
-              YouTube quota: {quota.uploadsToday}/{quota.maxUploadsPerDay} uploads today
-              ({quota.used.toLocaleString()}/{quota.limit.toLocaleString()} units used).
+              YouTube quota: {quota.uploadsToday}/{quota.maxUploadsPerDay} uploads today (
+              {quota.used.toLocaleString()}/{quota.limit.toLocaleString()} units used).
               {quota.remainingUploads === 0
                 ? ' Limit reached — uploads resume tomorrow.'
                 : ` ${quota.remainingUploads} upload remaining.`}
@@ -76,7 +74,9 @@ export default function UploadsPage() {
         <div className="flex flex-col items-center justify-center rounded-lg border bg-white px-6 py-16">
           <AlertCircle className="mb-3 h-10 w-10 text-red-400" />
           <p className="mb-1 text-lg font-medium text-gray-900">Failed to load uploads</p>
-          <p className="mb-4 text-sm text-gray-500">{error?.message ?? 'An unexpected error occurred'}</p>
+          <p className="mb-4 text-sm text-gray-500">
+            {error?.message ?? 'An unexpected error occurred'}
+          </p>
           <button
             onClick={() => refetch()}
             className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"

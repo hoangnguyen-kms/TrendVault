@@ -45,9 +45,7 @@ export default function TrendingPage() {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Trending Videos</h1>
-          <p className="text-sm text-gray-500">
-            Discover what's trending on YouTube and TikTok
-          </p>
+          <p className="text-sm text-gray-500">Discover what's trending on YouTube and TikTok</p>
         </div>
         <TrendingAutoRefresh />
       </div>
@@ -77,9 +75,7 @@ export default function TrendingPage() {
 
           {/* Infinite scroll sentinel */}
           <div ref={sentinelRef} className="mt-6 flex justify-center py-4">
-            {isFetchingNextPage && (
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-            )}
+            {isFetchingNextPage && <Loader2 className="h-6 w-6 animate-spin text-gray-400" />}
           </div>
         </>
       )}
@@ -91,10 +87,7 @@ function LoadingSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div
-          key={i}
-          className="animate-pulse rounded-lg border bg-white overflow-hidden"
-        >
+        <div key={i} className="animate-pulse rounded-lg border bg-white overflow-hidden">
           <div className="aspect-video bg-gray-200" />
           <div className="p-3 space-y-2">
             <div className="h-4 w-3/4 rounded bg-gray-200" />
@@ -107,22 +100,12 @@ function LoadingSkeleton() {
   );
 }
 
-function ErrorState({
-  message,
-  onRetry,
-}: {
-  message?: string;
-  onRetry: () => void;
-}) {
+function ErrorState({ message, onRetry }: { message?: string; onRetry: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border bg-white px-6 py-16">
       <AlertCircle className="mb-3 h-10 w-10 text-red-400" />
-      <p className="mb-1 text-lg font-medium text-gray-900">
-        Failed to load trending videos
-      </p>
-      <p className="mb-4 text-sm text-gray-500">
-        {message ?? 'An unexpected error occurred'}
-      </p>
+      <p className="mb-1 text-lg font-medium text-gray-900">Failed to load trending videos</p>
+      <p className="mb-4 text-sm text-gray-500">{message ?? 'An unexpected error occurred'}</p>
       <button
         onClick={onRetry}
         className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
@@ -138,9 +121,7 @@ function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border bg-white px-6 py-16">
       <p className="mb-1 text-lg font-medium text-gray-900">No trending videos found</p>
-      <p className="text-sm text-gray-500">
-        Try changing the platform, region, or category filter
-      </p>
+      <p className="text-sm text-gray-500">Try changing the platform, region, or category filter</p>
     </div>
   );
 }

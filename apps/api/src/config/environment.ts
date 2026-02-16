@@ -15,7 +15,9 @@ const envSchema = z.object({
   S3_SECRET_KEY: z.string().optional(),
   S3_BUCKET: z.string().default('trendvault-videos'),
   S3_REGION: z.string().default('us-east-1'),
-  ENCRYPTION_MASTER_KEY: z.string().regex(/^[0-9a-fA-F]{64,}$/, 'Must be at least 64 hex characters'),
+  ENCRYPTION_MASTER_KEY: z
+    .string()
+    .regex(/^[0-9a-fA-F]{64,}$/, 'Must be at least 64 hex characters'),
   YOUTUBE_API_KEY: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),

@@ -30,9 +30,7 @@ export default function LoginPage() {
             <TrendingUp className="h-8 w-8 text-blue-600" />
             <span className="text-2xl font-bold">TrendVault</span>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900">
-            Sign in to your account
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-900">Sign in to your account</h2>
         </div>
 
         <div className="rounded-lg border bg-white p-8 shadow-sm">
@@ -44,10 +42,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email
               </label>
               <input
@@ -62,10 +57,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <input
@@ -91,10 +83,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <Link
-                to="/register"
-                className="font-medium text-blue-600 hover:text-blue-700"
-              >
+              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-700">
                 Sign up
               </Link>
             </p>

@@ -18,7 +18,7 @@ export function successResponse<T>(data: T): SuccessResponse<T> {
 
 export function errorResponse(
   error: string,
-  details?: Array<{ field: string; message: string }>
+  details?: Array<{ field: string; message: string }>,
 ): ErrorResponse {
   return {
     success: false,

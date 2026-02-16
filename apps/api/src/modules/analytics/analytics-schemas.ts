@@ -12,7 +12,9 @@ export const VideoListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
   search: z.string().optional(),
-  sortBy: z.enum(['publishedAt', 'viewCount', 'likeCount', 'title', 'duration']).default('publishedAt'),
+  sortBy: z
+    .enum(['publishedAt', 'viewCount', 'likeCount', 'title', 'duration'])
+    .default('publishedAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 
@@ -23,10 +25,18 @@ export function getDateRange(range: string, from?: string, to?: string): { from:
   const toDate = new Date();
   const fromDate = new Date();
   switch (range) {
-    case '7d': fromDate.setDate(fromDate.getDate() - 7); break;
-    case '30d': fromDate.setDate(fromDate.getDate() - 30); break;
-    case '90d': fromDate.setDate(fromDate.getDate() - 90); break;
-    case '1y': fromDate.setFullYear(fromDate.getFullYear() - 1); break;
+    case '7d':
+      fromDate.setDate(fromDate.getDate() - 7);
+      break;
+    case '30d':
+      fromDate.setDate(fromDate.getDate() - 30);
+      break;
+    case '90d':
+      fromDate.setDate(fromDate.getDate() - 90);
+      break;
+    case '1y':
+      fromDate.setFullYear(fromDate.getFullYear() - 1);
+      break;
   }
   return { from: fromDate, to: toDate };
 }

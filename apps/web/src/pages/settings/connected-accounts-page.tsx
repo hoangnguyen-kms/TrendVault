@@ -45,8 +45,8 @@ export default function ConnectedAccountsPage() {
           <div className="text-sm text-yellow-700">
             <p className="font-medium">TikTok Upload Limitation</p>
             <p>
-              TikTok uploads go to your inbox as drafts (Inbox Upload mode).
-              Direct publishing requires TikTok app audit approval.
+              TikTok uploads go to your inbox as drafts (Inbox Upload mode). Direct publishing
+              requires TikTok app audit approval.
             </p>
           </div>
         </div>

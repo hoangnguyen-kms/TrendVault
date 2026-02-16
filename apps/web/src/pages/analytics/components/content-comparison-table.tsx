@@ -3,18 +3,20 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatCompactNumber } from '@/lib/format-utils';
 
 interface ContentComparisonTableProps {
-  data: Array<{
-    sourceTitle: string;
-    sourcePlatform: string;
-    publishedVersions: Array<{
-      publishedVideoId: string;
-      channelName: string;
-      platform: string;
-      viewCount: number;
-      likeCount: number;
-      commentCount: number;
-    }>;
-  }> | undefined;
+  data:
+    | Array<{
+        sourceTitle: string;
+        sourcePlatform: string;
+        publishedVersions: Array<{
+          publishedVideoId: string;
+          channelName: string;
+          platform: string;
+          viewCount: number;
+          likeCount: number;
+          commentCount: number;
+        }>;
+      }>
+    | undefined;
   isLoading: boolean;
 }
 
@@ -32,7 +34,8 @@ export function ContentComparisonTable({ data, isLoading }: ContentComparisonTab
   if (!data || data.length === 0) {
     return (
       <p className="py-6 text-center text-sm text-gray-400">
-        No cross-channel content found. Upload the same video to multiple channels to see comparisons.
+        No cross-channel content found. Upload the same video to multiple channels to see
+        comparisons.
       </p>
     );
   }
@@ -57,18 +60,22 @@ export function ContentComparisonTable({ data, isLoading }: ContentComparisonTab
                   <td className="py-2 pr-4 font-medium" rowSpan={item.publishedVersions.length}>
                     <div className="flex items-center gap-2">
                       <span className="line-clamp-1">{item.sourceTitle}</span>
-                      <Badge variant="secondary" className="shrink-0 text-[10px]">{item.sourcePlatform}</Badge>
+                      <Badge variant="secondary" className="shrink-0 text-[10px]">
+                        {item.sourcePlatform}
+                      </Badge>
                     </div>
                   </td>
                 )}
                 <td className="py-2 pr-4">{ver.channelName}</td>
                 <td className="py-2 pr-4">
-                  <Badge variant="outline" className="text-xs">{ver.platform}</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {ver.platform}
+                  </Badge>
                 </td>
                 <td className="py-2 pr-4 text-right">{formatCompactNumber(ver.viewCount)}</td>
                 <td className="py-2 text-right">{formatCompactNumber(ver.likeCount)}</td>
               </tr>
-            ))
+            )),
           )}
         </tbody>
       </table>

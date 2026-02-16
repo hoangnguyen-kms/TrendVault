@@ -25,7 +25,10 @@ export function EngagementChart({ data }: EngagementChartProps) {
     .filter((v) => v.publishedAt)
     .sort((a, b) => new Date(a.publishedAt!).getTime() - new Date(b.publishedAt!).getTime())
     .map((v) => ({
-      date: new Date(v.publishedAt!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: new Date(v.publishedAt!).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
       views: v.viewCount,
       likes: v.likeCount,
     }));

@@ -74,10 +74,12 @@ export function createUploadWorker(): Worker<UploadJobData> {
             uploadJobId: data.uploadJobId,
           });
           // Also update DB progress
-          await prisma.uploadJob.update({
-            where: { id: data.uploadJobId },
-            data: { progress: progress.percent },
-          }).catch(() => {}); // best-effort
+          await prisma.uploadJob
+            .update({
+              where: { id: data.uploadJobId },
+              data: { progress: progress.percent },
+            })
+            .catch(() => {}); // best-effort
         },
       });
 

@@ -14,12 +14,7 @@ export function VideoPlayer({ src, title }: VideoPlayerProps) {
 
   return (
     <div className="overflow-hidden rounded-lg bg-black">
-      <video
-        controls
-        className="aspect-video w-full"
-        title={title}
-        preload="metadata"
-      >
+      <video controls className="aspect-video w-full" title={title} preload="metadata">
         <source src={src} type="video/mp4" />
         Your browser does not support the video element.
       </video>

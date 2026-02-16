@@ -13,8 +13,12 @@ export class AnalyticsService {
       orderBy: { publishedAt: 'desc' },
       take: 6,
       select: {
-        id: true, title: true, thumbnailUrl: true,
-        viewCount: true, likeCount: true, publishedAt: true,
+        id: true,
+        title: true,
+        thumbnailUrl: true,
+        viewCount: true,
+        likeCount: true,
+        publishedAt: true,
       },
     });
 
@@ -27,9 +31,7 @@ export class AnalyticsService {
     const totalViews = Number(agg._sum.viewCount ?? 0);
     const totalLikes = Number(agg._sum.likeCount ?? 0);
     const totalComments = Number(agg._sum.commentCount ?? 0);
-    const avgEngagement = totalViews > 0
-      ? (totalLikes + totalComments) / totalViews
-      : null;
+    const avgEngagement = totalViews > 0 ? (totalLikes + totalComments) / totalViews : null;
 
     return {
       channelId: channel.id,
@@ -94,22 +96,35 @@ export class AnalyticsService {
     const uj = video.uploadJob;
 
     return {
-      trending: tv ? {
-        id: tv.id, platform: tv.platform, title: tv.title,
-        viewCount: tv.viewCount ? Number(tv.viewCount) : null,
-        region: tv.region, fetchedAt: tv.fetchedAt.toISOString(),
-      } : null,
-      download: dv ? {
-        id: dv.id, status: dv.status,
-        downloadedAt: dv.downloadedAt?.toISOString() ?? null,
-      } : null,
-      upload: uj ? {
-        id: uj.id, status: uj.status,
-        uploadedAt: uj.uploadedAt?.toISOString() ?? null,
-      } : null,
+      trending: tv
+        ? {
+            id: tv.id,
+            platform: tv.platform,
+            title: tv.title,
+            viewCount: tv.viewCount ? Number(tv.viewCount) : null,
+            region: tv.region,
+            fetchedAt: tv.fetchedAt.toISOString(),
+          }
+        : null,
+      download: dv
+        ? {
+            id: dv.id,
+            status: dv.status,
+            downloadedAt: dv.downloadedAt?.toISOString() ?? null,
+          }
+        : null,
+      upload: uj
+        ? {
+            id: uj.id,
+            status: uj.status,
+            uploadedAt: uj.uploadedAt?.toISOString() ?? null,
+          }
+        : null,
       published: {
-        id: video.id, platform: video.platform,
-        platformVideoId: video.platformVideoId, title: video.title,
+        id: video.id,
+        platform: video.platform,
+        platformVideoId: video.platformVideoId,
+        title: video.title,
         viewCount: video.viewCount ? Number(video.viewCount) : null,
         likeCount: video.likeCount ? Number(video.likeCount) : null,
         publishedAt: video.publishedAt?.toISOString() ?? null,
@@ -131,9 +146,17 @@ export class AnalyticsService {
       _count: true,
     });
 
-    const platformMap = new Map<string, { channels: number; videos: number; views: bigint; likes: bigint }>();
+    const platformMap = new Map<
+      string,
+      { channels: number; videos: number; views: bigint; likes: bigint }
+    >();
     for (const ch of channels) {
-      const entry = platformMap.get(ch.platform) ?? { channels: 0, videos: 0, views: 0n, likes: 0n };
+      const entry = platformMap.get(ch.platform) ?? {
+        channels: 0,
+        videos: 0,
+        views: 0n,
+        likes: 0n,
+      };
       entry.channels++;
       entry.videos += ch._count.publishedVideos;
       platformMap.set(ch.platform, entry);
@@ -142,7 +165,9 @@ export class AnalyticsService {
     // Get per-platform video stats
     for (const [platform, entry] of platformMap) {
       const agg = await prisma.publishedVideo.aggregate({
-        where: { channel: { connectedAccount: { userId }, platform: platform as 'YOUTUBE' | 'TIKTOK' } },
+        where: {
+          channel: { connectedAccount: { userId }, platform: platform as 'YOUTUBE' | 'TIKTOK' },
+        },
         _sum: { viewCount: true, likeCount: true },
       });
       entry.views = agg._sum.viewCount ?? 0n;
@@ -156,8 +181,11 @@ export class AnalyticsService {
       totalLikes: Number(videoAgg._sum.likeCount ?? 0),
       totalComments: Number(videoAgg._sum.commentCount ?? 0),
       platformBreakdown: Array.from(platformMap.entries()).map(([platform, d]) => ({
-        platform, channels: d.channels, videos: d.videos,
-        views: Number(d.views), likes: Number(d.likes),
+        platform,
+        channels: d.channels,
+        videos: d.videos,
+        views: Number(d.views),
+        likes: Number(d.likes),
       })),
     };
   }
@@ -174,7 +202,10 @@ export class AnalyticsService {
       },
     });
 
-    const groups = new Map<string, { sourceTitle: string; sourcePlatform: string; versions: typeof results }>();
+    const groups = new Map<
+      string,
+      { sourceTitle: string; sourcePlatform: string; versions: typeof results }
+    >();
     for (const r of results) {
       const dvId = r.uploadJob?.downloadedVideo?.id;
       if (!dvId) continue;

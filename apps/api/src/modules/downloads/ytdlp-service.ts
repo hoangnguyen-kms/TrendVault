@@ -116,8 +116,7 @@ export class YtdlpService {
   /** Find the actual downloaded file by video ID (handles extension mismatches) */
   private findDownloadedFile(dir: string, videoId: string): string | null {
     const prefix = videoId + '.';
-    const files = fs.readdirSync(dir)
-      .filter((f) => f.startsWith(prefix) && !f.endsWith('.part'));
+    const files = fs.readdirSync(dir).filter((f) => f.startsWith(prefix) && !f.endsWith('.part'));
     if (files.length === 0) return null;
     return path.join(dir, files[0]);
   }

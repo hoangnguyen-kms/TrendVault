@@ -95,10 +95,7 @@ export class DownloadService {
     return { id: download.id, bullmqJobId: jobId, status: 'PENDING' };
   }
 
-  async batchQueueDownloads(
-    userId: string,
-    trendingVideoIds: string[],
-  ): Promise<QueueResult[]> {
+  async batchQueueDownloads(userId: string, trendingVideoIds: string[]): Promise<QueueResult[]> {
     const results: QueueResult[] = [];
     for (const tvId of trendingVideoIds) {
       try {

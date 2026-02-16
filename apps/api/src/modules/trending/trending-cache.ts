@@ -22,13 +22,7 @@ export const trendingCache = {
 
   async acquireLock(key: string, ttlSeconds = 300): Promise<boolean> {
     try {
-      const result = await redis.set(
-        `${KEY_PREFIX}:lock:${key}`,
-        '1',
-        'EX',
-        ttlSeconds,
-        'NX',
-      );
+      const result = await redis.set(`${KEY_PREFIX}:lock:${key}`, '1', 'EX', ttlSeconds, 'NX');
       return result === 'OK';
     } catch {
       return false;

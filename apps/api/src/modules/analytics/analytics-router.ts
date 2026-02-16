@@ -8,29 +8,37 @@ import { DateRangeQuerySchema, VideoListQuerySchema, getDateRange } from './anal
 const router = Router();
 
 // GET /api/analytics/channels/:channelId/overview
-router.get('/channels/:channelId/overview', authMiddleware, async (req: AuthRequest, res: Response) => {
-  try {
-    const channelId = req.params.channelId as string;
-    const data = await analyticsService.getChannelOverview(channelId, req.userId!);
-    res.json(successResponse(data));
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to get channel overview';
-    res.status(message === 'Channel not found' ? 404 : 500).json(errorResponse(message));
-  }
-});
+router.get(
+  '/channels/:channelId/overview',
+  authMiddleware,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const channelId = req.params.channelId as string;
+      const data = await analyticsService.getChannelOverview(channelId, req.userId!);
+      res.json(successResponse(data));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to get channel overview';
+      res.status(message === 'Channel not found' ? 404 : 500).json(errorResponse(message));
+    }
+  },
+);
 
 // GET /api/analytics/channels/:channelId/videos
-router.get('/channels/:channelId/videos', authMiddleware, async (req: AuthRequest, res: Response) => {
-  try {
-    const channelId = req.params.channelId as string;
-    const query = VideoListQuerySchema.parse(req.query);
-    const data = await analyticsService.getChannelVideos(channelId, req.userId!, query);
-    res.json(successResponse(data));
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to get channel videos';
-    res.status(message === 'Channel not found' ? 404 : 500).json(errorResponse(message));
-  }
-});
+router.get(
+  '/channels/:channelId/videos',
+  authMiddleware,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const channelId = req.params.channelId as string;
+      const query = VideoListQuerySchema.parse(req.query);
+      const data = await analyticsService.getChannelVideos(channelId, req.userId!, query);
+      res.json(successResponse(data));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to get channel videos';
+      res.status(message === 'Channel not found' ? 404 : 500).json(errorResponse(message));
+    }
+  },
+);
 
 // GET /api/analytics/videos/:videoId/stats
 router.get('/videos/:videoId/stats', authMiddleware, async (req: AuthRequest, res: Response) => {
@@ -47,16 +55,20 @@ router.get('/videos/:videoId/stats', authMiddleware, async (req: AuthRequest, re
 });
 
 // GET /api/analytics/videos/:videoId/lifecycle
-router.get('/videos/:videoId/lifecycle', authMiddleware, async (req: AuthRequest, res: Response) => {
-  try {
-    const videoId = req.params.videoId as string;
-    const data = await analyticsService.getContentLifecycle(videoId, req.userId!);
-    res.json(successResponse(data));
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to get content lifecycle';
-    res.status(message === 'Video not found' ? 404 : 500).json(errorResponse(message));
-  }
-});
+router.get(
+  '/videos/:videoId/lifecycle',
+  authMiddleware,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const videoId = req.params.videoId as string;
+      const data = await analyticsService.getContentLifecycle(videoId, req.userId!);
+      res.json(successResponse(data));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to get content lifecycle';
+      res.status(message === 'Video not found' ? 404 : 500).json(errorResponse(message));
+    }
+  },
+);
 
 // GET /api/analytics/cross-channel
 router.get('/cross-channel', authMiddleware, async (req: AuthRequest, res: Response) => {
