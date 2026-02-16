@@ -35,6 +35,12 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      DATABASE_URL: postgresql://trendvault:trendvault_ci@localhost:5432/trendvault_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-test-secret-key-at-least-32-chars
+      ENCRYPTION_MASTER_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -46,12 +52,12 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+
+      # Prisma generate runs via postinstall; now deploy migrations for test DB
+      - name: Run database migrations
+        run: pnpm --filter @trendvault/api exec prisma migrate deploy
+
       - run: pnpm lint
       - run: pnpm type-check
       - run: pnpm build
       - run: pnpm test
-        env:
-          DATABASE_URL: postgresql://trendvault:trendvault_ci@localhost:5433/trendvault_test
-          REDIS_URL: redis://localhost:6379
-          JWT_SECRET: ci-test-secret-key-at-least-32-chars
-          ENCRYPTION_MASTER_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
