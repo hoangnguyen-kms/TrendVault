@@ -1,3 +1,5 @@
+import { CircuitBreaker } from '../../../lib/circuit-breaker.js';
+import { callWithResilience } from '../../../lib/call-with-resilience.js';
 import type {
   IPlatformUploader,
   UploadOptions,
@@ -9,6 +11,15 @@ import type {
  * Direct Post deferred until TikTok audit approval.
  */
 export class TikTokUploader implements IPlatformUploader {
+  private circuitBreaker: CircuitBreaker;
+
+  constructor() {
+    this.circuitBreaker = new CircuitBreaker('tiktok-upload', {
+      failureThreshold: 3,
+      resetTimeout: 120000,
+      monitorWindow: 120000,
+    });
+  }
   async upload(options: UploadOptions): Promise<UploadResult> {
     const { accessToken, videoStream, title, totalBytes, onProgress } = options;
 
@@ -29,21 +40,27 @@ export class TikTokUploader implements IPlatformUploader {
     onProgress?: (progress: { percent: number; phase: string }) => void,
   ): Promise<UploadResult> {
     // 1. Initialize inbox upload
-    const initRes = await fetch('https://open.tiktokapis.com/v2/post/publish/inbox/video/init/', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: JSON.stringify({
-        source_info: {
-          source: 'FILE_UPLOAD',
-          video_size: totalBytes,
-          chunk_size: totalBytes, // Single-chunk upload for simplicity
-          total_chunk_count: 1,
-        },
-      }),
-    });
+    const initRes = await callWithResilience(
+      this.circuitBreaker,
+      () =>
+        fetch('https://open.tiktokapis.com/v2/post/publish/inbox/video/init/', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: JSON.stringify({
+            source_info: {
+              source: 'FILE_UPLOAD',
+              video_size: totalBytes,
+              chunk_size: totalBytes,
+              total_chunk_count: 1,
+            },
+          }),
+        }),
+      'TikTok Inbox Init',
+      { maxAttempts: 2, baseDelay: 2000, maxDelay: 10000 },
+    );
 
     const initData = (await initRes.json()) as {
       data?: { publish_id: string; upload_url: string };
@@ -78,14 +95,20 @@ export class TikTokUploader implements IPlatformUploader {
     }
     const videoBuffer = Buffer.concat(chunks);
 
-    const uploadRes = await fetch(upload_url, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'video/mp4',
-        'Content-Range': `bytes 0-${videoBuffer.length - 1}/${videoBuffer.length}`,
-      },
-      body: videoBuffer,
-    });
+    const uploadRes = await callWithResilience(
+      this.circuitBreaker,
+      () =>
+        fetch(upload_url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'video/mp4',
+            'Content-Range': `bytes 0-${videoBuffer.length - 1}/${videoBuffer.length}`,
+          },
+          body: videoBuffer,
+        }),
+      'TikTok Video Upload',
+      { maxAttempts: 2, baseDelay: 2000, maxDelay: 10000 },
+    );
 
     if (!uploadRes.ok) {
       throw new Error(`TikTok upload failed: HTTP ${uploadRes.status}`);
@@ -110,14 +133,20 @@ export class TikTokUploader implements IPlatformUploader {
     for (let i = 0; i < 10; i++) {
       await new Promise((r) => setTimeout(r, 3000));
 
-      const res = await fetch('https://open.tiktokapis.com/v2/post/publish/status/fetch/', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ publish_id: publishId }),
-      });
+      const res = await callWithResilience(
+        this.circuitBreaker,
+        () =>
+          fetch('https://open.tiktokapis.com/v2/post/publish/status/fetch/', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ publish_id: publishId }),
+          }),
+        'TikTok Publish Status',
+        { maxAttempts: 2, baseDelay: 1000, maxDelay: 3000 },
+      );
 
       const data = (await res.json()) as {
         data?: { status: string; publicaly_available_post_id?: string[] };
