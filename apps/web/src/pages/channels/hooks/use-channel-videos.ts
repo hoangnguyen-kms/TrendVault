@@ -1,28 +1,27 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
+import type { ApiSuccess, VideoLibraryQuery } from '@trendvault/shared-types';
 
-interface VideoListQuery {
-  page: number;
-  limit: number;
-  search?: string;
-  sortBy: string;
-  sortOrder: string;
+interface PublishedVideoSummary {
+  id: string;
+  title: string;
+  platform: string;
+  thumbnailUrl: string | null;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  publishedAt: string | null;
 }
 
-interface PaginatedResult {
-  data: Record<string, unknown>[];
+interface PaginatedResult<T> {
+  data: T[];
   page: number;
   limit: number;
   total: number;
   hasMore: boolean;
 }
 
-interface SuccessRes<T> {
-  success: boolean;
-  data: T;
-}
-
-export function useChannelVideos(channelId: string | undefined, query: VideoListQuery) {
+export function useChannelVideos(channelId: string | undefined, query: VideoLibraryQuery) {
   return useQuery({
     queryKey: ['channel-videos', channelId, query],
     queryFn: async () => {
@@ -33,7 +32,7 @@ export function useChannelVideos(channelId: string | undefined, query: VideoList
         sortOrder: query.sortOrder,
       });
       if (query.search) params.set('search', query.search);
-      const res = await apiClient.get<SuccessRes<PaginatedResult>>(
+      const res = await apiClient.get<ApiSuccess<PaginatedResult<PublishedVideoSummary>>>(
         `/analytics/channels/${channelId}/videos?${params}`,
       );
       return res.data;
