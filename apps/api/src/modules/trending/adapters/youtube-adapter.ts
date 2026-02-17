@@ -3,6 +3,9 @@ import { Platform } from '../../../lib/prisma-client.js';
 import { redis } from '../../../lib/redis-client.js';
 import { env } from '../../../config/environment.js';
 import { YOUTUBE_CATEGORIES } from '@trendvault/shared-types';
+import { CircuitBreaker } from '../../../lib/circuit-breaker.js';
+import { retryWithBackoff } from '../../../lib/retry-with-backoff.js';
+import { ServiceUnavailableError } from '../../../lib/app-errors.js';
 import type {
   IPlatformAdapter,
   FetchTrendingOptions,
@@ -18,9 +21,32 @@ const DAILY_QUOTA_LIMIT = 5000; // reserved for trending only
 export class YouTubeAdapter implements IPlatformAdapter {
   platform: Platform = Platform.YOUTUBE;
   private youtube;
+  private circuitBreaker: CircuitBreaker;
 
   constructor() {
     this.youtube = google.youtube({ version: 'v3', auth: env.YOUTUBE_API_KEY });
+    this.circuitBreaker = new CircuitBreaker('youtube-api', {
+      failureThreshold: 5,
+      resetTimeout: 60000,
+      monitorWindow: 60000,
+    });
+  }
+
+  /**
+   * Wraps YouTube API calls with circuit breaker and retry logic.
+   */
+  private async callWithResilience<T>(apiCall: () => Promise<T>): Promise<T> {
+    try {
+      return await retryWithBackoff(async () => await this.circuitBreaker.execute(apiCall), {
+        maxAttempts: 3,
+        baseDelay: 1000,
+        maxDelay: 5000,
+      });
+    } catch (error) {
+      throw new ServiceUnavailableError(
+        `YouTube API unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
   }
 
   async fetchTrending(options: FetchTrendingOptions): Promise<FetchTrendingResult> {
@@ -49,14 +75,16 @@ export class YouTubeAdapter implements IPlatformAdapter {
     maxResults: number,
     pageToken?: string,
   ): Promise<FetchTrendingResult> {
-    const response = await this.youtube.videos.list({
-      part: ['snippet', 'statistics', 'contentDetails'],
-      chart: 'mostPopular',
-      regionCode: region,
-      videoCategoryId: category,
-      maxResults,
-      pageToken,
-    });
+    const response = await this.callWithResilience(() =>
+      this.youtube.videos.list({
+        part: ['snippet', 'statistics', 'contentDetails'],
+        chart: 'mostPopular',
+        regionCode: region,
+        videoCategoryId: category,
+        maxResults,
+        pageToken,
+      }),
+    );
     await this.trackQuota(1);
     return this.mapVideoListResponse(response.data, region);
   }

@@ -12,6 +12,7 @@ export function TosAcceptanceModal({ isOpen }: TosAcceptanceModalProps) {
   const navigate = useNavigate();
   const acceptTos = useAcceptTos();
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -22,7 +23,22 @@ export function TosAcceptanceModal({ isOpen }: TosAcceptanceModalProps) {
   };
 
   const handleAccept = async () => {
-    await acceptTos.mutateAsync();
+    try {
+      setError(null);
+      await acceptTos.mutateAsync();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to accept Terms of Service');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      window.location.href = '/login';
+    } catch {
+      // Force logout even if API fails
+      window.location.href = '/login';
+    }
   };
 
   const handleViewFullTerms = () => {
@@ -88,6 +104,16 @@ export function TosAcceptanceModal({ isOpen }: TosAcceptanceModalProps) {
           </p>
         )}
 
+        {error && (
+          <div className="mt-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            <p className="font-semibold">Error</p>
+            <p>{error}</p>
+            <Button onClick={handleAccept} variant="outline" size="sm" className="mt-2">
+              Retry
+            </Button>
+          </div>
+        )}
+
         <div className="mt-6 flex gap-3">
           <Button
             onClick={handleAccept}
@@ -98,6 +124,9 @@ export function TosAcceptanceModal({ isOpen }: TosAcceptanceModalProps) {
           </Button>
           <Button onClick={handleViewFullTerms} variant="outline">
             View Full Terms
+          </Button>
+          <Button onClick={handleLogout} variant="outline">
+            Logout
           </Button>
         </div>
       </Card>

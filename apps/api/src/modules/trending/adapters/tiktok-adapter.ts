@@ -1,5 +1,8 @@
 import { Platform } from '../../../lib/prisma-client.js';
 import { env } from '../../../config/environment.js';
+import { CircuitBreaker } from '../../../lib/circuit-breaker.js';
+import { retryWithBackoff } from '../../../lib/retry-with-backoff.js';
+import { ServiceUnavailableError } from '../../../lib/app-errors.js';
 import type {
   IPlatformAdapter,
   FetchTrendingOptions,
@@ -16,6 +19,29 @@ const APIFY_BASE_URL = 'https://api.apify.com/v2';
  */
 export class TikTokAdapter implements IPlatformAdapter {
   platform: Platform = Platform.TIKTOK;
+  private circuitBreaker: CircuitBreaker;
+
+  constructor() {
+    this.circuitBreaker = new CircuitBreaker('tiktok-apify-api', {
+      failureThreshold: 5,
+      resetTimeout: 60000,
+      monitorWindow: 60000,
+    });
+  }
+
+  private async callWithResilience<T>(apiCall: () => Promise<T>): Promise<T> {
+    try {
+      return await retryWithBackoff(async () => await this.circuitBreaker.execute(apiCall), {
+        maxAttempts: 3,
+        baseDelay: 1000,
+        maxDelay: 5000,
+      });
+    } catch (error) {
+      throw new ServiceUnavailableError(
+        `TikTok API unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
 
   async fetchTrending(options: FetchTrendingOptions): Promise<FetchTrendingResult> {
     return this.fetchFromApify(options);
@@ -35,23 +61,25 @@ export class TikTokAdapter implements IPlatformAdapter {
     // Run the Apify actor synchronously (waits for completion)
     const runUrl = `${APIFY_BASE_URL}/acts/${APIFY_ACTOR_ID}/run-sync-get-dataset-items`;
 
-    const response = await fetch(runUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.APIFY_API_TOKEN}`,
-      },
-      body: JSON.stringify({
-        hashtags: [],
-        resultsPerPage: maxResults,
-        searchQueries: [],
-        shouldDownloadCovers: false,
-        shouldDownloadSlideshowImages: false,
-        shouldDownloadSubtitles: false,
-        shouldDownloadVideos: false,
+    const response = await this.callWithResilience(() =>
+      fetch(runUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${env.APIFY_API_TOKEN}`,
+        },
+        body: JSON.stringify({
+          hashtags: [],
+          resultsPerPage: maxResults,
+          searchQueries: [],
+          shouldDownloadCovers: false,
+          shouldDownloadSlideshowImages: false,
+          shouldDownloadSubtitles: false,
+          shouldDownloadVideos: false,
+        }),
+        signal: AbortSignal.timeout(30_000),
       }),
-      signal: AbortSignal.timeout(30_000),
-    });
+    );
 
     if (!response.ok) {
       throw new Error(`Apify request failed: ${response.status} ${response.statusText}`);

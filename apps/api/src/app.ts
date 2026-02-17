@@ -7,6 +7,7 @@ import { helmetConfig } from './config/helmet.js';
 import { env } from './config/environment.js';
 import { requestLogger } from './middleware/request-logger.js';
 import { errorHandler } from './middleware/error-handler.js';
+import { notFoundHandler } from './middleware/not-found-handler.js';
 import { authRouter } from './modules/auth/auth-router.js';
 import { trendingRouter } from './modules/trending/trending-router.js';
 import { downloadRouter } from './modules/downloads/download-router.js';
@@ -46,6 +47,10 @@ if (env.NODE_ENV === 'development') {
   setupSwagger(app);
 }
 
+// 404 handler for unmatched routes (must be after all routes)
+app.use(notFoundHandler);
+
+// Global error handler (must be last)
 app.use(errorHandler);
 
 export { app };
