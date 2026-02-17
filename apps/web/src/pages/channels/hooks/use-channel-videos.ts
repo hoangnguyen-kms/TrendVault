@@ -11,6 +11,7 @@ interface PublishedVideoSummary {
   likeCount: number;
   commentCount: number;
   publishedAt: string | null;
+  isShort: boolean;
 }
 
 interface PaginatedResult<T> {

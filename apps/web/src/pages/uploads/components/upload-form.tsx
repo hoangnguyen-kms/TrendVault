@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { useCreateUpload } from '../hooks/use-uploads';
 import { useChannels } from '@/pages/settings/hooks/use-connected-accounts';
+import { ShortsUploadToggle } from './shorts-upload-toggle';
+import { UploadMetadataEditor } from './upload-metadata-editor';
 import type { DownloadedVideo } from '@trendvault/shared-types';
 
 interface ApiSuccess<T> {
@@ -18,6 +20,7 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState('');
   const [privacyStatus, setPrivacyStatus] = useState<'public' | 'private' | 'unlisted'>('private');
+  const [uploadAsShort, setUploadAsShort] = useState(false);
 
   const createUpload = useCreateUpload();
   const { data: channels } = useChannels();
@@ -33,19 +36,21 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
     },
   });
 
-  // Auto-fill title when video selected
+  // Auto-fill title and pre-set uploadAsShort when video selected
   const handleVideoSelect = (videoId: string) => {
     setSelectedVideoId(videoId);
     const video = downloads?.find((d) => d.id === videoId);
     if (video) {
       setTitle(video.title);
       setDescription(video.description ?? '');
+      setUploadAsShort(video.isShort ?? false);
     }
   };
 
-  // Determine selected channel platform for TikTok warnings
+  // Determine selected channel platform for platform-specific UI
   const selectedChannel = channels?.find((ch) => ch.id === selectedChannelId);
   const isTikTok = selectedChannel?.platform === 'TIKTOK';
+  const isYouTube = selectedChannel?.platform === 'YOUTUBE';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +69,7 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
         : [],
       privacyStatus: isTikTok ? 'private' : privacyStatus,
       uploadMode: isTikTok ? 'inbox' : null,
+      uploadAsShort: isYouTube ? uploadAsShort : false,
     });
 
     // Reset form
@@ -73,6 +79,7 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
     setDescription('');
     setTags('');
     setPrivacyStatus('private');
+    setUploadAsShort(false);
     onSuccess();
   };
 
@@ -159,6 +166,7 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
             maxLength={5000}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
           />
+          <UploadMetadataEditor uploadAsShort={uploadAsShort} />
         </div>
 
         {/* Tags */}
@@ -191,6 +199,18 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
               <option value="public">Public</option>
             </select>
           </div>
+        )}
+
+        {/* Shorts toggle (YouTube only) */}
+        {isYouTube && (
+          <ShortsUploadToggle
+            sourceIsShort={downloads?.find((d) => d.id === selectedVideoId)?.isShort ?? false}
+            sourceAspectRatio={
+              downloads?.find((d) => d.id === selectedVideoId)?.aspectRatio ?? null
+            }
+            value={uploadAsShort}
+            onChange={setUploadAsShort}
+          />
         )}
 
         {/* Submit */}

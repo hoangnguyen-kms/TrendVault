@@ -1,6 +1,8 @@
 import { ExternalLink, Clock, Eye, ThumbsUp, MessageCircle, Download, Loader2 } from 'lucide-react';
 import type { TrendingVideo } from '@trendvault/shared-types';
 import { useQueueDownload } from '@/pages/downloads/hooks/use-downloads';
+import { cn } from '@/lib/utils';
+import { ShortsBadge } from './shorts-badge';
 
 interface TrendingVideoCardProps {
   video: TrendingVideo;
@@ -32,7 +34,12 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
       className="group block cursor-pointer rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden"
     >
       {/* Thumbnail */}
-      <div className="relative aspect-video bg-gray-100">
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-t-lg bg-gray-100',
+          video.isShort ? 'aspect-[9/16] max-w-[200px]' : 'aspect-video',
+        )}
+      >
         {video.thumbnailUrl ? (
           <img
             src={video.thumbnailUrl}
@@ -59,6 +66,9 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
         >
           {video.platform === 'YOUTUBE' ? 'YT' : 'TT'}
         </span>
+
+        {/* Shorts badge */}
+        {video.isShort && <ShortsBadge className="absolute top-2 right-2" />}
 
         {/* Hover overlay with actions */}
         <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/0 group-hover:bg-black/20 transition-colors">

@@ -92,4 +92,20 @@ router.get('/cross-channel/compare', authMiddleware, async (req: AuthRequest, re
   }
 });
 
+// GET /api/analytics/channels/:id/shorts-breakdown
+router.get(
+  '/channels/:id/shorts-breakdown',
+  authMiddleware,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const channelId = req.params.id as string;
+      const data = await analyticsService.getShortsBreakdown(channelId);
+      res.json(successResponse(data));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to get shorts breakdown';
+      res.status(500).json(errorResponse(message));
+    }
+  },
+);
+
 export { router as analyticsRouter };

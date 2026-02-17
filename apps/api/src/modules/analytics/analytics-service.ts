@@ -235,6 +235,33 @@ export class AnalyticsService {
       }));
   }
 
+  async getShortsBreakdown(channelId: string) {
+    const [shorts, regular] = await Promise.all([
+      prisma.publishedVideo.aggregate({
+        where: { channelId, isShort: true },
+        _count: true,
+        _avg: { viewCount: true, likeCount: true },
+      }),
+      prisma.publishedVideo.aggregate({
+        where: { channelId, isShort: false },
+        _count: true,
+        _avg: { viewCount: true, likeCount: true },
+      }),
+    ]);
+    return {
+      shorts: {
+        count: shorts._count,
+        avgViews: shorts._avg.viewCount ? Number(shorts._avg.viewCount) : null,
+        avgLikes: shorts._avg.likeCount ? Number(shorts._avg.likeCount) : null,
+      },
+      regular: {
+        count: regular._count,
+        avgViews: regular._avg.viewCount ? Number(regular._avg.viewCount) : null,
+        avgLikes: regular._avg.likeCount ? Number(regular._avg.likeCount) : null,
+      },
+    };
+  }
+
   async getChannelVideos(channelId: string, userId: string, query: VideoListQuery) {
     const channel = await prisma.channel.findFirst({
       where: { id: channelId, connectedAccount: { userId } },

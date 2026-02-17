@@ -3,6 +3,7 @@ import { env } from '../../../config/environment.js';
 import { CircuitBreaker } from '../../../lib/circuit-breaker.js';
 import { retryWithBackoff } from '../../../lib/retry-with-backoff.js';
 import { ServiceUnavailableError } from '../../../lib/app-errors.js';
+import { detectShort } from '../shorts-detection-service.js';
 import type {
   IPlatformAdapter,
   FetchTrendingOptions,
@@ -98,16 +99,21 @@ export class TikTokAdapter implements IPlatformAdapter {
   }
 
   private mapApifyItem(item: ApifyTikTokItem, region: string, index: number): TrendingVideoDTO {
+    const title = item.text ?? '';
+    const duration = item.videoMeta?.duration ?? null;
+    // TikTok Apify response does not expose pixel dimensions — use title/duration heuristics only
+    const isShort = detectShort({ duration, thumbnailWidth: null, thumbnailHeight: null, title });
+
     return {
       platform: Platform.TIKTOK,
       platformVideoId: item.id ?? String(item.webVideoUrl?.split('/').pop() ?? ''),
       region,
-      title: item.text ?? '',
+      title,
       description: item.text ?? null,
       thumbnailUrl: item.videoMeta?.coverUrl ?? null,
       channelName: item.authorMeta?.nickName ?? item.authorMeta?.name ?? null,
       channelId: item.authorMeta?.id ?? null,
-      duration: item.videoMeta?.duration ?? null,
+      duration,
       viewCount: this.toBigInt(item.playCount),
       likeCount: this.toBigInt(item.diggCount),
       commentCount: this.toBigInt(item.commentCount),
@@ -117,6 +123,9 @@ export class TikTokAdapter implements IPlatformAdapter {
       category: null,
       tags: item.hashtags?.map((h) => h.name) ?? [],
       rawMetadata: null,
+      isShort,
+      width: null,
+      height: null,
     };
   }
 

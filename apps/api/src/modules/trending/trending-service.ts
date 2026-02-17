@@ -1,6 +1,7 @@
 import { Platform, Prisma } from '../../lib/prisma-client.js';
 import { prisma } from '../../lib/prisma-client.js';
 import { trendingCache } from './trending-cache.js';
+import { computeAspectRatio } from './shorts-detection-service.js';
 import type { IPlatformAdapter, TrendingVideoDTO } from './adapters/platform-adapter.interface.js';
 import type { TrendingQuery } from '@trendvault/shared-types';
 
@@ -17,8 +18,8 @@ export class TrendingService {
   }
 
   async getTrending(params: TrendingQuery) {
-    const { platform, region, category, page, limit } = params;
-    const cacheKey = `${platform}:${region}:${category ?? 'all'}:${page}:${limit}`;
+    const { platform, region, category, contentType, page, limit } = params;
+    const cacheKey = `${platform}:${region}:${category ?? 'all'}:${contentType}:${page}:${limit}`;
 
     // 1. Check cache
     const cached = await trendingCache.get<CachedTrendingPage>(cacheKey);
@@ -57,11 +58,19 @@ export class TrendingService {
       return bViews - aViews;
     });
 
+    // 4b. Filter by contentType
+    const filteredVideos =
+      contentType === 'shorts'
+        ? allVideos.filter((v) => v.isShort)
+        : contentType === 'regular'
+          ? allVideos.filter((v) => !v.isShort)
+          : allVideos;
+
     // 5. Paginate with proper offset
     const offset = (page - 1) * limit;
-    const paginatedVideos = allVideos.slice(offset, offset + limit);
+    const paginatedVideos = filteredVideos.slice(offset, offset + limit);
 
-    // 6. Upsert to DB and get IDs for the response
+    // 6. Upsert to DB and get IDs for the response (upsert all, not just filtered)
     const idMap = await this.upsertVideos(allVideos);
 
     // 7. Format response (include DB id for download actions)
@@ -69,8 +78,8 @@ export class TrendingService {
       data: paginatedVideos.map((v) => serializeVideo(v, idMap)),
       page,
       limit,
-      total: allVideos.length,
-      hasMore: offset + limit < allVideos.length,
+      total: filteredVideos.length,
+      hasMore: offset + limit < filteredVideos.length,
     };
 
     // 8. Cache
@@ -153,6 +162,10 @@ export class TrendingService {
             commentCount: v.commentCount,
             shareCount: v.shareCount,
             trendingRank: v.trendingRank,
+            isShort: v.isShort,
+            width: v.width,
+            height: v.height,
+            aspectRatio: v.width && v.height ? computeAspectRatio(v.width, v.height) : null,
             fetchedAt: new Date(),
           },
           create: {
@@ -174,6 +187,10 @@ export class TrendingService {
             category: v.category,
             tags: v.tags,
             rawMetadata: v.rawMetadata ? (v.rawMetadata as Prisma.InputJsonValue) : Prisma.JsonNull,
+            isShort: v.isShort,
+            width: v.width,
+            height: v.height,
+            aspectRatio: v.width && v.height ? computeAspectRatio(v.width, v.height) : null,
           },
         }),
       ),
@@ -208,6 +225,10 @@ function serializeVideo(v: TrendingVideoDTO, idMap: Map<string, string>) {
     trendingRank: v.trendingRank,
     category: v.category,
     tags: v.tags,
+    isShort: v.isShort,
+    width: v.width,
+    height: v.height,
+    aspectRatio: v.width && v.height ? computeAspectRatio(v.width, v.height) : null,
     fetchedAt: new Date().toISOString(),
   };
 }

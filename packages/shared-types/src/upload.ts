@@ -26,6 +26,8 @@ export const UploadJobSchema = z.object({
   tags: z.array(z.string()),
   privacyStatus: z.string(),
   uploadMode: z.string().nullable(),
+  uploadAsShort: z.boolean().default(false),
+  categoryId: z.string().nullable().optional(),
   status: UploadStatusSchema,
   bullmqJobId: z.string().nullable(),
   platformVideoId: z.string().nullable(),
@@ -49,6 +51,8 @@ export const CreateUploadRequestSchema = z.object({
   tags: z.array(z.string().max(50)).max(30).default([]),
   privacyStatus: z.enum(['public', 'private', 'unlisted']).default('private'),
   uploadMode: z.enum(['direct_post', 'inbox']).nullable().optional(),
+  uploadAsShort: z.boolean().default(false),
+  categoryId: z.string().nullable().optional(),
 });
 
 export type CreateUploadRequest = z.infer<typeof CreateUploadRequestSchema>;
@@ -93,6 +97,8 @@ export const PublishedVideoSchema = z.object({
   thumbnailUrl: z.string().nullable(),
   privacyStatus: z.string().nullable(),
   duration: z.number().int().nullable(),
+  isShort: z.boolean().default(false),
+  categoryId: z.string().nullable().optional(),
   tags: z.array(z.string()),
   publishedAt: z.string().nullable(),
   createdAt: z.string(),

@@ -12,6 +12,8 @@ interface UploadInput {
   tags?: string[];
   privacyStatus?: string;
   uploadMode?: string | null;
+  uploadAsShort?: boolean;
+  categoryId?: string | null;
 }
 
 function serializeUploadJob(job: Record<string, unknown>) {
@@ -34,6 +36,16 @@ export class UploadService {
     });
     if (!downloadedVideo) {
       throw new Error('Downloaded video not found or not ready for upload');
+    }
+
+    // Warn if uploadAsShort is set but aspect ratio suggests landscape video
+    if (input.uploadAsShort) {
+      const ar = (downloadedVideo as Record<string, unknown>).aspectRatio;
+      if (ar !== null && ar !== undefined && (ar as number) >= 0.7) {
+        console.warn(
+          `[upload-service] uploadAsShort=true but aspectRatio=${ar} >= 0.7 for video ${downloadedVideo.id} — may not be portrait/short format`,
+        );
+      }
     }
 
     // 2. Verify channel belongs to user
@@ -84,6 +96,8 @@ export class UploadService {
         tags: input.tags ?? [],
         privacyStatus: input.privacyStatus ?? 'private',
         uploadMode: channel.platform === 'TIKTOK' ? (input.uploadMode ?? 'inbox') : null,
+        uploadAsShort: input.uploadAsShort ?? false,
+        categoryId: input.categoryId ?? null,
         status: 'PENDING',
       },
     });
@@ -102,6 +116,8 @@ export class UploadService {
         tags: input.tags ?? [],
         privacyStatus: input.privacyStatus ?? 'private',
         uploadMode: channel.platform === 'TIKTOK' ? (input.uploadMode ?? 'inbox') : null,
+        uploadAsShort: input.uploadAsShort ?? false,
+        categoryId: input.categoryId ?? null,
         userId,
         connectedAccountId: channel.connectedAccount.id,
       },
@@ -186,6 +202,8 @@ export class UploadService {
         tags: job.tags,
         privacyStatus: job.privacyStatus,
         uploadMode: job.uploadMode,
+        uploadAsShort: job.uploadAsShort,
+        categoryId: job.categoryId,
         userId,
         connectedAccountId: job.channel.connectedAccount.id,
       },

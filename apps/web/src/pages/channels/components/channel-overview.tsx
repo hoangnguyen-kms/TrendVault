@@ -2,6 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ChannelStatsCards } from './channel-stats-cards';
 import { EngagementChart } from './engagement-chart';
 import { VideoLibraryCard } from './video-library-card';
+import { ShortsAnalyticsPanel } from './shorts-analytics-panel';
 import { useChannelOverview } from '../hooks/use-channels';
 
 interface ChannelOverviewProps {
@@ -37,6 +38,8 @@ export function ChannelOverview({ channelId }: ChannelOverviewProps) {
 
       <EngagementChart data={data.recentVideos} />
 
+      <ShortsAnalyticsPanel channelId={channelId} />
+
       {data.recentVideos.length > 0 && (
         <div>
           <h3 className="mb-3 text-sm font-semibold text-gray-500 uppercase">Recent Videos</h3>
@@ -50,6 +53,7 @@ export function ChannelOverview({ channelId }: ChannelOverviewProps) {
                 viewCount={video.viewCount}
                 likeCount={video.likeCount}
                 publishedAt={video.publishedAt}
+                isShort={video.isShort}
               />
             ))}
           </div>

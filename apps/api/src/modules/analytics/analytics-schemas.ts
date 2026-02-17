@@ -20,6 +20,20 @@ export const VideoListQuerySchema = z.object({
 
 export type VideoListQuery = z.infer<typeof VideoListQuerySchema>;
 
+export const ShortsBreakdownSchema = z.object({
+  shorts: z.object({
+    count: z.number(),
+    avgViews: z.number().nullable(),
+    avgLikes: z.number().nullable(),
+  }),
+  regular: z.object({
+    count: z.number(),
+    avgViews: z.number().nullable(),
+    avgLikes: z.number().nullable(),
+  }),
+});
+export type ShortsBreakdown = z.infer<typeof ShortsBreakdownSchema>;
+
 export function getDateRange(range: string, from?: string, to?: string): { from: Date; to: Date } {
   if (from && to) return { from: new Date(from), to: new Date(to) };
   const toDate = new Date();

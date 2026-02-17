@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { Card, CardContent } from '@/components/ui/card';
 import { Eye, ThumbsUp } from 'lucide-react';
 import { formatCompactNumber, formatDate } from '@/lib/format-utils';
+import { ShortsBadge } from '../../trending/components/shorts-badge';
 
 interface VideoLibraryCardProps {
   id: string;
@@ -10,6 +11,7 @@ interface VideoLibraryCardProps {
   viewCount: number;
   likeCount: number;
   publishedAt: string | null;
+  isShort?: boolean;
 }
 
 export function VideoLibraryCard({
@@ -19,11 +21,12 @@ export function VideoLibraryCard({
   viewCount,
   likeCount,
   publishedAt,
+  isShort,
 }: VideoLibraryCardProps) {
   return (
     <Link to={`/videos/${id}`}>
       <Card className="overflow-hidden transition-shadow hover:shadow-md">
-        <div className="aspect-video bg-gray-100">
+        <div className="relative aspect-video bg-gray-100">
           {thumbnailUrl ? (
             <img src={thumbnailUrl} alt={title} className="h-full w-full object-cover" />
           ) : (
@@ -31,6 +34,7 @@ export function VideoLibraryCard({
               No thumbnail
             </div>
           )}
+          {isShort && <ShortsBadge className="absolute top-1 right-1" />}
         </div>
         <CardContent className="p-3">
           <h4 className="line-clamp-2 text-sm font-medium leading-tight">{title}</h4>

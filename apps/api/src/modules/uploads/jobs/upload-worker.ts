@@ -17,6 +17,8 @@ interface UploadJobData {
   tags: string[];
   privacyStatus: string;
   uploadMode: string | null;
+  uploadAsShort: boolean;
+  categoryId: string | null;
   userId: string;
   connectedAccountId: string;
 }
@@ -67,6 +69,8 @@ export function createUploadWorker(): Worker<UploadJobData> {
         tags: data.tags,
         privacyStatus: data.privacyStatus,
         uploadMode: data.uploadMode,
+        categoryId: data.categoryId ?? undefined,
+        uploadAsShort: data.uploadAsShort,
         totalBytes,
         onProgress: async (progress) => {
           await job.updateProgress({

@@ -8,6 +8,8 @@ export const CreateUploadRequestSchema = z.object({
   tags: z.array(z.string().max(50)).max(30).default([]),
   privacyStatus: z.enum(['public', 'private', 'unlisted']).default('private'),
   uploadMode: z.enum(['direct_post', 'inbox']).nullable().optional(),
+  uploadAsShort: z.boolean().default(false),
+  categoryId: z.string().nullable().optional(),
 });
 
 export const GetUploadsQuerySchema = z.object({

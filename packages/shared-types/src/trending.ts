@@ -7,6 +7,7 @@ export const TrendingQuerySchema = z.object({
   platform: z.enum(['ALL', 'YOUTUBE', 'TIKTOK']).default('ALL'),
   region: z.string().min(2).max(5).default('US'),
   category: z.string().nullish(),
+  contentType: z.enum(['all', 'shorts', 'regular']).default('all'),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
@@ -34,6 +35,10 @@ export const TrendingVideoSchema = z.object({
   trendingRank: z.number().int().nullable(),
   category: z.string().nullable(),
   tags: z.array(z.string()),
+  isShort: z.boolean().default(false),
+  width: z.number().int().nullable().optional(),
+  height: z.number().int().nullable().optional(),
+  aspectRatio: z.number().nullable().optional(),
   fetchedAt: z.string(),
 });
 

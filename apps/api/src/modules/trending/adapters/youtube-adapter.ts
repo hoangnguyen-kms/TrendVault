@@ -6,6 +6,7 @@ import { YOUTUBE_CATEGORIES } from '@trendvault/shared-types';
 import { CircuitBreaker } from '../../../lib/circuit-breaker.js';
 import { retryWithBackoff } from '../../../lib/retry-with-backoff.js';
 import { ServiceUnavailableError } from '../../../lib/app-errors.js';
+import { detectShort, computeAspectRatio } from '../shorts-detection-service.js';
 import type {
   IPlatformAdapter,
   FetchTrendingOptions,
@@ -135,27 +136,38 @@ export class YouTubeAdapter implements IPlatformAdapter {
     data: youtube_v3.Schema$VideoListResponse,
     region: string,
   ): FetchTrendingResult {
-    const videos: TrendingVideoDTO[] = (data.items ?? []).map((item, index) => ({
-      platform: Platform.YOUTUBE,
-      platformVideoId: item.id ?? '',
-      region,
-      title: item.snippet?.title ?? '',
-      description: item.snippet?.description ?? null,
-      thumbnailUrl:
-        item.snippet?.thumbnails?.high?.url ?? item.snippet?.thumbnails?.default?.url ?? null,
-      channelName: item.snippet?.channelTitle ?? null,
-      channelId: item.snippet?.channelId ?? null,
-      duration: this.parseDuration(item.contentDetails?.duration),
-      viewCount: this.toBigInt(item.statistics?.viewCount),
-      likeCount: this.toBigInt(item.statistics?.likeCount),
-      commentCount: this.toBigInt(item.statistics?.commentCount),
-      shareCount: null, // YouTube doesn't expose share count
-      publishedAt: item.snippet?.publishedAt ? new Date(item.snippet.publishedAt) : null,
-      trendingRank: index + 1,
-      category: item.snippet?.categoryId ?? null,
-      tags: item.snippet?.tags ?? [],
-      rawMetadata: null,
-    }));
+    const videos: TrendingVideoDTO[] = (data.items ?? []).map((item, index) => {
+      const title = item.snippet?.title ?? '';
+      const duration = this.parseDuration(item.contentDetails?.duration);
+      const thumbnailWidth = item.snippet?.thumbnails?.high?.width ?? null;
+      const thumbnailHeight = item.snippet?.thumbnails?.high?.height ?? null;
+      const isShort = detectShort({ duration, thumbnailWidth, thumbnailHeight, title });
+
+      return {
+        platform: Platform.YOUTUBE,
+        platformVideoId: item.id ?? '',
+        region,
+        title,
+        description: item.snippet?.description ?? null,
+        thumbnailUrl:
+          item.snippet?.thumbnails?.high?.url ?? item.snippet?.thumbnails?.default?.url ?? null,
+        channelName: item.snippet?.channelTitle ?? null,
+        channelId: item.snippet?.channelId ?? null,
+        duration,
+        viewCount: this.toBigInt(item.statistics?.viewCount),
+        likeCount: this.toBigInt(item.statistics?.likeCount),
+        commentCount: this.toBigInt(item.statistics?.commentCount),
+        shareCount: null, // YouTube doesn't expose share count
+        publishedAt: item.snippet?.publishedAt ? new Date(item.snippet.publishedAt) : null,
+        trendingRank: index + 1,
+        category: item.snippet?.categoryId ?? null,
+        tags: item.snippet?.tags ?? [],
+        rawMetadata: null,
+        isShort,
+        width: thumbnailWidth,
+        height: thumbnailHeight,
+      };
+    });
 
     return {
       videos,

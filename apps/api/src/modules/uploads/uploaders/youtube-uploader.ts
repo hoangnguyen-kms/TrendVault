@@ -41,6 +41,8 @@ export class YouTubeUploader implements IPlatformUploader {
       description,
       tags,
       privacyStatus,
+      categoryId,
+      uploadAsShort,
       totalBytes,
       onProgress,
     } = options;
@@ -50,13 +52,29 @@ export class YouTubeUploader implements IPlatformUploader {
 
     const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
 
+    // Build snippet body with optional Shorts / category support
+    const snippetBody: Record<string, unknown> = {
+      title,
+      description: description ?? undefined,
+      tags: tags ?? [],
+    };
+
+    if (uploadAsShort) {
+      snippetBody.categoryId = categoryId || '10';
+      if (description && !/#shorts/i.test(description)) {
+        snippetBody.description = `${description}\n\n#Shorts`;
+      }
+    } else if (categoryId) {
+      snippetBody.categoryId = categoryId;
+    }
+
     // 1,600 quota units per videos.insert
     const response = await this.callWithResilience(() =>
       youtube.videos.insert(
         {
           part: ['snippet', 'status'],
           requestBody: {
-            snippet: { title, description: description ?? undefined, tags: tags ?? [] },
+            snippet: snippetBody,
             status: { privacyStatus: privacyStatus || 'private' },
           },
           media: { mimeType: 'video/*', body: videoStream },

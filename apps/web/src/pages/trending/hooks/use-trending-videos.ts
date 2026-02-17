@@ -9,16 +9,18 @@ interface ApiSuccess<T> {
 }
 
 export function useTrendingVideos() {
-  const { platform, region, category, autoRefresh, refreshInterval } = useTrendingFilters();
+  const { platform, region, category, autoRefresh, refreshInterval, contentType } =
+    useTrendingFilters();
 
   return useInfiniteQuery({
-    queryKey: ['trending', platform, region, category],
+    queryKey: ['trending', platform, region, category, contentType],
     queryFn: async ({ pageParam = 1 }) => {
       const params = new URLSearchParams({
         platform,
         region,
         page: String(pageParam),
         limit: '20',
+        contentType,
       });
       if (category) params.set('category', category);
 

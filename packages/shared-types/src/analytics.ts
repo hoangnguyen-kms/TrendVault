@@ -51,6 +51,7 @@ export const ChannelOverviewSchema = z.object({
       viewCount: z.number(),
       likeCount: z.number(),
       publishedAt: z.string().nullable(),
+      isShort: z.boolean().default(false),
     }),
   ),
 });

@@ -8,6 +8,8 @@ export interface UploadOptions {
   tags?: string[];
   privacyStatus?: string;
   uploadMode?: string | null; // TikTok only: 'direct_post' | 'inbox'
+  categoryId?: string;
+  uploadAsShort?: boolean;
   totalBytes?: number;
   onProgress?: (progress: { percent: number; phase: string }) => void;
 }

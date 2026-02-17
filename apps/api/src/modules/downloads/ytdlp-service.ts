@@ -2,6 +2,7 @@ import youtubedl from 'youtube-dl-exec';
 import path from 'path';
 import fs from 'fs';
 import { env } from '../../config/environment.js';
+import { detectShort, computeAspectRatio } from '../trending/shorts-detection-service.js';
 
 export interface DownloadOptions {
   url: string;
@@ -24,6 +25,10 @@ export interface DownloadResult {
   duration: number | null;
   resolution: string | null;
   title: string;
+  width: number | null;
+  height: number | null;
+  aspectRatio: number | null;
+  isShort: boolean;
 }
 
 const DOWNLOAD_DIR = path.resolve(env.DOWNLOAD_DIR);
@@ -84,6 +89,17 @@ export class YtdlpService {
 
     const ext = path.extname(actualPath).slice(1);
     const stats = fs.statSync(actualPath);
+
+    const width = (metadata.width as number | undefined) ?? null;
+    const height = (metadata.height as number | undefined) ?? null;
+    const aspectRatio = width && height ? computeAspectRatio(width, height) : null;
+    const isShort = detectShort({
+      duration: (metadata.duration as number | undefined) ?? null,
+      thumbnailWidth: width,
+      thumbnailHeight: height,
+      title: (metadata.title as string | undefined) ?? '',
+    });
+
     return {
       filePath: actualPath,
       fileSize: stats.size,
@@ -91,6 +107,10 @@ export class YtdlpService {
       duration: (metadata.duration as number) ?? null,
       resolution: (metadata.resolution as string) ?? null,
       title: (metadata.title as string) ?? 'Untitled',
+      width,
+      height,
+      aspectRatio,
+      isShort,
     };
   }
 

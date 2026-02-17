@@ -19,6 +19,9 @@ export interface TrendingVideoDTO {
   category: string | null;
   tags: string[];
   rawMetadata: Record<string, unknown> | null;
+  isShort: boolean;
+  width: number | null;
+  height: number | null;
 }
 
 export interface FetchTrendingOptions {

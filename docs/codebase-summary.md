@@ -1,8 +1,9 @@
 # TrendVault Codebase Summary
 
-**Version:** 1.3.0 (Phase 5 Complete)
-**Generated:** 2026-02-15
+**Version:** 1.5.0 (Phase 7 Complete)
+**Generated:** 2026-02-18
 **Monorepo Structure:** Turborepo + pnpm workspaces
+**Status:** Production-Ready - All Core Features Implemented
 
 ## Project Structure
 
@@ -724,6 +725,42 @@ pnpm -F web dev       # Start Web only
 - Branch protection on main
 - CI/CD via GitHub Actions
 
+## Phase 6 Implementation Summary
+
+**Completed Security & Polish:**
+
+- Circuit breaker + retry-with-backoff on all platform adapters
+- AppError hierarchy with Prisma error mapping
+- Dark mode (Zustand + CSS variables + theme persistence)
+- ErrorBoundary + custom 404/500 error pages
+- ToS/Privacy pages with first-login acceptance modal
+- Production Docker Compose + multi-stage Dockerfiles
+- Nginx reverse proxy (SSL, gzip, rate limiting)
+- k6 load tests (trending, downloads)
+- Helmet CSP hardening (custom directives + dev allowances)
+- Swagger/OpenAPI integration (JSDoc on auth/trending routers)
+- tosAcceptedAt field + migration + PATCH /auth/accept-tos endpoint
+
+**Files Created:** 15+ (services, middleware, UI components, scripts)
+**Files Modified:** 20+ (integrations across all modules)
+
+## Phase 7 Implementation Summary
+
+**YouTube Shorts Integration (Complete):**
+
+- Shorts detection service (duration ≤180s + aspectRatio <0.7)
+- Database fields: isShort, width, height, aspectRatio on TrendingVideo/DownloadedVideo/PublishedVideo
+- UploadJob fields: uploadAsShort, categoryId for YouTube API hints
+- GET `/api/analytics/channels/:id/shorts-breakdown` - Shorts analytics endpoint
+- GET `/api/trending?contentType=all|shorts|regular` - Content type filtering
+- ShortsBadge, ShortsUploadToggle, ShortsAnalyticsPanel components
+- Backfill script for retroactive detection on 100+ existing videos
+- 31 unit tests validating detection heuristics and API endpoints
+
+**Files Created:** 3 (shorts-detection-service, backfill script, detailed implementation docs)
+**Files Modified:** 9 (services, adapters, routers, pages)
+**Test Coverage:** 31 passing unit tests
+
 ## Key Architectural Decisions
 
 1. **Strategy Pattern (Adapters):** Abstracts platform differences (YouTube vs TikTok)
@@ -732,6 +769,7 @@ pnpm -F web dev       # Start Web only
 4. **BullMQ Jobs:** Warm cache proactively, decouple from request path
 5. **Monorepo:** Code reuse (shared-types), unified tooling (Turborepo)
 6. **Zod Schemas:** Runtime validation + type inference (DRY)
+7. **Heuristic Detection:** Shorts identification without external API dependency
 
 ## Known Limitations & Future Work
 
@@ -747,16 +785,19 @@ pnpm -F web dev       # Start Web only
 
 | Metric                | Value                                                                                                              |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Total Files           | 180+                                                                                                               |
-| Backend Source Files  | ~55 (excl. migrations)                                                                                             |
-| Frontend Source Files | ~40                                                                                                                |
+| Total Files           | 200+                                                                                                               |
+| Backend Source Files  | ~60 (excl. migrations)                                                                                             |
+| Frontend Source Files | ~45                                                                                                                |
 | Shared Package Files  | 10                                                                                                                 |
 | Database Entities     | 8 (User, ConnectedAccount, TrendingVideo, DownloadedVideo, Channel, UploadJob, PublishedVideo, VideoStatsSnapshot) |
-| API Endpoints         | 30+ (auth: 4, trending: 3, downloads: 3, uploads: 4, accounts: 3, channels: 2, analytics: 6, videos: 1)            |
+| API Endpoints         | 32+ (auth: 4, trending: 4, downloads: 3, uploads: 4, accounts: 3, channels: 2, analytics: 7, videos: 1)            |
+| New Fields (Phase 7)  | 7 (isShort, width, height, aspectRatio, uploadAsShort, categoryId on 4 models)                                     |
+| New Components        | 3 (ShortsBadge, ShortsUploadToggle, ShortsAnalyticsPanel)                                                          |
 | OAuth Providers       | 2 (Google, TikTok)                                                                                                 |
 | Upload Uploaders      | 2 (YouTube, TikTok)                                                                                                |
 | Redis Cache Keys      | 5+ patterns                                                                                                        |
 | Socket.IO Events      | 6+ (download:_, upload:_, OAuth:\*)                                                                                |
+| Unit Tests            | 31 (Phase 7 Shorts detection + analytics)                                                                          |
 
 ## Documentation Map
 

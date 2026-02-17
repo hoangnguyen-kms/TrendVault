@@ -55,6 +55,10 @@ export default function CrossChannelPage() {
                 <p>
                   Total views: <strong>{aggregate.totalViews?.toLocaleString()}</strong>
                 </p>
+                <p className="pt-2 text-xs text-muted-foreground border-t">
+                  Shorts vs Regular breakdown is available per channel. Open a channel and view the
+                  Shorts &amp; Regular panel for detailed split metrics.
+                </p>
               </div>
             ) : (
               <p>No data available.</p>
