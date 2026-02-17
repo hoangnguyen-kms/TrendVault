@@ -1,9 +1,9 @@
 # TrendVault Development Roadmap
 
-**Version:** 1.3.0
-**Status:** Phase 5 Complete
-**Updated:** 2026-02-15
-**Next Phase:** Phase 6 (Polish & Launch)
+**Version:** 1.4.0
+**Status:** Phase 6 In Progress (70%)
+**Updated:** 2026-02-17
+**Next Phase:** Phase 6 Completion → Phase 7 (YouTube Shorts)
 
 ## Timeline Overview
 
@@ -14,7 +14,8 @@
 | 3     | Download Engine                | Weeks 7-9   | COMPLETE | 100%       |
 | 4     | Upload & OAuth                 | Weeks 10-13 | COMPLETE | 100%       |
 | 5     | Channel Management & Analytics | Weeks 14-16 | COMPLETE | 100%       |
-| 6     | Polish & Launch                | Weeks 17-19 | PENDING  | 0%         |
+| 6     | Polish & Launch                | Weeks 17-19 | PROGRESS | 70%        |
+| 7     | YouTube Shorts Integration     | Week 20     | PENDING  | 0%         |
 
 **Total Project Duration:** 19 weeks (from start)
 **Estimated Completion:** Week 19 (early May 2026)
@@ -309,7 +310,7 @@ model PublishedVideo {
 
 ## Phase 6: Polish & Launch (Weeks 17-19)
 
-**Status:** PENDING (0%)
+**Status:** IN PROGRESS (70%)
 
 **Objectives:**
 
@@ -321,24 +322,28 @@ model PublishedVideo {
 
 **Deliverables:**
 
-- [ ] Security audit (OWASP Top 10)
-- [ ] CORS hardening (whitelist origins)
-- [ ] Rate limiting tuning
-- [ ] Input validation comprehensive review
-- [ ] Error message sanitization
-- [ ] Helmet security headers
-- [ ] Database backup strategy
-- [ ] API performance optimization (query analysis)
-- [ ] Frontend performance (lighthouse > 90)
-- [ ] Bundle size analysis
-- [ ] E2E tests (Playwright)
-- [ ] Load testing
-- [ ] Deployment guide (Nginx, Docker, MinIO)
-- [ ] Environment setup documentation
-- [ ] Monitoring & alerting setup
-- [ ] Logging aggregation (future: ELK)
-- [ ] Public launch checklist
-- [ ] Marketing materials
+**Completed (70%):**
+
+- [x] Circuit breaker + retry-with-backoff on platform adapters
+- [x] AppError hierarchy + Prisma error mapping
+- [x] Dark mode (Zustand + CSS variables)
+- [x] ErrorBoundary + 404/500 pages
+- [x] ToS/Privacy pages (content created)
+- [x] Production Docker Compose + multi-stage builds
+- [x] Nginx reverse proxy (SSL, gzip, rate limit)
+- [x] k6 load tests (trending, downloads)
+- [x] Basic Helmet security headers
+- [x] npm audit (no critical vulnerabilities)
+
+**Remaining (30%):**
+
+- [ ] Swagger integration (config exists, needs wiring)
+- [ ] Helmet CSP hardening (custom config needed)
+- [ ] tosAcceptedAt field + migration + first-login ToS modal
+- [ ] JSDoc annotations on all routers for Swagger
+- [ ] Security audit (OWASP Top 10 review)
+- [ ] E2E tests (Playwright - optional)
+- [ ] Deployment documentation
 
 **Deployment Target:**
 
@@ -356,6 +361,60 @@ Single Server (Docker Compose):
 - Unit tests: > 80% for services
 - Integration tests: Core APIs
 - E2E tests: Critical user flows
+
+## Phase 7: YouTube Shorts Integration (Week 20)
+
+**Status:** PENDING (0%)
+
+**Objectives:**
+
+- Detect Shorts (duration + aspect ratio heuristic)
+- Optimize Shorts uploads (categoryId=10, videoType=short)
+- Add Shorts to trending discovery
+
+**Deliverables:**
+
+- [ ] Shorts detector service (duration ≤180s + aspect ratio <0.7)
+- [ ] isShort boolean field on TrendingVideo, DownloadedVideo, PublishedVideo
+- [ ] YouTube Shorts upload hints (categoryId, videoType)
+- [ ] Trending Shorts discovery (Apify or SerpApi)
+- [ ] Frontend Shorts filter toggle
+- [ ] Shorts badge on video cards
+
+**Database Changes:**
+
+```prisma
+model TrendingVideo {
+  // ... existing fields
+  isShort Boolean? @default(false) @map("is_short")
+}
+
+model DownloadedVideo {
+  // ... existing fields
+  isShort Boolean? @default(false) @map("is_short")
+}
+
+model PublishedVideo {
+  // ... existing fields
+  isShort Boolean? @default(false) @map("is_short")
+}
+```
+
+**Files to Create:**
+
+- `apps/api/src/lib/shorts-detector.ts` (heuristic logic)
+- `apps/api/prisma/migrations/YYYYMMDD_add_is_short/migration.sql`
+
+**Files to Modify:**
+
+- `apps/api/src/modules/trending/trending-service.ts` (apply detector)
+- `apps/api/src/modules/downloads/download-service.ts` (apply detector)
+- `apps/api/src/modules/uploads/youtube-uploader.ts` (upload hints)
+- `apps/api/src/modules/trending/adapters/youtube-adapter.ts` (Shorts trending)
+- `apps/web/src/pages/trending/trending-filters.tsx` (Shorts toggle)
+- `apps/web/src/pages/trending/trending-video-card.tsx` (Shorts badge)
+
+**Estimated Duration:** 1 week (~7.5 hours)
 
 ## Critical Path
 

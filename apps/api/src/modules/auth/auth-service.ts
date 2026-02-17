@@ -13,6 +13,7 @@ export interface UserWithoutPassword {
   email: string;
   name: string;
   avatarUrl: string | null;
+  tosAcceptedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,6 +42,7 @@ export const authService = {
         email: true,
         name: true,
         avatarUrl: true,
+        tosAcceptedAt: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -77,6 +79,7 @@ export const authService = {
         email: true,
         name: true,
         avatarUrl: true,
+        tosAcceptedAt: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -151,5 +154,24 @@ export const authService = {
   async revokeRefreshToken(token: string): Promise<void> {
     const tokenHash = this.hashToken(token);
     await prisma.refreshToken.deleteMany({ where: { tokenHash } });
+  },
+
+  /** Accept Terms of Service for a user */
+  async acceptTos(userId: string): Promise<UserWithoutPassword> {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { tosAcceptedAt: new Date() },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatarUrl: true,
+        tosAcceptedAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return user;
   },
 };

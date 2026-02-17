@@ -137,4 +137,19 @@ export const authController = {
       res.status(500).json(errorResponse(message));
     }
   },
+
+  async acceptTos(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      if (!req.userId) {
+        res.status(401).json(errorResponse('Authentication required'));
+        return;
+      }
+
+      const user = await authService.acceptTos(req.userId);
+      res.json(successResponse(user));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to accept ToS';
+      res.status(500).json(errorResponse(message));
+    }
+  },
 };

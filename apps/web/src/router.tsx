@@ -12,6 +12,8 @@ const ConnectedAccountsPage = lazy(() => import('@/pages/settings/connected-acco
 const ChannelDashboardPage = lazy(() => import('@/pages/channels/channel-dashboard-page'));
 const VideoDetailPage = lazy(() => import('@/pages/videos/video-detail-page'));
 const CrossChannelPage = lazy(() => import('@/pages/analytics/cross-channel-page'));
+const TermsOfServicePage = lazy(() => import('@/pages/legal/terms-of-service-page'));
+const PrivacyPolicyPage = lazy(() => import('@/pages/legal/privacy-policy-page'));
 
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -41,6 +43,22 @@ export const router = createBrowserRouter([
     element: (
       <SuspenseWrapper>
         <RegisterPage />
+      </SuspenseWrapper>
+    ),
+  },
+  {
+    path: '/legal/terms-of-service',
+    element: (
+      <SuspenseWrapper>
+        <TermsOfServicePage />
+      </SuspenseWrapper>
+    ),
+  },
+  {
+    path: '/legal/privacy-policy',
+    element: (
+      <SuspenseWrapper>
+        <PrivacyPolicyPage />
       </SuspenseWrapper>
     ),
   },

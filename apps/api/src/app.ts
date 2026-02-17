@@ -3,6 +3,8 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { corsOptions } from './config/cors.js';
+import { helmetConfig } from './config/helmet.js';
+import { env } from './config/environment.js';
 import { requestLogger } from './middleware/request-logger.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { authRouter } from './modules/auth/auth-router.js';
@@ -15,10 +17,11 @@ import { uploadRouter } from './modules/uploads/upload-router.js';
 import { analyticsRouter } from './modules/analytics/analytics-router.js';
 import { videosRouter } from './modules/videos/videos-router.js';
 import { successResponse } from './lib/api-response.js';
+import { setupSwagger } from './config/swagger.js';
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet(helmetConfig));
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
@@ -37,6 +40,11 @@ app.use('/api/videos', videosRouter);
 app.get('/api/health', (req, res) => {
   res.json(successResponse({ status: 'ok', timestamp: new Date().toISOString() }));
 });
+
+// Setup Swagger (dev only)
+if (env.NODE_ENV === 'development') {
+  setupSwagger(app);
+}
 
 app.use(errorHandler);
 

@@ -1,0 +1,10 @@
+node_modules
+.git
+.env
+*.md
+tests
+.claude
+plans
+docs
+docker/nginx/ssl/*.key
+docker/nginx/ssl/*.crt

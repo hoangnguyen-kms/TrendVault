@@ -5,13 +5,76 @@ import { trendingController } from './trending-controller.js';
 
 const router = Router();
 
-// GET /api/trending/regions — supported regions + YouTube categories (must be before /:id)
+/**
+ * @openapi
+ * /trending/regions:
+ *   get:
+ *     tags: [Trending]
+ *     summary: Get supported regions and YouTube categories
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of supported regions and categories
+ *       401:
+ *         description: Authentication required
+ */
 router.get('/regions', authMiddleware, trendingController.getSupportedRegions);
 
-// GET /api/trending — list trending videos (rate limited: 30 req/min)
+/**
+ * @openapi
+ * /trending:
+ *   get:
+ *     tags: [Trending]
+ *     summary: List trending videos
+ *     description: Rate limited to 30 requests per minute
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: platform
+ *         schema:
+ *           type: string
+ *           enum: [YOUTUBE, TIKTOK]
+ *       - in: query
+ *         name: region
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of trending videos
+ *       401:
+ *         description: Authentication required
+ */
 router.get('/', authMiddleware, trendingLimiter, trendingController.getTrending);
 
-// GET /api/trending/:id — single trending video details
+/**
+ * @openapi
+ * /trending/{id}:
+ *   get:
+ *     tags: [Trending]
+ *     summary: Get trending video by ID
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Trending video details
+ *       401:
+ *         description: Authentication required
+ *       404:
+ *         description: Video not found
+ */
 router.get('/:id', authMiddleware, trendingController.getTrendingVideoById);
 
 export { router as trendingRouter };
