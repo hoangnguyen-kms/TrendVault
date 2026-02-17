@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import type { User } from '@trendvault/shared-types';
+import type { User, ApiSuccess } from '@trendvault/shared-types';
 
 interface LoginCredentials {
   email: string;
@@ -11,11 +11,6 @@ interface RegisterData {
   name: string;
   email: string;
   password: string;
-}
-
-interface ApiSuccess<T> {
-  success: true;
-  data: T;
 }
 
 export function useCurrentUser() {
@@ -40,8 +35,10 @@ export function useLogin() {
     mutationFn: async (credentials: LoginCredentials) => {
       return apiClient.post<ApiSuccess<User>>('/auth/login', credentials);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+    onSuccess: (response) => {
+      // Immediately populate the cache so RootLayout sees the user without
+      // waiting for a refetch (avoids redirect back to /login on stale null cache)
+      queryClient.setQueryData(['user'], response.data);
     },
   });
 }
@@ -53,8 +50,8 @@ export function useRegister() {
     mutationFn: async (data: RegisterData) => {
       return apiClient.post<ApiSuccess<User>>('/auth/register', data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+    onSuccess: (response) => {
+      queryClient.setQueryData(['user'], response.data);
     },
   });
 }
@@ -67,7 +64,8 @@ export function useLogout() {
       return apiClient.post<{ message: string }>('/auth/logout');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+      // Clear synchronously so RootLayout redirects to /login in the same render
+      queryClient.setQueryData(['user'], null);
     },
   });
 }

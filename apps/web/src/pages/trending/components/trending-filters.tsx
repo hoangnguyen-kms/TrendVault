@@ -1,7 +1,6 @@
 import { useTrendingFilters } from '../hooks/use-trending-filters';
 import { useSupportedRegions } from '../hooks/use-trending-videos';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 
 const PLATFORM_TABS = [
   { value: 'ALL' as const, label: 'All' },
@@ -43,16 +42,20 @@ export function TrendingFilters() {
       </div>
 
       {/* Content type filter */}
-      <div className="flex gap-1">
+      <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
         {(['all', 'shorts', 'regular'] as const).map((ct) => (
-          <Button
+          <button
             key={ct}
-            variant={contentType === ct ? 'default' : 'outline'}
-            size="sm"
             onClick={() => setContentType(ct)}
+            className={cn(
+              'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+              contentType === ct
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900',
+            )}
           >
             {ct === 'all' ? 'All' : ct === 'shorts' ? 'Shorts' : 'Regular'}
-          </Button>
+          </button>
         ))}
       </div>
 

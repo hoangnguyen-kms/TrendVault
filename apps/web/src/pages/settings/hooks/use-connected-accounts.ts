@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
+import type { ApiSuccess } from '@trendvault/shared-types';
 
 interface ChannelInfo {
   id: string;
@@ -23,11 +24,6 @@ interface ConnectedAccountInfo {
   createdAt: string;
   updatedAt: string;
   channels: ChannelInfo[];
-}
-
-interface ApiSuccess<T> {
-  success: true;
-  data: T;
 }
 
 export function useConnectedAccounts() {

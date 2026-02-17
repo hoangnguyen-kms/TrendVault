@@ -5,12 +5,8 @@ import type {
   PaginatedUploadsResponse,
   CreateUploadRequest,
   YouTubeQuotaInfo,
+  ApiSuccess,
 } from '@trendvault/shared-types';
-
-interface ApiSuccess<T> {
-  success: true;
-  data: T;
-}
 
 interface UploadFilters {
   platform: string;

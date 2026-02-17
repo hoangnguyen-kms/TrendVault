@@ -6,12 +6,7 @@ import { useCreateUpload } from '../hooks/use-uploads';
 import { useChannels } from '@/pages/settings/hooks/use-connected-accounts';
 import { ShortsUploadToggle } from './shorts-upload-toggle';
 import { UploadMetadataEditor } from './upload-metadata-editor';
-import type { DownloadedVideo } from '@trendvault/shared-types';
-
-interface ApiSuccess<T> {
-  success: true;
-  data: T;
-}
+import type { DownloadedVideo, ApiSuccess } from '@trendvault/shared-types';
 
 export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
   const [selectedVideoId, setSelectedVideoId] = useState('');

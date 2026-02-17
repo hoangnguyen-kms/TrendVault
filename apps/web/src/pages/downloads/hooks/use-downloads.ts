@@ -1,12 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import type { PaginatedDownloadsResponse, DownloadedVideo } from '@trendvault/shared-types';
+import type {
+  PaginatedDownloadsResponse,
+  DownloadedVideo,
+  ApiSuccess,
+} from '@trendvault/shared-types';
 import { useState } from 'react';
-
-interface ApiSuccess<T> {
-  success: true;
-  data: T;
-}
 
 interface DownloadFilters {
   platform: string;

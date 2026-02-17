@@ -1,12 +1,7 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { useTrendingFilters } from './use-trending-filters';
-import type { PaginatedTrendingResponse } from '@trendvault/shared-types';
-
-interface ApiSuccess<T> {
-  success: true;
-  data: T;
-}
+import type { PaginatedTrendingResponse, ApiSuccess } from '@trendvault/shared-types';
 
 export function useTrendingVideos() {
   const { platform, region, category, autoRefresh, refreshInterval, contentType } =

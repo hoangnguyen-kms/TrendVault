@@ -3,7 +3,6 @@ import { env } from '../../../config/environment.js';
 import { CircuitBreaker } from '../../../lib/circuit-breaker.js';
 import { retryWithBackoff } from '../../../lib/retry-with-backoff.js';
 import { ServiceUnavailableError } from '../../../lib/app-errors.js';
-import { detectShort } from '../shorts-detection-service.js';
 import type {
   IPlatformAdapter,
   FetchTrendingOptions,
@@ -101,8 +100,10 @@ export class TikTokAdapter implements IPlatformAdapter {
   private mapApifyItem(item: ApifyTikTokItem, region: string, index: number): TrendingVideoDTO {
     const title = item.text ?? '';
     const duration = item.videoMeta?.duration ?? null;
-    // TikTok Apify response does not expose pixel dimensions — use title/duration heuristics only
-    const isShort = detectShort({ duration, thumbnailWidth: null, thumbnailHeight: null, title });
+    // TikTok is inherently short-form: treat all videos ≤180s as Shorts.
+    // detectShort() is designed for YouTube and requires aspect ratio or #shorts in title,
+    // neither of which TikTok API exposes reliably.
+    const isShort = duration !== null ? duration <= 180 : true;
 
     return {
       platform: Platform.TIKTOK,
