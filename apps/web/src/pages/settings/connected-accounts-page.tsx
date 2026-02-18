@@ -1,4 +1,4 @@
-import { AlertCircle, RefreshCw, Youtube, Music2 } from 'lucide-react';
+import { AlertCircle, RefreshCw, Youtube, Music2, Instagram } from 'lucide-react';
 import { useSearchParams } from 'react-router';
 import { ConnectedAccountCard } from './components/connected-account-card';
 import { useConnectedAccounts, useDisconnectAccount } from './hooks/use-connected-accounts';
@@ -15,6 +15,7 @@ export default function ConnectedAccountsPage() {
 
   const hasYouTube = accounts?.some((a) => a.platform === 'YOUTUBE');
   const hasTikTok = accounts?.some((a) => a.platform === 'TIKTOK');
+  const hasInstagram = accounts?.some((a) => a.platform === 'INSTAGRAM');
 
   return (
     <div className="max-w-3xl">
@@ -22,14 +23,16 @@ export default function ConnectedAccountsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Connected Accounts</h1>
         <p className="text-sm text-gray-500">
-          Connect your YouTube and TikTok accounts to upload videos
+          Connect your YouTube, TikTok, and Instagram accounts to upload videos
         </p>
       </div>
 
       {/* Success/Error banners */}
       {connected && (
         <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-          Successfully connected {connected === 'youtube' ? 'YouTube' : 'TikTok'} account!
+          Successfully connected{' '}
+          {connected === 'youtube' ? 'YouTube' : connected === 'tiktok' ? 'TikTok' : 'Instagram'}{' '}
+          account!
         </div>
       )}
       {error && (
@@ -70,6 +73,15 @@ export default function ConnectedAccountsPage() {
           >
             <Music2 className="h-5 w-5" />
             Connect TikTok
+          </a>
+        )}
+        {!hasInstagram && (
+          <a
+            href={`${API_BASE}/oauth/instagram`}
+            className="inline-flex items-center gap-2 rounded-lg border bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+          >
+            <Instagram className="h-5 w-5 text-pink-600" />
+            Connect Instagram
           </a>
         )}
       </div>
@@ -120,7 +132,7 @@ export default function ConnectedAccountsPage() {
         <div className="flex flex-col items-center rounded-lg border bg-white px-6 py-16">
           <p className="mb-1 text-lg font-medium text-gray-900">No accounts connected</p>
           <p className="text-sm text-gray-500">
-            Connect a YouTube or TikTok account to start uploading videos
+            Connect a YouTube, TikTok, or Instagram account to start uploading videos
           </p>
         </div>
       )}

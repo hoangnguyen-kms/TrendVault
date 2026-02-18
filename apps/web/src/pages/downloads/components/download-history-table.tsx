@@ -116,10 +116,14 @@ function DownloadRow({
       <td className="px-4 py-3">
         <span
           className={`inline-flex rounded px-1.5 py-0.5 text-xs font-bold text-white ${
-            download.platform === 'YOUTUBE' ? 'bg-red-600' : 'bg-black'
+            download.platform === 'YOUTUBE'
+              ? 'bg-red-600'
+              : download.platform === 'INSTAGRAM'
+                ? 'bg-pink-600'
+                : 'bg-black'
           }`}
         >
-          {download.platform === 'YOUTUBE' ? 'YT' : 'TT'}
+          {download.platform === 'YOUTUBE' ? 'YT' : download.platform === 'INSTAGRAM' ? 'IG' : 'TT'}
         </span>
       </td>
 

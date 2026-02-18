@@ -2,11 +2,13 @@ import { prisma } from '../../../lib/prisma-client.js';
 import { oauthService } from '../../oauth/oauth-service.js';
 import { YouTubeStatsFetcher } from '../platform-stats/youtube-stats-fetcher.js';
 import { TikTokStatsFetcher } from '../platform-stats/tiktok-stats-fetcher.js';
+import { InstagramStatsFetcher } from '../platform-stats/instagram-stats-fetcher.js';
 import type { IPlatformStatsFetcher } from '../platform-stats/platform-stats-fetcher-interface.js';
 
 const fetchers: Record<string, IPlatformStatsFetcher> = {
   YOUTUBE: new YouTubeStatsFetcher(),
   TIKTOK: new TikTokStatsFetcher(),
+  INSTAGRAM: new InstagramStatsFetcher(),
 };
 
 export async function handleChannelMetadataSync(): Promise<void> {

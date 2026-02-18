@@ -1,4 +1,4 @@
-import { Trash2, Youtube, Music2 } from 'lucide-react';
+import { Trash2, Youtube, Music2, Instagram } from 'lucide-react';
 
 interface ChannelInfo {
   id: string;
@@ -29,9 +29,16 @@ export function ConnectedAccountCard({
   onDisconnect,
   isDisconnecting,
 }: ConnectedAccountCardProps) {
-  const PlatformIcon = platform === 'YOUTUBE' ? Youtube : Music2;
-  const platformColor = platform === 'YOUTUBE' ? 'text-red-600' : 'text-black';
-  const platformLabel = platform === 'YOUTUBE' ? 'YouTube' : 'TikTok';
+  const PlatformIcon =
+    platform === 'YOUTUBE' ? Youtube : platform === 'INSTAGRAM' ? Instagram : Music2;
+  const platformColor =
+    platform === 'YOUTUBE'
+      ? 'text-red-600'
+      : platform === 'INSTAGRAM'
+        ? 'text-pink-600'
+        : 'text-black';
+  const platformLabel =
+    platform === 'YOUTUBE' ? 'YouTube' : platform === 'INSTAGRAM' ? 'Instagram' : 'TikTok';
 
   return (
     <div className="rounded-lg border bg-white p-4">

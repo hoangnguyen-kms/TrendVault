@@ -140,14 +140,12 @@ export class OAuthService {
     userId: string,
   ): Promise<string> {
     const blob = await this.decryptTokenBlob(account, userId);
-    if (!blob.refreshToken) {
-      throw new Error('No refresh token available — please reconnect');
-    }
 
     let newAccessToken: string;
     let newExpiresAt: Date;
 
     if (account.platform === 'YOUTUBE') {
+      if (!blob.refreshToken) throw new Error('No refresh token available — please reconnect');
       const res = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -162,7 +160,22 @@ export class OAuthService {
       if (!data.access_token) throw new Error('Google token refresh failed');
       newAccessToken = data.access_token;
       newExpiresAt = new Date(Date.now() + data.expires_in * 1000);
+    } else if (account.platform === 'INSTAGRAM') {
+      // Instagram long-lived tokens are refreshed using the existing access token (no refresh_token needed)
+      const res = await fetch(
+        `https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token` +
+          `&access_token=${encodeURIComponent(blob.accessToken)}`,
+      );
+      const data = (await res.json()) as {
+        access_token?: string;
+        token_type?: string;
+        expires_in?: number;
+      };
+      if (!data.access_token) throw new Error('Instagram token refresh failed');
+      newAccessToken = data.access_token;
+      newExpiresAt = new Date(Date.now() + (data.expires_in ?? 5184000) * 1000);
     } else {
+      if (!blob.refreshToken) throw new Error('No refresh token available — please reconnect');
       const res = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -205,6 +218,8 @@ export class OAuthService {
     try {
       if (platform === 'YOUTUBE') {
         await this.discoverYouTubeChannels(accountId, accessToken);
+      } else if (platform === 'INSTAGRAM') {
+        await this.discoverInstagramProfile(accountId, accessToken);
       } else {
         await this.discoverTikTokProfile(accountId, accessToken);
       }
@@ -298,6 +313,48 @@ export class OAuthService {
     });
   }
 
+  private async discoverInstagramProfile(accountId: string, accessToken: string): Promise<void> {
+    const res = await fetch(
+      `https://graph.instagram.com/me?fields=id,username,name,profile_picture_url,followers_count,media_count&access_token=${encodeURIComponent(accessToken)}`,
+    );
+    const data = (await res.json()) as {
+      id?: string;
+      username?: string;
+      name?: string;
+      profile_picture_url?: string;
+      followers_count?: number;
+      media_count?: number;
+    };
+
+    if (!data.id) return;
+
+    await prisma.channel.upsert({
+      where: {
+        connectedAccountId_platformChannelId: {
+          connectedAccountId: accountId,
+          platformChannelId: data.id,
+        },
+      },
+      update: {
+        name: data.name ?? data.username ?? 'Instagram User',
+        avatarUrl: data.profile_picture_url ?? null,
+        subscriberCount: data.followers_count != null ? BigInt(data.followers_count) : null,
+        videoCount: data.media_count ?? null,
+        lastSyncedAt: new Date(),
+      },
+      create: {
+        connectedAccountId: accountId,
+        platform: 'INSTAGRAM',
+        platformChannelId: data.id,
+        name: data.name ?? data.username ?? 'Instagram User',
+        avatarUrl: data.profile_picture_url ?? null,
+        subscriberCount: data.followers_count != null ? BigInt(data.followers_count) : null,
+        videoCount: data.media_count ?? null,
+        lastSyncedAt: new Date(),
+      },
+    });
+  }
+
   /** Best-effort token revocation — H4 fix: token in POST body, not URL */
   private async revokeToken(platform: Platform, token: string): Promise<void> {
     if (platform === 'YOUTUBE') {
@@ -306,6 +363,12 @@ export class OAuthService {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ token }),
       });
+    } else if (platform === 'INSTAGRAM') {
+      // Revoke all permissions granted to the app for this user
+      await fetch(
+        `https://graph.instagram.com/me/permissions?access_token=${encodeURIComponent(token)}`,
+        { method: 'DELETE' },
+      );
     } else {
       await fetch('https://open.tiktokapis.com/v2/oauth/revoke/', {
         method: 'POST',

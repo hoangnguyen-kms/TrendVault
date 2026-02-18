@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Youtube, Music2, Plus } from 'lucide-react';
+import { Youtube, Music2, Instagram, Plus } from 'lucide-react';
 import { Link } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { formatCompactNumber } from '@/lib/format-utils';
@@ -22,6 +22,8 @@ export function ChannelSidebar({ channels, selectedId, onSelect }: ChannelSideba
   const PlatformIcon = ({ platform }: { platform: string }) =>
     platform === 'YOUTUBE' ? (
       <Youtube className="h-4 w-4 text-red-500" />
+    ) : platform === 'INSTAGRAM' ? (
+      <Instagram className="h-4 w-4 text-pink-600" />
     ) : (
       <Music2 className="h-4 w-4 text-gray-800" />
     );

@@ -42,6 +42,7 @@ model RefreshToken {
 enum Platform {
   YOUTUBE
   TIKTOK
+  INSTAGRAM
 }
 
 model ConnectedAccount {

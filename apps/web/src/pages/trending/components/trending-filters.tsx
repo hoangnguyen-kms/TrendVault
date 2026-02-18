@@ -6,6 +6,7 @@ const PLATFORM_TABS = [
   { value: 'ALL' as const, label: 'All' },
   { value: 'YOUTUBE' as const, label: 'YouTube' },
   { value: 'TIKTOK' as const, label: 'TikTok' },
+  { value: 'INSTAGRAM' as const, label: 'Instagram' },
 ];
 
 export function TrendingFilters() {

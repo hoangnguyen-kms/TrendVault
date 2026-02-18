@@ -5,6 +5,8 @@ import { getStorageService } from '../../../services/storage/storage-factory.js'
 import { oauthService } from '../../oauth/oauth-service.js';
 import { YouTubeUploader } from '../uploaders/youtube-uploader.js';
 import { TikTokUploader } from '../uploaders/tiktok-uploader.js';
+import { InstagramUploader } from '../uploaders/instagram-uploader.js';
+import type { IPlatformUploader } from '../uploaders/platform-uploader-interface.js';
 import { getIO } from '../../../config/socket-io.js';
 
 interface UploadJobData {
@@ -27,6 +29,7 @@ export function createUploadWorker(): Worker<UploadJobData> {
   const storage = getStorageService();
   const youtubeUploader = new YouTubeUploader();
   const tiktokUploader = new TikTokUploader();
+  const instagramUploader = new InstagramUploader();
 
   const worker = new Worker<UploadJobData>(
     'video-uploads',
@@ -58,7 +61,20 @@ export function createUploadWorker(): Worker<UploadJobData> {
       const totalBytes = downloadedVideo.fileSize ? Number(downloadedVideo.fileSize) : 0;
 
       // 4. Select uploader
-      const uploader = data.platform === 'YOUTUBE' ? youtubeUploader : tiktokUploader;
+      let uploader: IPlatformUploader;
+      switch (data.platform) {
+        case 'YOUTUBE':
+          uploader = youtubeUploader;
+          break;
+        case 'TIKTOK':
+          uploader = tiktokUploader;
+          break;
+        case 'INSTAGRAM':
+          uploader = instagramUploader;
+          break;
+        default:
+          throw new Error(`Unsupported upload platform: ${data.platform}`);
+      }
 
       // 5. Upload with progress
       const result = await uploader.upload({
@@ -72,6 +88,7 @@ export function createUploadWorker(): Worker<UploadJobData> {
         categoryId: data.categoryId ?? undefined,
         uploadAsShort: data.uploadAsShort,
         totalBytes,
+        storageKey: downloadedVideo.storageKey ?? undefined,
         onProgress: async (progress) => {
           await job.updateProgress({
             ...progress,
@@ -104,7 +121,7 @@ export function createUploadWorker(): Worker<UploadJobData> {
         data: {
           channelId: data.channelId,
           uploadJobId: data.uploadJobId,
-          platform: data.platform as 'YOUTUBE' | 'TIKTOK',
+          platform: data.platform as 'YOUTUBE' | 'TIKTOK' | 'INSTAGRAM',
           platformVideoId: result.platformVideoId,
           title: data.title,
           description: data.description,

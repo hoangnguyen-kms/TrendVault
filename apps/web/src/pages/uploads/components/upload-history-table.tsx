@@ -115,10 +115,14 @@ export function UploadHistoryTable({
               <td className="px-4 py-3">
                 <span
                   className={`inline-flex rounded px-1.5 py-0.5 text-xs font-bold text-white ${
-                    ul.platform === 'YOUTUBE' ? 'bg-red-600' : 'bg-black'
+                    ul.platform === 'YOUTUBE'
+                      ? 'bg-red-600'
+                      : ul.platform === 'INSTAGRAM'
+                        ? 'bg-pink-600'
+                        : 'bg-black'
                   }`}
                 >
-                  {ul.platform === 'YOUTUBE' ? 'YT' : 'TT'}
+                  {ul.platform === 'YOUTUBE' ? 'YT' : ul.platform === 'INSTAGRAM' ? 'IG' : 'TT'}
                 </span>
               </td>
               <td className="px-4 py-3">

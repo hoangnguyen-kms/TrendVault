@@ -182,13 +182,20 @@ export default function VideoDetailPage() {
                     href={
                       video.platform === 'YOUTUBE'
                         ? `https://youtube.com/watch?v=${video.platformVideoId}`
-                        : `https://tiktok.com/@_/video/${video.platformVideoId}`
+                        : video.platform === 'INSTAGRAM'
+                          ? `https://www.instagram.com/reel/${video.platformVideoId}`
+                          : `https://tiktok.com/@_/video/${video.platformVideoId}`
                     }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <ExternalLink className="mr-1 h-3 w-3" />
-                    View on {video.platform === 'YOUTUBE' ? 'YouTube' : 'TikTok'}
+                    View on{' '}
+                    {video.platform === 'YOUTUBE'
+                      ? 'YouTube'
+                      : video.platform === 'INSTAGRAM'
+                        ? 'Instagram'
+                        : 'TikTok'}
                   </a>
                 </Button>
               )}

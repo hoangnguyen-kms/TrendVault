@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 
 interface TrendingFiltersState {
-  platform: 'ALL' | 'YOUTUBE' | 'TIKTOK';
+  platform: 'ALL' | 'YOUTUBE' | 'TIKTOK' | 'INSTAGRAM';
   region: string;
   category: string | null;
   autoRefresh: boolean;
   refreshInterval: number; // ms
   contentType: 'all' | 'shorts' | 'regular';
-  setPlatform: (platform: 'ALL' | 'YOUTUBE' | 'TIKTOK') => void;
+  setPlatform: (platform: 'ALL' | 'YOUTUBE' | 'TIKTOK' | 'INSTAGRAM') => void;
   setRegion: (region: string) => void;
   setCategory: (category: string | null) => void;
   toggleAutoRefresh: () => void;

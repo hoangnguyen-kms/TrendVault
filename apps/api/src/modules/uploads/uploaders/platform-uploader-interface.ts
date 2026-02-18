@@ -11,6 +11,7 @@ export interface UploadOptions {
   categoryId?: string;
   uploadAsShort?: boolean;
   totalBytes?: number;
+  storageKey?: string; // For platforms requiring a public URL (e.g. Instagram)
   onProgress?: (progress: { percent: number; phase: string }) => void;
 }
 

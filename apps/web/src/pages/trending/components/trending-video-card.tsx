@@ -14,7 +14,9 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
   const externalUrl =
     video.platform === 'YOUTUBE'
       ? `https://www.youtube.com/watch?v=${video.platformVideoId}`
-      : `https://www.tiktok.com/@${video.channelId ?? 'user'}/video/${video.platformVideoId}`;
+      : video.platform === 'INSTAGRAM'
+        ? `https://www.instagram.com/reel/${video.platformVideoId}`
+        : `https://www.tiktok.com/@${video.channelId ?? 'user'}/video/${video.platformVideoId}`;
 
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -61,10 +63,14 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
         {/* Platform badge */}
         <span
           className={`absolute top-2 left-2 rounded px-1.5 py-0.5 text-xs font-bold text-white ${
-            video.platform === 'YOUTUBE' ? 'bg-red-600' : 'bg-black'
+            video.platform === 'YOUTUBE'
+              ? 'bg-red-600'
+              : video.platform === 'INSTAGRAM'
+                ? 'bg-pink-600'
+                : 'bg-black'
           }`}
         >
-          {video.platform === 'YOUTUBE' ? 'YT' : 'TT'}
+          {video.platform === 'YOUTUBE' ? 'YT' : video.platform === 'INSTAGRAM' ? 'IG' : 'TT'}
         </span>
 
         {/* Shorts badge */}

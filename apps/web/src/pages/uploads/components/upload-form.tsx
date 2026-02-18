@@ -46,6 +46,7 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
   const selectedChannel = channels?.find((ch) => ch.id === selectedChannelId);
   const isTikTok = selectedChannel?.platform === 'TIKTOK';
   const isYouTube = selectedChannel?.platform === 'YOUTUBE';
+  const isInstagram = selectedChannel?.platform === 'INSTAGRAM';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +65,7 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
         : [],
       privacyStatus: isTikTok ? 'private' : privacyStatus,
       uploadMode: isTikTok ? 'inbox' : null,
-      uploadAsShort: isYouTube ? uploadAsShort : false,
+      uploadAsShort: isYouTube || isInstagram ? uploadAsShort : false,
     });
 
     // Reset form
@@ -137,6 +138,19 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
           </div>
         )}
 
+        {/* Instagram info */}
+        {isInstagram && (
+          <div className="rounded-md border border-pink-200 bg-pink-50 px-3 py-2">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="mt-0.5 h-4 w-4 text-pink-600" />
+              <p className="text-xs text-pink-700">
+                Instagram: Video will be published as a Reel. Vertical (9:16) videos are recommended
+                for best reach.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Title */}
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">Title</label>
@@ -178,8 +192,8 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
           />
         </div>
 
-        {/* Privacy (YouTube only) */}
-        {!isTikTok && (
+        {/* Privacy (YouTube only — TikTok and Instagram use fixed privacy) */}
+        {!isTikTok && !isInstagram && (
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">Privacy</label>
             <select
@@ -196,8 +210,8 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
           </div>
         )}
 
-        {/* Shorts toggle (YouTube only) */}
-        {isYouTube && (
+        {/* Shorts/Reels toggle (YouTube and Instagram) */}
+        {(isYouTube || isInstagram) && (
           <ShortsUploadToggle
             sourceIsShort={downloads?.find((d) => d.id === selectedVideoId)?.isShort ?? false}
             sourceAspectRatio={

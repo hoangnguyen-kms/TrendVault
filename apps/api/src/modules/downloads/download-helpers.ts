@@ -20,6 +20,9 @@ export function buildVideoUrl(
       const username = channelId ?? 'user';
       return `https://www.tiktok.com/@${username}/video/${platformVideoId}`;
     }
+    case 'INSTAGRAM':
+      // Instagram Reel URL — platformVideoId is the shortCode (alphanumeric + _ + -)
+      return `https://www.instagram.com/reel/${platformVideoId}/`;
     default:
       throw new Error(`Unsupported platform: ${platform}`);
   }
