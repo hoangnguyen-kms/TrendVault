@@ -4,6 +4,7 @@ import type {
   PlatformVideo,
   VideoStats,
 } from './platform-stats-fetcher-interface.js';
+import { retryWithBackoff } from '../../../lib/retry-with-backoff.js';
 
 const IG_BASE = 'https://graph.instagram.com/v21.0';
 
@@ -66,7 +67,7 @@ export class InstagramStatsFetcher implements IPlatformStatsFetcher {
       `?fields=id,username,name,profile_picture_url,followers_count,media_count` +
       `&access_token=${accessToken}`;
 
-    const res = await fetch(url);
+    const res = await retryWithBackoff(() => fetch(url), { maxAttempts: 3, baseDelay: 1000 });
     const data = (await res.json()) as IgUserResponse;
 
     if (data.error) {
@@ -95,7 +96,7 @@ export class InstagramStatsFetcher implements IPlatformStatsFetcher {
 
     if (pageToken) url += `&after=${pageToken}`;
 
-    const res = await fetch(url);
+    const res = await retryWithBackoff(() => fetch(url), { maxAttempts: 3, baseDelay: 1000 });
     const data = (await res.json()) as IgMediaListResponse;
 
     // Filter to VIDEO only — Instagram returns Reels as media_type === 'VIDEO'

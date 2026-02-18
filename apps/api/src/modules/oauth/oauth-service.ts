@@ -174,7 +174,7 @@ export class OAuthService {
       if (!data.access_token) throw new Error('Instagram token refresh failed');
       newAccessToken = data.access_token;
       newExpiresAt = new Date(Date.now() + (data.expires_in ?? 5184000) * 1000);
-    } else {
+    } else if (account.platform === 'TIKTOK') {
       if (!blob.refreshToken) throw new Error('No refresh token available — please reconnect');
       const res = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
         method: 'POST',
@@ -190,6 +190,8 @@ export class OAuthService {
       if (!data.access_token) throw new Error('TikTok token refresh failed');
       newAccessToken = data.access_token;
       newExpiresAt = new Date(Date.now() + data.expires_in * 1000);
+    } else {
+      throw new Error(`Unsupported platform for token refresh: ${account.platform}`);
     }
 
     // Re-encrypt blob with new access token (keep existing refresh token)

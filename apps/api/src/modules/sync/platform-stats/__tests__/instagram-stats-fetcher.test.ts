@@ -1,4 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+// Hoisted so it survives vi.restoreAllMocks() — re-applied in beforeEach
+const { mockRetryWithBackoff } = vi.hoisted(() => ({
+  mockRetryWithBackoff: vi.fn().mockImplementation((fn: () => Promise<unknown>) => fn()),
+}));
+
+vi.mock('../../../../lib/retry-with-backoff.js', () => ({
+  retryWithBackoff: mockRetryWithBackoff,
+}));
+
 import { InstagramStatsFetcher } from '../instagram-stats-fetcher.js';
 
 // ---------------------------------------------------------------------------
@@ -40,6 +50,8 @@ describe('InstagramStatsFetcher', () => {
   let originalFetch: typeof fetch;
 
   beforeEach(() => {
+    // Restore pass-through after vi.restoreAllMocks wipes it
+    mockRetryWithBackoff.mockImplementation((fn: () => Promise<unknown>) => fn());
     fetcher = new InstagramStatsFetcher();
     originalFetch = global.fetch;
   });

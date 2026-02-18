@@ -303,12 +303,16 @@ router.get('/instagram/callback', async (req: Request, res: Response) => {
       throw new Error(msg);
     }
 
-    // Exchange short-lived token for 60-day long-lived token
-    const longTokenRes = await fetch(
-      `https://graph.instagram.com/access_token?grant_type=ig_exchange_token` +
-        `&client_secret=${encodeURIComponent(env.INSTAGRAM_APP_SECRET!)}` +
-        `&access_token=${encodeURIComponent(shortTokenData.access_token)}`,
-    );
+    // Exchange short-lived token for 60-day long-lived token (POST body to avoid secret in URL)
+    const longTokenRes = await fetch('https://graph.instagram.com/access_token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'ig_exchange_token',
+        client_secret: env.INSTAGRAM_APP_SECRET!,
+        access_token: shortTokenData.access_token,
+      }),
+    });
 
     const longTokenData = (await longTokenRes.json()) as {
       access_token?: string;

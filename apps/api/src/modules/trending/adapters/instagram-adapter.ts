@@ -1,8 +1,7 @@
 import { Platform } from '../../../lib/prisma-client.js';
 import { env } from '../../../config/environment.js';
 import { CircuitBreaker } from '../../../lib/circuit-breaker.js';
-import { retryWithBackoff } from '../../../lib/retry-with-backoff.js';
-import { ServiceUnavailableError } from '../../../lib/app-errors.js';
+import { callWithResilience } from '../../../lib/call-with-resilience.js';
 import type {
   IPlatformAdapter,
   FetchTrendingOptions,
@@ -30,20 +29,6 @@ export class InstagramAdapter implements IPlatformAdapter {
     });
   }
 
-  private async callWithResilience<T>(apiCall: () => Promise<T>): Promise<T> {
-    try {
-      return await retryWithBackoff(async () => await this.circuitBreaker.execute(apiCall), {
-        maxAttempts: 3,
-        baseDelay: 1000,
-        maxDelay: 5000,
-      });
-    } catch (error) {
-      throw new ServiceUnavailableError(
-        `Instagram API unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
-  }
-
   async fetchTrending(options: FetchTrendingOptions): Promise<FetchTrendingResult> {
     return this.fetchFromApify(options);
   }
@@ -61,21 +46,24 @@ export class InstagramAdapter implements IPlatformAdapter {
 
     const runUrl = `${APIFY_BASE_URL}/acts/${encodeURIComponent(APIFY_ACTOR_ID)}/run-sync-get-dataset-items`;
 
-    const response = await this.callWithResilience(() =>
-      fetch(runUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${env.APIFY_API_TOKEN}`,
-        },
-        body: JSON.stringify({
-          resultsLimit: maxResults,
-          scrapeType: 'reels',
-          shouldDownloadVideos: false,
-          shouldDownloadCovers: false,
+    const response = await callWithResilience(
+      this.circuitBreaker,
+      () =>
+        fetch(runUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${env.APIFY_API_TOKEN}`,
+          },
+          body: JSON.stringify({
+            resultsLimit: maxResults,
+            scrapeType: 'reels',
+            shouldDownloadVideos: false,
+            shouldDownloadCovers: false,
+          }),
+          signal: AbortSignal.timeout(30_000),
         }),
-        signal: AbortSignal.timeout(30_000),
-      }),
+      'Instagram API',
     );
 
     if (!response.ok) {

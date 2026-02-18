@@ -1,13 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // ---------------------------------------------------------------------------
-// Hoist stable mock implementations before vi.mock() factories run.
-// This ensures they survive vi.clearAllMocks() between tests because
-// vi.clearAllMocks only clears call counts and return values set dynamically —
-// the stable `mockImplementation` set here is re-applied in beforeEach.
+// Hoist stable mock so it survives vi.clearAllMocks() — re-applied in beforeEach.
 // ---------------------------------------------------------------------------
-const { mockExecute } = vi.hoisted(() => ({
-  mockExecute: vi.fn().mockImplementation((fn: () => unknown) => fn()),
+const { mockCallWithResilience } = vi.hoisted(() => ({
+  mockCallWithResilience: vi
+    .fn()
+    .mockImplementation((_cb: unknown, fn: () => Promise<unknown>) => fn()),
 }));
 
 vi.mock('../../../../config/environment.js', () => ({
@@ -19,21 +18,12 @@ vi.mock('../../../../lib/logger.js', () => ({
 }));
 
 vi.mock('../../../../lib/circuit-breaker.js', () => ({
-  CircuitBreaker: vi.fn().mockImplementation(() => ({ execute: mockExecute })),
+  CircuitBreaker: vi.fn().mockImplementation(() => ({})),
 }));
 
-// retryWithBackoff: immediately invoke the supplied async fn
-vi.mock('../../../../lib/retry-with-backoff.js', () => ({
-  retryWithBackoff: vi.fn().mockImplementation((fn: () => Promise<unknown>) => fn()),
-}));
-
-vi.mock('../../../../lib/app-errors.js', () => ({
-  ServiceUnavailableError: class ServiceUnavailableError extends Error {
-    constructor(msg: string) {
-      super(msg);
-      this.name = 'ServiceUnavailableError';
-    }
-  },
+// callWithResilience: pass-through — invoke the apiCall (2nd arg) directly
+vi.mock('../../../../lib/call-with-resilience.js', () => ({
+  callWithResilience: mockCallWithResilience,
 }));
 
 import { InstagramAdapter } from '../instagram-adapter.js';
@@ -80,7 +70,7 @@ describe('InstagramAdapter', () => {
   beforeEach(() => {
     originalFetch = global.fetch;
     // Restore pass-through implementation after vi.clearAllMocks wipes it
-    mockExecute.mockImplementation((fn: () => unknown) => fn());
+    mockCallWithResilience.mockImplementation((_cb: unknown, fn: () => Promise<unknown>) => fn());
     adapter = new InstagramAdapter();
   });
 
