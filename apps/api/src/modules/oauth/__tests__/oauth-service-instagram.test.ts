@@ -126,15 +126,13 @@ describe('OAuthService — Instagram', () => {
         JSON.stringify({ accessToken: 'OLD_ACCESS_TOKEN', refreshToken: null }),
       );
 
-      const mockFetch = vi
-        .fn()
-        .mockReturnValue(
-          jsonResponse({
-            access_token: 'NEW_ACCESS_TOKEN',
-            token_type: 'bearer',
-            expires_in: 5184000,
-          }),
-        );
+      const mockFetch = vi.fn().mockReturnValue(
+        jsonResponse({
+          access_token: 'NEW_ACCESS_TOKEN',
+          token_type: 'bearer',
+          expires_in: 5184000,
+        }),
+      );
       global.fetch = mockFetch;
       vi.mocked(prisma.connectedAccount.update).mockResolvedValue(expiredAccount as never);
 
