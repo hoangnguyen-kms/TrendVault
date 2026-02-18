@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import { useState } from 'react';
 import type {
@@ -62,6 +63,10 @@ export function useCreateUpload() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
+      toast.success('Upload queued successfully');
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to create upload');
     },
   });
 }
@@ -76,6 +81,10 @@ export function useRetryUpload() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
+      toast.success('Upload retry queued');
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to retry upload');
     },
   });
 }
@@ -89,6 +98,10 @@ export function useCancelUpload() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
+      toast.success('Upload cancelled');
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to cancel upload');
     },
   });
 }

@@ -4,7 +4,7 @@ import { PlatformSchema } from './platform.js';
 // --- Query params ---
 
 export const TrendingQuerySchema = z.object({
-  platform: z.enum(['ALL', 'YOUTUBE', 'TIKTOK']).default('ALL'),
+  platform: z.enum(['ALL', 'YOUTUBE', 'TIKTOK', 'INSTAGRAM']).default('ALL'),
   region: z.string().min(2).max(5).default('US'),
   category: z.string().nullish(),
   contentType: z.enum(['all', 'shorts', 'regular']).default('all'),

@@ -8,6 +8,7 @@ import type { TrendingQuery } from '@trendvault/shared-types';
 // TTLs in seconds
 const YOUTUBE_CACHE_TTL = 1800; // 30 min
 const TIKTOK_CACHE_TTL = 900; // 15 min
+const INSTAGRAM_CACHE_TTL = 900; // 15 min (Apify scraping)
 const ALL_CACHE_TTL = 900; // 15 min (limited by shortest platform TTL)
 
 export class TrendingService {
@@ -88,7 +89,9 @@ export class TrendingService {
         ? TIKTOK_CACHE_TTL
         : platform === 'YOUTUBE'
           ? YOUTUBE_CACHE_TTL
-          : ALL_CACHE_TTL;
+          : platform === 'INSTAGRAM'
+            ? INSTAGRAM_CACHE_TTL
+            : ALL_CACHE_TTL;
     await trendingCache.set(cacheKey, response, ttl);
 
     return response;
@@ -130,7 +133,12 @@ export class TrendingService {
           total: result.videos.length,
           hasMore: result.videos.length >= 20,
         };
-        const ttl = platform === Platform.TIKTOK ? TIKTOK_CACHE_TTL : YOUTUBE_CACHE_TTL;
+        const ttl =
+          platform === Platform.TIKTOK
+            ? TIKTOK_CACHE_TTL
+            : platform === Platform.INSTAGRAM
+              ? INSTAGRAM_CACHE_TTL
+              : YOUTUBE_CACHE_TTL;
         await trendingCache.set(cacheKey, response, ttl);
       }
     } finally {

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import type { ApiSuccess } from '@trendvault/shared-types';
 
@@ -46,6 +47,10 @@ export function useDisconnectAccount() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['connected-accounts'] });
       queryClient.invalidateQueries({ queryKey: ['channels'] });
+      toast.success('Account disconnected');
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to disconnect account');
     },
   });
 }

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import type {
   PaginatedDownloadsResponse,
@@ -61,6 +62,10 @@ export function useQueueDownload() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['downloads'] });
+      toast.success('Download queued');
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to queue download');
     },
   });
 }
@@ -75,8 +80,12 @@ export function useBatchDownload() {
       });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['downloads'] });
+      toast.success(`${variables.length} download${variables.length > 1 ? 's' : ''} queued`);
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to queue downloads');
     },
   });
 }
@@ -91,6 +100,10 @@ export function useRetryDownload() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['downloads'] });
+      toast.success('Download retry queued');
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to retry download');
     },
   });
 }
@@ -104,6 +117,10 @@ export function useDeleteDownload() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['downloads'] });
+      toast.success('Download deleted');
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete download');
     },
   });
 }

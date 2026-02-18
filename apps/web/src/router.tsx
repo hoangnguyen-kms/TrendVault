@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router';
 import { lazy, Suspense } from 'react';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
 
 const LoginPage = lazy(() => import('@/pages/auth/login-page'));
 const RegisterPage = lazy(() => import('@/pages/auth/register-page'));
@@ -16,50 +17,44 @@ const TermsOfServicePage = lazy(() => import('@/pages/legal/terms-of-service-pag
 const PrivacyPolicyPage = lazy(() => import('@/pages/legal/privacy-policy-page'));
 
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-gray-500">Loading...</div>
-        </div>
-      }
-    >
-      {children}
-    </Suspense>
-  );
+  return <Suspense fallback={<PageSkeleton />}>{children}</Suspense>;
+}
+
+function MinimalSuspenseWrapper({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={null}>{children}</Suspense>;
 }
 
 export const router = createBrowserRouter([
   {
     path: '/login',
     element: (
-      <SuspenseWrapper>
+      <MinimalSuspenseWrapper>
         <LoginPage />
-      </SuspenseWrapper>
+      </MinimalSuspenseWrapper>
     ),
   },
   {
     path: '/register',
     element: (
-      <SuspenseWrapper>
+      <MinimalSuspenseWrapper>
         <RegisterPage />
-      </SuspenseWrapper>
+      </MinimalSuspenseWrapper>
     ),
   },
   {
     path: '/legal/terms-of-service',
     element: (
-      <SuspenseWrapper>
+      <MinimalSuspenseWrapper>
         <TermsOfServicePage />
-      </SuspenseWrapper>
+      </MinimalSuspenseWrapper>
     ),
   },
   {
     path: '/legal/privacy-policy',
     element: (
-      <SuspenseWrapper>
+      <MinimalSuspenseWrapper>
         <PrivacyPolicyPage />
-      </SuspenseWrapper>
+      </MinimalSuspenseWrapper>
     ),
   },
   {

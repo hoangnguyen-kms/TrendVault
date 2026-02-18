@@ -2,7 +2,7 @@ import { Queue } from 'bullmq';
 import { redisConfig } from '../../../config/redis.js';
 import { SUPPORTED_REGION_CODES } from '@trendvault/shared-types';
 
-const PLATFORMS = ['YOUTUBE', 'TIKTOK'] as const;
+const PLATFORMS = ['YOUTUBE', 'TIKTOK', 'INSTAGRAM'] as const;
 
 export const trendingRefreshQueue = new Queue('trending-refresh', {
   connection: { url: redisConfig.url },

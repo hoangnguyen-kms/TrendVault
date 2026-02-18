@@ -3,6 +3,7 @@ import { Outlet, Navigate } from 'react-router';
 import { useCurrentUser } from '@/hooks/use-auth';
 import { needsTosAcceptance } from '@/hooks/use-tos-guard';
 import { TosAcceptanceModal } from '@/components/tos/tos-acceptance-modal';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
 import { AppSidebar } from './app-sidebar';
 import { AppHeader } from './app-header';
 
@@ -31,13 +32,7 @@ export default function RootLayout() {
         <div className="flex flex-1 flex-col overflow-hidden">
           <AppHeader />
           <main className="flex-1 overflow-y-auto p-6">
-            <Suspense
-              fallback={
-                <div className="flex h-full items-center justify-center">
-                  <div className="text-lg">Loading...</div>
-                </div>
-              }
-            >
+            <Suspense fallback={<PageSkeleton />}>
               <Outlet />
             </Suspense>
           </main>
