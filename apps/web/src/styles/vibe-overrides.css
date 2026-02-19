@@ -1,0 +1,72 @@
+/* Vibe CSS variable utility classes for edge cases where inline styles are impractical.
+   Import AFTER @vibe/core/tokens in main.tsx. */
+
+/* ------------------------------------------------------------------ */
+/*  Surface / Background                                               */
+/* ------------------------------------------------------------------ */
+.surface-primary {
+  background-color: var(--primary-background-color);
+}
+.surface-secondary {
+  background-color: var(--secondary-background-color);
+}
+.surface-grey {
+  background-color: var(--allgrey-background-color);
+}
+.surface-hover {
+  background-color: var(--primary-background-hover-color);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Text                                                               */
+/* ------------------------------------------------------------------ */
+.text-primary {
+  color: var(--primary-text-color);
+}
+.text-secondary {
+  color: var(--secondary-text-color);
+}
+.text-on-primary {
+  color: var(--text-color-on-primary);
+}
+.text-on-inverted {
+  color: var(--text-color-on-inverted);
+}
+.text-disabled {
+  color: var(--disabled-text-color);
+}
+.text-link {
+  color: var(--link-color);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Borders                                                            */
+/* ------------------------------------------------------------------ */
+.border-ui {
+  border-color: var(--ui-border-color);
+}
+.border-layout {
+  border-color: var(--layout-border-color);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Semantic status                                                    */
+/* ------------------------------------------------------------------ */
+.text-positive {
+  color: var(--positive-color);
+}
+.text-negative {
+  color: var(--negative-color);
+}
+.text-warning {
+  color: var(--warning-color);
+}
+.bg-positive-selected {
+  background-color: var(--positive-color-selected);
+}
+.bg-negative-selected {
+  background-color: var(--negative-color-selected);
+}
+.bg-warning-selected {
+  background-color: var(--warning-color-selected);
+}

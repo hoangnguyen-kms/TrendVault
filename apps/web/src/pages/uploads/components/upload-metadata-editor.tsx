@@ -10,7 +10,7 @@ export function UploadMetadataEditor({ uploadAsShort }: UploadMetadataEditorProp
   if (!uploadAsShort) return null;
 
   return (
-    <p className="text-xs text-muted-foreground">
+    <p style={{ font: 'var(--font-text3-normal)', color: 'var(--secondary-text-color)' }}>
       Shorts work best with vertical video (9:16 ratio) under 60 seconds. Title should be concise;
       description limited to 2,200 chars.
     </p>

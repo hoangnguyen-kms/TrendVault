@@ -33,7 +33,10 @@ export function ContentComparisonTable({ data, isLoading }: ContentComparisonTab
 
   if (!data || data.length === 0) {
     return (
-      <p className="py-6 text-center text-sm text-gray-400">
+      <p
+        className="py-6 text-center"
+        style={{ font: 'var(--font-text2-normal)', color: 'var(--disabled-text-color)' }}
+      >
         No cross-channel content found. Upload the same video to multiple channels to see
         comparisons.
       </p>
@@ -42,22 +45,50 @@ export function ContentComparisonTable({ data, isLoading }: ContentComparisonTab
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="w-full" style={{ font: 'var(--font-text2-normal)' }}>
         <thead>
-          <tr className="border-b text-left text-gray-500">
-            <th className="pb-2 pr-4 font-medium">Source Video</th>
-            <th className="pb-2 pr-4 font-medium">Channel</th>
-            <th className="pb-2 pr-4 font-medium">Platform</th>
-            <th className="pb-2 pr-4 text-right font-medium">Views</th>
-            <th className="pb-2 text-right font-medium">Likes</th>
+          <tr
+            style={{
+              borderBottom: '1px solid var(--ui-border-color)',
+              color: 'var(--secondary-text-color)',
+              textAlign: 'left',
+            }}
+          >
+            <th className="pb-2 pr-4" style={{ font: 'var(--font-text2-medium)' }}>
+              Source Video
+            </th>
+            <th className="pb-2 pr-4" style={{ font: 'var(--font-text2-medium)' }}>
+              Channel
+            </th>
+            <th className="pb-2 pr-4" style={{ font: 'var(--font-text2-medium)' }}>
+              Platform
+            </th>
+            <th className="pb-2 pr-4 text-right" style={{ font: 'var(--font-text2-medium)' }}>
+              Views
+            </th>
+            <th className="pb-2 text-right" style={{ font: 'var(--font-text2-medium)' }}>
+              Likes
+            </th>
           </tr>
         </thead>
         <tbody>
           {data.map((item) =>
             item.publishedVersions.map((ver, idx) => (
-              <tr key={ver.publishedVideoId} className="border-b last:border-0">
+              <tr
+                key={ver.publishedVideoId}
+                style={{
+                  borderBottom:
+                    idx < item.publishedVersions.length - 1
+                      ? '1px solid var(--ui-border-color)'
+                      : undefined,
+                }}
+              >
                 {idx === 0 && (
-                  <td className="py-2 pr-4 font-medium" rowSpan={item.publishedVersions.length}>
+                  <td
+                    className="py-2 pr-4"
+                    style={{ font: 'var(--font-text2-medium)' }}
+                    rowSpan={item.publishedVersions.length}
+                  >
                     <div className="flex items-center gap-2">
                       <span className="line-clamp-1">{item.sourceTitle}</span>
                       <Badge variant="secondary" className="shrink-0 text-[10px]">

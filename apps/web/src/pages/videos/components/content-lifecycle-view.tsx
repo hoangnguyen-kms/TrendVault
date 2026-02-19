@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Download, Upload, Video, ArrowRight } from 'lucide-react';
+import { Icon } from '@vibe/core';
+import { Activity, Download, Upload, Video, MoveArrowRightNarrow } from '@vibe/icons';
 import { formatDate, formatCompactNumber } from '@/lib/format-utils';
 
 interface ContentLifecycleViewProps {
@@ -32,12 +33,31 @@ const steps = [
   {
     key: 'trending',
     label: 'Trending Source',
-    icon: TrendingUp,
-    color: 'bg-orange-50 text-orange-700',
+    icon: Activity,
+    iconColor: 'var(--color-working_orange)',
+    bgColor: 'var(--color-working_orange-selected)',
   },
-  { key: 'download', label: 'Downloaded', icon: Download, color: 'bg-blue-50 text-blue-700' },
-  { key: 'upload', label: 'Uploaded', icon: Upload, color: 'bg-purple-50 text-purple-700' },
-  { key: 'published', label: 'Published', icon: Video, color: 'bg-green-50 text-green-700' },
+  {
+    key: 'download',
+    label: 'Downloaded',
+    icon: Download,
+    iconColor: 'var(--primary-color)',
+    bgColor: 'var(--primary-selected-color)',
+  },
+  {
+    key: 'upload',
+    label: 'Uploaded',
+    icon: Upload,
+    iconColor: 'var(--color-purple)',
+    bgColor: 'var(--color-purple-selected)',
+  },
+  {
+    key: 'published',
+    label: 'Published',
+    icon: Video,
+    iconColor: 'var(--positive-color)',
+    bgColor: 'var(--positive-color-selected)',
+  },
 ] as const;
 
 export function ContentLifecycleView({ data }: ContentLifecycleViewProps) {
@@ -79,23 +99,32 @@ export function ContentLifecycleView({ data }: ContentLifecycleViewProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Content Lifecycle</CardTitle>
+        <CardTitle>
+          <span style={{ font: 'var(--font-text1-medium)' }}>Content Lifecycle</span>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex items-start gap-2 overflow-x-auto">
           {steps.map((step, i) => {
-            const Icon = step.icon;
             const sd = stepData[step.key];
             return (
               <div key={step.key} className="flex items-center gap-2">
                 <div
                   className={`min-w-[160px] rounded-lg border p-3 ${sd.exists ? '' : 'border-dashed opacity-50'}`}
+                  style={{ borderColor: 'var(--ui-border-color)' }}
                 >
                   <div className="mb-2 flex items-center gap-2">
-                    <div className={`rounded p-1 ${step.color}`}>
-                      <Icon className="h-3 w-3" />
+                    <div className="rounded p-1" style={{ backgroundColor: step.bgColor }}>
+                      <Icon icon={step.icon} iconSize={12} style={{ color: step.iconColor }} />
                     </div>
-                    <span className="text-xs font-medium">{step.label}</span>
+                    <span
+                      style={{
+                        font: 'var(--font-text3-medium)',
+                        color: 'var(--primary-text-color)',
+                      }}
+                    >
+                      {step.label}
+                    </span>
                     {sd.exists && (
                       <Badge variant="outline" className="ml-auto text-[10px]">
                         Done
@@ -103,13 +132,24 @@ export function ContentLifecycleView({ data }: ContentLifecycleViewProps) {
                     )}
                   </div>
                   {sd.lines.map((line, j) => (
-                    <p key={j} className="text-xs text-gray-500">
+                    <p
+                      key={j}
+                      style={{
+                        font: 'var(--font-text3-normal)',
+                        color: 'var(--secondary-text-color)',
+                      }}
+                    >
                       {line}
                     </p>
                   ))}
                 </div>
                 {i < steps.length - 1 && (
-                  <ArrowRight className="h-4 w-4 flex-shrink-0 text-gray-300" />
+                  <Icon
+                    icon={MoveArrowRightNarrow}
+                    iconSize={16}
+                    className="flex-shrink-0"
+                    style={{ color: 'var(--disabled-text-color)' }}
+                  />
                 )}
               </div>
             );

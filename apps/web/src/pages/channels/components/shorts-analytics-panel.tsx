@@ -24,20 +24,44 @@ export function ShortsAnalyticsPanel({ channelId }: ShortsAnalyticsPanelProps) {
 
   return (
     <div>
-      <h3 className="mb-3 text-sm font-semibold text-gray-500 uppercase">Shorts vs Regular</h3>
+      <h3
+        className="mb-3 uppercase"
+        style={{ font: 'var(--font-text2-medium)', color: 'var(--secondary-text-color)' }}
+      >
+        Shorts vs Regular
+      </h3>
       <div className="grid grid-cols-2 gap-4">
         {(['shorts', 'regular'] as const).map((type) => (
-          <div key={type} className="rounded-lg border p-4">
-            <h4 className="text-sm font-semibold capitalize mb-2">{type}</h4>
-            <p className="text-2xl font-bold">{bd?.[type].count ?? 0}</p>
-            <p className="text-xs text-muted-foreground">videos</p>
+          <div
+            key={type}
+            className="rounded-lg p-4"
+            style={{ border: '1px solid var(--ui-border-color)' }}
+          >
+            <h4
+              className="mb-2 capitalize"
+              style={{ font: 'var(--font-text2-medium)', color: 'var(--primary-text-color)' }}
+            >
+              {type}
+            </h4>
+            <p style={{ font: 'var(--font-h2-bold)', color: 'var(--primary-text-color)' }}>
+              {bd?.[type].count ?? 0}
+            </p>
+            <p style={{ font: 'var(--font-text3-normal)', color: 'var(--secondary-text-color)' }}>
+              videos
+            </p>
             {bd?.[type].avgViews != null && (
-              <p className="text-sm mt-1">
+              <p
+                className="mt-1"
+                style={{ font: 'var(--font-text2-normal)', color: 'var(--primary-text-color)' }}
+              >
                 {Math.round(bd[type].avgViews!).toLocaleString()} avg views
               </p>
             )}
             {bd?.[type].avgLikes != null && (
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p
+                className="mt-0.5"
+                style={{ font: 'var(--font-text3-normal)', color: 'var(--secondary-text-color)' }}
+              >
                 {Math.round(bd[type].avgLikes!).toLocaleString()} avg likes
               </p>
             )}

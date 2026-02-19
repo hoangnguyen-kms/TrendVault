@@ -25,14 +25,18 @@ export default function CrossChannelPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <h1 className="text-xl font-semibold">Cross-Channel Analytics</h1>
+      <h1 style={{ font: 'var(--font-text1-bold)', color: 'var(--primary-text-color)' }}>
+        Cross-Channel Analytics
+      </h1>
 
       <AggregateStatsCards data={aggregate} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Platform Comparison</CardTitle>
+            <CardTitle>
+              <span style={{ font: 'var(--font-text1-medium)' }}>Platform Comparison</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <PlatformComparisonChart data={aggregate} />
@@ -41,9 +45,13 @@ export default function CrossChannelPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Overview</CardTitle>
+            <CardTitle>
+              <span style={{ font: 'var(--font-text1-medium)' }}>Overview</span>
+            </CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-gray-600">
+          <CardContent
+            style={{ font: 'var(--font-text2-normal)', color: 'var(--secondary-text-color)' }}
+          >
             {aggregate ? (
               <div className="space-y-2">
                 <p>
@@ -55,7 +63,14 @@ export default function CrossChannelPage() {
                 <p>
                   Total views: <strong>{aggregate.totalViews?.toLocaleString()}</strong>
                 </p>
-                <p className="pt-2 text-xs text-muted-foreground border-t">
+                <p
+                  className="pt-2"
+                  style={{
+                    font: 'var(--font-text3-normal)',
+                    color: 'var(--secondary-text-color)',
+                    borderTop: '1px solid var(--ui-border-color)',
+                  }}
+                >
                   Shorts vs Regular breakdown is available per channel. Open a channel and view the
                   Shorts &amp; Regular panel for detailed split metrics.
                 </p>
@@ -69,7 +84,9 @@ export default function CrossChannelPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Content Performance Comparison</CardTitle>
+          <CardTitle>
+            <span style={{ font: 'var(--font-text1-medium)' }}>Content Performance Comparison</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <ContentComparisonTable data={comparison} isLoading={compLoading} />

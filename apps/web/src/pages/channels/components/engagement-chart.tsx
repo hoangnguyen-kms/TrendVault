@@ -37,10 +37,14 @@ export function EngagementChart({ data }: EngagementChartProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Recent Performance</CardTitle>
+          <CardTitle>
+            <span style={{ font: 'var(--font-text1-medium)' }}>Recent Performance</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-500">No video data available yet.</p>
+          <p style={{ font: 'var(--font-text2-normal)', color: 'var(--secondary-text-color)' }}>
+            No video data available yet.
+          </p>
         </CardContent>
       </Card>
     );
@@ -49,7 +53,9 @@ export function EngagementChart({ data }: EngagementChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Recent Performance</CardTitle>
+        <CardTitle>
+          <span style={{ font: 'var(--font-text1-medium)' }}>Recent Performance</span>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={280}>

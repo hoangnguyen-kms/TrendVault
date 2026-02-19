@@ -9,7 +9,8 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Icon } from '@vibe/core';
+import { Search, DropdownChevronLeft, DropdownChevronRight } from '@vibe/icons';
 import { VideoLibraryCard } from './video-library-card';
 import { useChannelVideos } from '../hooks/use-channel-videos';
 
@@ -64,7 +65,12 @@ export function VideoLibraryGrid({ channelId }: VideoLibraryGridProps) {
       {/* Search and sort row */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Icon
+            icon={Search}
+            iconSize={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2"
+            style={{ color: 'var(--icon-color)' }}
+          />
           <Input
             placeholder="Search videos..."
             value={searchInput}
@@ -136,9 +142,11 @@ export function VideoLibraryGrid({ channelId }: VideoLibraryGridProps) {
                 disabled={page <= 1}
                 onClick={() => setPage(page - 1)}
               >
-                <ChevronLeft className="h-4 w-4" />
+                <Icon icon={DropdownChevronLeft} iconSize={16} />
               </Button>
-              <span className="text-sm text-gray-500">
+              <span
+                style={{ font: 'var(--font-text2-normal)', color: 'var(--secondary-text-color)' }}
+              >
                 Page {page} of {Math.ceil(data.total / data.limit)}
               </span>
               <Button
@@ -147,13 +155,18 @@ export function VideoLibraryGrid({ channelId }: VideoLibraryGridProps) {
                 disabled={!data.hasMore}
                 onClick={() => setPage(page + 1)}
               >
-                <ChevronRight className="h-4 w-4" />
+                <Icon icon={DropdownChevronRight} iconSize={16} />
               </Button>
             </div>
           )}
         </>
       ) : (
-        <p className="py-8 text-center text-sm text-gray-400">No videos found.</p>
+        <p
+          className="py-8 text-center"
+          style={{ font: 'var(--font-text2-normal)', color: 'var(--disabled-text-color)' }}
+        >
+          No videos found.
+        </p>
       )}
     </div>
   );

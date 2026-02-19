@@ -1,14 +1,5 @@
-import {
-  RotateCcw,
-  Trash2,
-  ExternalLink,
-  Loader2,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  AlertCircle,
-  Upload,
-} from 'lucide-react';
+import { Icon, Loader } from '@vibe/core';
+import { Rotate, Delete, ExternalPage, Check, CloseRound, Time, Alert, Upload } from '@vibe/icons';
 import type { UploadJob } from '@trendvault/shared-types';
 
 interface UploadHistoryTableProps {
@@ -20,46 +11,105 @@ interface UploadHistoryTableProps {
 }
 
 function UploadStatusBadge({ status, progress }: { status: string; progress: number }) {
+  const base = { font: 'var(--font-text3-medium)' };
+
   switch (status) {
     case 'PENDING':
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-yellow-700">
-          <Clock className="h-3 w-3" /> Pending
+        <span
+          className="inline-flex items-center gap-1"
+          style={{ ...base, color: 'var(--warning-color)' }}
+        >
+          <Icon icon={Time} iconSize={12} /> Pending
         </span>
       );
     case 'UPLOADING':
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-700">
-          <Loader2 className="h-3 w-3 animate-spin" /> {progress}%
+        <span
+          className="inline-flex items-center gap-1"
+          style={{ ...base, color: 'var(--primary-color)' }}
+        >
+          <Loader size={Loader.sizes?.XS} /> {progress}%
         </span>
       );
     case 'PROCESSING':
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-purple-700">
-          <Loader2 className="h-3 w-3 animate-spin" /> Processing
+        <span
+          className="inline-flex items-center gap-1"
+          style={{ ...base, color: 'var(--color-purple)' }}
+        >
+          <Loader size={Loader.sizes?.XS} /> Processing
         </span>
       );
     case 'COMPLETED':
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700">
-          <CheckCircle2 className="h-3 w-3" /> Done
+        <span
+          className="inline-flex items-center gap-1"
+          style={{ ...base, color: 'var(--positive-color)' }}
+        >
+          <Icon icon={Check} iconSize={12} /> Done
         </span>
       );
     case 'FAILED':
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700">
-          <XCircle className="h-3 w-3" /> Failed
+        <span
+          className="inline-flex items-center gap-1"
+          style={{ ...base, color: 'var(--negative-color)' }}
+        >
+          <Icon icon={CloseRound} iconSize={12} /> Failed
         </span>
       );
     case 'CANCELLED':
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500">
-          <AlertCircle className="h-3 w-3" /> Cancelled
+        <span
+          className="inline-flex items-center gap-1"
+          style={{ ...base, color: 'var(--secondary-text-color)' }}
+        >
+          <Icon icon={Alert} iconSize={12} /> Cancelled
         </span>
       );
     default:
-      return <span className="text-xs text-gray-500">{status}</span>;
+      return (
+        <span style={{ font: 'var(--font-text3-normal)', color: 'var(--secondary-text-color)' }}>
+          {status}
+        </span>
+      );
   }
+}
+
+function ActionButton({
+  onClick,
+  disabled,
+  title,
+  hoverColor,
+  children,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  title: string;
+  hoverColor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="rounded p-1.5 transition-colors disabled:opacity-50"
+      style={{ color: 'var(--icon-color)' }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+          'var(--primary-background-hover-color)';
+        (e.currentTarget as HTMLButtonElement).style.color = hoverColor;
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
+        (e.currentTarget as HTMLButtonElement).style.color = 'var(--icon-color)';
+      }}
+      title={title}
+    >
+      {children}
+    </button>
+  );
 }
 
 export function UploadHistoryTable({
@@ -71,65 +121,119 @@ export function UploadHistoryTable({
 }: UploadHistoryTableProps) {
   if (uploads.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-lg border bg-white px-6 py-16">
-        <Upload className="mb-3 h-10 w-10 text-gray-300" />
-        <p className="mb-1 text-lg font-medium text-gray-900">No uploads yet</p>
-        <p className="text-sm text-gray-500">Use the form above to upload a downloaded video</p>
+      <div
+        className="flex flex-col items-center justify-center rounded-lg border px-6 py-16"
+        style={{
+          backgroundColor: 'var(--primary-background-color)',
+          borderColor: 'var(--ui-border-color)',
+        }}
+      >
+        <Icon
+          icon={Upload}
+          iconSize={40}
+          className="mb-3"
+          style={{ color: 'var(--disabled-text-color)' }}
+        />
+        <p
+          className="mb-1"
+          style={{ font: 'var(--font-text1-bold)', color: 'var(--primary-text-color)' }}
+        >
+          No uploads yet
+        </p>
+        <p style={{ font: 'var(--font-text2-normal)', color: 'var(--secondary-text-color)' }}>
+          Use the form above to upload a downloaded video
+        </p>
       </div>
     );
   }
 
+  const tdStyle = { borderBottom: '1px solid var(--ui-border-color)' };
+
   return (
-    <div className="overflow-hidden rounded-lg border bg-white">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div
+      className="overflow-hidden rounded-lg border"
+      style={{
+        backgroundColor: 'var(--primary-background-color)',
+        borderColor: 'var(--ui-border-color)',
+      }}
+    >
+      <table className="min-w-full" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+        <thead style={{ backgroundColor: 'var(--allgrey-background-color)' }}>
           <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              Title
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              Platform
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              Status
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              Privacy
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              Date
-            </th>
-            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
-              Actions
-            </th>
+            {['Title', 'Platform', 'Status', 'Privacy', 'Date', ''].map((header, i) => (
+              <th
+                key={header || 'actions'}
+                className={`px-4 py-3 uppercase ${i === 5 ? 'text-right' : 'text-left'}`}
+                style={{
+                  font: 'var(--font-text3-medium)',
+                  color: 'var(--secondary-text-color)',
+                  borderBottom: '1px solid var(--ui-border-color)',
+                }}
+              >
+                {header || 'Actions'}
+              </th>
+            ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody>
           {uploads.map((ul) => (
-            <tr key={ul.id} className="hover:bg-gray-50">
-              <td className="px-4 py-3">
-                <span className="text-sm font-medium text-gray-900 line-clamp-1 max-w-[240px]">
+            <tr
+              key={ul.id}
+              style={{ transition: 'background-color 0.1s' }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLTableRowElement).style.backgroundColor =
+                  'var(--primary-background-hover-color)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLTableRowElement).style.backgroundColor = 'transparent';
+              }}
+            >
+              <td className="px-4 py-3" style={tdStyle}>
+                <span
+                  className="line-clamp-1 max-w-[240px]"
+                  style={{ font: 'var(--font-text2-medium)', color: 'var(--primary-text-color)' }}
+                >
                   {ul.title}
                 </span>
               </td>
-              <td className="px-4 py-3">
+              <td className="px-4 py-3" style={tdStyle}>
                 <span
-                  className={`inline-flex rounded px-1.5 py-0.5 text-xs font-bold text-white ${
-                    ul.platform === 'YOUTUBE'
-                      ? 'bg-red-600'
-                      : ul.platform === 'INSTAGRAM'
-                        ? 'bg-pink-600'
-                        : 'bg-black'
-                  }`}
+                  className="inline-flex rounded px-1.5 py-0.5"
+                  style={{
+                    font: 'var(--font-text3-bold)',
+                    color: '#ffffff',
+                    backgroundColor:
+                      ul.platform === 'YOUTUBE'
+                        ? '#dc2626'
+                        : ul.platform === 'INSTAGRAM'
+                          ? '#db2777'
+                          : '#000000',
+                  }}
                 >
                   {ul.platform === 'YOUTUBE' ? 'YT' : ul.platform === 'INSTAGRAM' ? 'IG' : 'TT'}
                 </span>
               </td>
-              <td className="px-4 py-3">
+              <td className="px-4 py-3" style={tdStyle}>
                 <UploadStatusBadge status={ul.status} progress={ul.progress} />
               </td>
-              <td className="px-4 py-3 text-sm text-gray-500 capitalize">{ul.privacyStatus}</td>
-              <td className="px-4 py-3 text-sm text-gray-500">
+              <td
+                className="px-4 py-3 capitalize"
+                style={{
+                  ...tdStyle,
+                  font: 'var(--font-text2-normal)',
+                  color: 'var(--secondary-text-color)',
+                }}
+              >
+                {ul.privacyStatus}
+              </td>
+              <td
+                className="px-4 py-3"
+                style={{
+                  ...tdStyle,
+                  font: 'var(--font-text2-normal)',
+                  color: 'var(--secondary-text-color)',
+                }}
+              >
                 {new Date(ul.createdAt).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
@@ -137,38 +241,49 @@ export function UploadHistoryTable({
                   minute: '2-digit',
                 })}
               </td>
-              <td className="px-4 py-3">
+              <td className="px-4 py-3" style={tdStyle}>
                 <div className="flex items-center justify-end gap-1">
                   {ul.publishUrl && (
                     <a
                       href={ul.publishUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600"
+                      className="rounded p-1.5 transition-colors"
+                      style={{ color: 'var(--icon-color)' }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                          'var(--primary-background-hover-color)';
+                        (e.currentTarget as HTMLAnchorElement).style.color = 'var(--primary-color)';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                          'transparent';
+                        (e.currentTarget as HTMLAnchorElement).style.color = 'var(--icon-color)';
+                      }}
                       title="View on platform"
                     >
-                      <ExternalLink className="h-4 w-4" />
+                      <Icon icon={ExternalPage} iconSize={16} />
                     </a>
                   )}
                   {(ul.status === 'FAILED' || ul.status === 'CANCELLED') && (
-                    <button
+                    <ActionButton
                       onClick={() => onRetry(ul.id)}
                       disabled={isRetrying}
-                      className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-green-600 disabled:opacity-50"
                       title="Retry upload"
+                      hoverColor="var(--positive-color)"
                     >
-                      <RotateCcw className="h-4 w-4" />
-                    </button>
+                      <Icon icon={Rotate} iconSize={16} />
+                    </ActionButton>
                   )}
                   {(ul.status === 'PENDING' || ul.status === 'UPLOADING') && (
-                    <button
+                    <ActionButton
                       onClick={() => onCancel(ul.id)}
                       disabled={isCancelling}
-                      className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-600 disabled:opacity-50"
                       title="Cancel upload"
+                      hoverColor="var(--negative-color)"
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                      <Icon icon={Delete} iconSize={16} />
+                    </ActionButton>
                   )}
                 </div>
               </td>

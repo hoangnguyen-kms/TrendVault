@@ -49,3 +49,10 @@ export function initializeTheme() {
     applyTheme('system');
   }
 }
+
+/** Bridge Zustand theme state to Vibe ThemeProvider's systemTheme prop */
+export function useVibeTheme(): 'light' | 'dark' | undefined {
+  const { theme } = useThemeStore();
+  if (theme === 'system') return undefined; // let Vibe use OS preference
+  return theme;
+}

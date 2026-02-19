@@ -1,4 +1,5 @@
-import { RefreshCw } from 'lucide-react';
+import { Icon } from '@vibe/core';
+import { Retry } from '@vibe/icons';
 import { useTrendingFilters } from '../hooks/use-trending-filters';
 import { cn } from '@/lib/utils';
 
@@ -17,12 +18,21 @@ export function TrendingAutoRefresh() {
     <div className="flex items-center gap-2">
       <button
         onClick={toggleAutoRefresh}
-        className={cn(
-          'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-          autoRefresh ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
-        )}
+        className={cn('flex items-center gap-1.5 rounded-md px-3 py-1.5 transition-colors')}
+        style={{
+          font: 'var(--font-text2-medium)',
+          ...(autoRefresh
+            ? {
+                backgroundColor: 'var(--primary-selected-color)',
+                color: 'var(--primary-color)',
+              }
+            : {
+                backgroundColor: 'var(--allgrey-background-color)',
+                color: 'var(--secondary-text-color)',
+              }),
+        }}
       >
-        <RefreshCw className={cn('h-3.5 w-3.5', autoRefresh && 'animate-spin')} />
+        <Icon icon={Retry} iconSize={14} className={cn(autoRefresh && 'animate-spin')} />
         Auto
       </button>
 
@@ -30,7 +40,13 @@ export function TrendingAutoRefresh() {
         <select
           value={refreshInterval}
           onChange={(e) => setRefreshInterval(Number(e.target.value))}
-          className="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-md border px-2 py-1.5 outline-none transition-colors"
+          style={{
+            font: 'var(--font-text2-normal)',
+            borderColor: 'var(--ui-border-color)',
+            backgroundColor: 'var(--primary-background-color)',
+            color: 'var(--secondary-text-color)',
+          }}
         >
           {INTERVALS.map((i) => (
             <option key={i.value} value={i.value}>

@@ -35,7 +35,10 @@ const COLORS = {
 export function StatsTimeSeriesChart({ data, metric, dateRange }: StatsTimeSeriesChartProps) {
   if (!data || data.labels.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center text-sm text-gray-400">
+      <div
+        className="flex h-64 items-center justify-center"
+        style={{ font: 'var(--font-text2-normal)', color: 'var(--disabled-text-color)' }}
+      >
         No stats data available for this period.
       </div>
     );

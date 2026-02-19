@@ -2,8 +2,8 @@
 
 Complete documentation for the TrendVault cross-platform trending video discovery, download, and re-upload application.
 
-**Project Status:** Phase 2 Complete (Trending Video Discovery)
-**Last Updated:** 2026-02-15
+**Project Status:** Phase 8 Complete (Instagram Reels Integration)
+**Last Updated:** 2026-02-19
 
 ## Documentation Guide
 
@@ -22,7 +22,14 @@ Complete documentation for the TrendVault cross-platform trending video discover
 - [project-overview-pdr.md](./project-overview-pdr.md) — Goals, timeline, risks
 - [development-roadmap.md](./development-roadmap.md) — Phase breakdown, milestones, dependencies
 
-**Developers (Onboarding):**
+**Frontend Developers (Onboarding):**
+
+- [project-overview-pdr.md](./project-overview-pdr.md) — Context and scope
+- [frontend-architecture.md](./frontend-architecture.md) — React/TypeScript structure
+- [design-guidelines.md](./design-guidelines.md) — Styling with Vibe Design System
+- [code-standards.md](./code-standards.md) — How to write code
+
+**Backend Developers (Onboarding):**
 
 - [project-overview-pdr.md](./project-overview-pdr.md) — Context and scope
 - [codebase-summary.md](./codebase-summary.md) — Where to find code
@@ -90,23 +97,76 @@ Complete documentation for the TrendVault cross-platform trending video discover
 
 ---
 
-### codebase-summary.md (481 LOC)
+### codebase-summary.md (783 LOC)
 
 **Purpose:** Complete guide to codebase structure and file organization
 
 **Contains:**
 
-- Full directory structure
-- Backend module breakdown
-- Frontend pages and components
-- Shared packages
-- Database schema and migrations
-- Dependencies and scripts
-- Phase 2 implementation details
+- Full directory structure (backend, frontend, shared, docker)
+- Backend module breakdown (all 10 modules)
+- Frontend styling architecture (Vibe Design System)
+- Frontend overview (pages, components, hooks, stores)
+- Shared packages (types, config)
+- Database schema (8 models, Phase 8)
+- Dependencies summary
+- Phase 0-8 implementation details
 - Code quality standards
 - Architectural decisions
+- Statistics and documentation map
 
 **Best For:** Finding code, understanding file organization, onboarding
+
+**Related:** See [frontend-architecture.md](./frontend-architecture.md) for detailed React structure and [design-guidelines.md](./design-guidelines.md) for styling guide
+
+---
+
+### frontend-architecture.md (446 LOC)
+
+**Purpose:** Comprehensive React frontend architecture and development guide
+
+**Contains:**
+
+- Project structure and file organization
+- 9 main pages (auth, trending, downloads, uploads, settings, channels, videos, analytics, dashboard)
+- Layout and UI components
+- 15 custom hooks (data fetching, real-time, UI, theme)
+- State management (Zustand + TanStack Query)
+- Styling with Vibe Design System
+- Routing configuration (React Router 7)
+- Real-time updates via Socket.IO
+- Component composition patterns
+- Dependencies and development scripts
+- Best practices
+
+**Best For:** Frontend developers onboarding, implementing React components, understanding architecture
+
+**Related:** See [design-guidelines.md](./design-guidelines.md) for detailed styling reference
+
+---
+
+### design-guidelines.md (472 LOC)
+
+**Purpose:** Complete Vibe Design System styling reference and guide
+
+**Contains:**
+
+- Design system architecture overview
+- Complete token reference (text, background, semantic, platform brand colors)
+- Platform branding colors (YouTube, TikTok, Instagram)
+- Typography tokens and usage
+- Border and shadow tokens
+- 6 styling patterns with code examples
+- Theme switching guide
+- Migration notes from old Tailwind approach
+- Implementation examples (button, card, badge)
+- Best practices (8 principles)
+- File organization and import order
+- Debugging common issues
+
+**Best For:** Frontend developers styling components, debugging CSS variable issues, learning Vibe Design System
+
+**Related:** See [frontend-architecture.md](./frontend-architecture.md) for React structure overview
 
 ---
 
@@ -155,37 +215,42 @@ Complete documentation for the TrendVault cross-platform trending video discover
 
 ## Quick Links
 
-| Question                      | Document                                                                                      |
-| ----------------------------- | --------------------------------------------------------------------------------------------- |
-| What is TrendVault?           | [project-overview-pdr.md](./project-overview-pdr.md)                                          |
-| How is it structured?         | [codebase-summary.md](./codebase-summary.md)                                                  |
-| How does it work?             | [system-architecture.md](./system-architecture.md)                                            |
-| What's the timeline?          | [development-roadmap.md](./development-roadmap.md)                                            |
-| How do I write code?          | [code-standards.md](./code-standards.md)                                                      |
-| Where is file X?              | [codebase-summary.md](./codebase-summary.md)                                                  |
-| How do I implement feature Y? | [code-standards.md](./code-standards.md) + [system-architecture.md](./system-architecture.md) |
+| Question                             | Document                                                                                      |
+| ------------------------------------ | --------------------------------------------------------------------------------------------- |
+| What is TrendVault?                  | [project-overview-pdr.md](./project-overview-pdr.md)                                          |
+| How is it structured?                | [codebase-summary.md](./codebase-summary.md)                                                  |
+| How does it work?                    | [system-architecture.md](./system-architecture.md)                                            |
+| What's the timeline?                 | [development-roadmap.md](./development-roadmap.md)                                            |
+| How do I write code?                 | [code-standards.md](./code-standards.md)                                                      |
+| Where is file X?                     | [codebase-summary.md](./codebase-summary.md)                                                  |
+| How do I structure React components? | [frontend-architecture.md](./frontend-architecture.md)                                        |
+| How do I style with Vibe tokens?     | [design-guidelines.md](./design-guidelines.md)                                                |
+| How do I implement feature Y?        | [code-standards.md](./code-standards.md) + [system-architecture.md](./system-architecture.md) |
 
 ## Phase Status
 
-| Phase | Title                          | Status      | Completion |
-| ----- | ------------------------------ | ----------- | ---------- |
-| 1     | Foundation & Scaffolding       | COMPLETE    | 100%       |
-| 2     | Trending Video Discovery       | COMPLETE    | 100%       |
-| 3     | Download Engine                | IN PROGRESS | 0%         |
-| 4     | Upload & OAuth                 | PENDING     | 0%         |
-| 5     | Channel Management & Analytics | PENDING     | 0%         |
-| 6     | Polish & Launch                | PENDING     | 0%         |
+| Phase | Title                            | Status   | Completion |
+| ----- | -------------------------------- | -------- | ---------- |
+| 1     | Foundation & Scaffolding         | COMPLETE | 100%       |
+| 2     | Trending Video Discovery         | COMPLETE | 100%       |
+| 3     | Download Engine                  | COMPLETE | 100%       |
+| 4     | Upload & OAuth (YouTube, TikTok) | COMPLETE | 100%       |
+| 5     | Channel Management & Analytics   | COMPLETE | 100%       |
+| 6     | Security, Polish & Launch        | COMPLETE | 100%       |
+| 7     | YouTube Shorts Integration       | COMPLETE | 100%       |
+| 8     | Instagram Reels Integration      | COMPLETE | 100%       |
 
 See [development-roadmap.md](./development-roadmap.md) for detailed timeline.
 
 ## Technology Stack
 
-| Layer    | Technology                                 |
-| -------- | ------------------------------------------ |
-| Frontend | React 19, Vite 6, TailwindCSS 4, shadcn/ui |
-| Backend  | Node.js 22, Express 5, Prisma 6, BullMQ 5  |
-| Database | PostgreSQL 17, Redis 7, MinIO              |
-| Monorepo | Turborepo, pnpm workspaces                 |
+| Layer    | Technology                                                                             |
+| -------- | -------------------------------------------------------------------------------------- |
+| Frontend | React 19, Vite 6, Vibe Design System (@vibe/core, @vibe/icons), TailwindCSS 4 (layout) |
+| Backend  | Node.js 22, Express 5, Prisma 6, BullMQ 5, Socket.IO 4                                 |
+| Database | PostgreSQL 17, Redis 7, MinIO 7, Apify integration                                     |
+| OAuth    | Google (YouTube), TikTok, Meta (Instagram)                                             |
+| Monorepo | Turborepo, pnpm workspaces                                                             |
 
 ## Getting Started
 
@@ -219,12 +284,21 @@ See [system-architecture.md](./system-architecture.md) for full architecture.
 
 ## Common Tasks
 
-### Onboarding as Developer
+### Onboarding as Frontend Developer
+
+1. Read [project-overview-pdr.md](./project-overview-pdr.md)
+2. Review [frontend-architecture.md](./frontend-architecture.md)
+3. Study [design-guidelines.md](./design-guidelines.md)
+4. Review [code-standards.md](./code-standards.md)
+5. Clone and run `pnpm dev`
+
+### Onboarding as Backend Developer
 
 1. Read [project-overview-pdr.md](./project-overview-pdr.md)
 2. Skim [codebase-summary.md](./codebase-summary.md)
-3. Review [code-standards.md](./code-standards.md)
-4. Clone and run `pnpm dev`
+3. Review [system-architecture.md](./system-architecture.md)
+4. Review [code-standards.md](./code-standards.md)
+5. Clone and run `pnpm dev`
 
 ### Implementing a Feature
 
@@ -283,5 +357,5 @@ These docs are living documents updated as the project progresses.
 
 ---
 
-**Last Updated:** 2026-02-15
-**Phase Status:** Phase 2 Complete, Phase 3 Ready
+**Last Updated:** 2026-02-19
+**Phase Status:** Phase 8 Complete (All phases finished)

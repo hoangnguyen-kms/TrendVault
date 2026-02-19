@@ -437,102 +437,25 @@ model VideoStatsSnapshot { ... }                     # Phase 5
 
 ## Frontend (`apps/web/`)
 
-### Pages
+**Comprehensive documentation:** See `/docs/frontend-architecture.md`
 
-| Directory          | Files                                                                     | Phase | Status     |
-| ------------------ | ------------------------------------------------------------------------- | ----- | ---------- |
-| `pages/auth/`      | `login-page.tsx`, `register-page.tsx`                                     | 1     | Complete   |
-| `pages/trending/`  | `trending-page.tsx` + 3 components + 2 hooks                              | 2     | Complete   |
-| `pages/downloads/` | `downloads-page.tsx` + components + hooks                                 | 3     | Complete   |
-| `pages/uploads/`   | `uploads-page.tsx`, `upload-form.tsx`, `upload-history-table.tsx`, 1 hook | 4     | Complete   |
-| `pages/settings/`  | `connected-accounts-page.tsx`, `connected-account-card.tsx`, 1 hook       | 4     | Complete   |
-| `pages/channels/`  | `channel-dashboard-page.tsx` + 6 components + 2 hooks                     | 5     | Complete   |
-| `pages/videos/`    | `video-detail-page.tsx` + 4 components + 1 hook                           | 5     | Complete   |
-| `pages/analytics/` | `cross-channel-page.tsx` + 3 components + 1 hook                          | 5     | Complete   |
-| `pages/`           | `dashboard-page.tsx`                                                      | 1     | Scaffolded |
+**Overview:** React 19 + TypeScript frontend with Vibe Design System styling, TanStack Query for data fetching, Zustand for state management.
 
-### Trending Page (`pages/trending/`)
+**Key Features:**
 
-```
-trending-page.tsx (main page component)
-├── Layout (header, sidebar)
-├── <TrendingFilters> (platform, region, category selector)
-├── <TrendingAutoRefresh> (toggle + interval selector)
-└── <TrendingVideoGrid>
-    └── <TrendingVideoCard> × N (infinite scroll)
-```
+- 9 main pages (auth, trending, downloads, uploads, settings, channels, videos, analytics, dashboard)
+- Real-time updates via Socket.IO
+- OAuth integration (Google, TikTok, Instagram)
+- Responsive design (Tailwind layout + Vibe tokens for styling)
+- Dark/light theme switching with CSS variables
 
-**Hooks:**
+**Architecture:**
 
-- `use-trending-filters.ts` - Filter state (platform, region, category)
-- `use-trending-videos.ts` - Data fetching (TanStack Query useInfiniteQuery)
-
-**Components:**
-
-- `trending-filters.tsx` - Filter UI (dropdowns, buttons)
-- `trending-video-card.tsx` - Video card (thumbnail, title, stats, creator)
-- `trending-auto-refresh.tsx` - Refresh toggle + interval selector
-
-### Layout Components (`components/layout/`)
-
-| File              | Purpose                               |
-| ----------------- | ------------------------------------- |
-| `root-layout.tsx` | Main app wrapper (sidebar, header)    |
-| `app-header.tsx`  | Top navigation bar                    |
-| `app-sidebar.tsx` | Navigation sidebar (links, user info) |
-
-### Hooks
-
-| File          | Purpose                                    |
-| ------------- | ------------------------------------------ |
-| `use-auth.ts` | Auth context hook (check logged-in status) |
-
-### Stores (`stores/`)
-
-| File            | Purpose                   | Library |
-| --------------- | ------------------------- | ------- |
-| `auth-store.ts` | User authentication state | Zustand |
-
-**State:**
-
-```typescript
-{
-  user: User | null,
-  isAuthenticated: boolean,
-  setUser(user),
-  logout(),
-}
-```
-
-### Library Utilities (`lib/`)
-
-| File               | Purpose                                          |
-| ------------------ | ------------------------------------------------ |
-| `api-client.ts`    | HTTP client + TanStack Query integration         |
-| `query-client.ts`  | TanStack Query configuration                     |
-| `socket-client.ts` | Socket.IO client for real-time updates (Phase 3) |
-| `utils.ts`         | Helper functions (formatting, etc.)              |
-
-**API Client:**
-
-```typescript
-// Configured with base URL, interceptors
-// Used by hooks via TanStack Query
-export const apiClient = {
-  get(path, config),
-  post(path, data, config),
-  // ... standard HTTP methods
-}
-```
-
-### Configuration Files
-
-| File              | Purpose                   |
-| ----------------- | ------------------------- |
-| `components.json` | shadcn/ui components list |
-| `vite.config.ts`  | Vite bundler config       |
-| `tsconfig*.json`  | TypeScript configs        |
-| `package.json`    | Dependencies + scripts    |
+- Components: Pages, layout shell, reusable UI components
+- Hooks: Custom data-fetching hooks using TanStack Query
+- Stores: Zustand for theme and auth state
+- Utilities: API client, Socket.IO, formatting helpers
+- Styling: Vibe CSS variables (colors, typography, shadows) + Tailwind (layout)
 
 ## Shared Packages (`packages/`)
 
@@ -577,52 +500,11 @@ export type User = z.infer<typeof UserSchema>
 - Redis 7 (port 6379)
 - MinIO (ports 9000/9001)
 
-## Dependencies Summary
+## Key Dependencies
 
-### Backend (`apps/api/package.json`)
-
-| Package              | Version | Purpose                           |
-| -------------------- | ------- | --------------------------------- |
-| `express`            | ^5.0.0  | HTTP server framework             |
-| `prisma`             | ^6.0.0  | ORM database access               |
-| `@prisma/client`     | ^6.0.0  | Prisma runtime client             |
-| `redis`              | ^4.6.0  | Redis client                      |
-| `bullmq`             | ^5.0.0  | Job queue (Redis-backed)          |
-| `socket.io`          | ^4.7.0  | Real-time communication (Phase 3) |
-| `yt-dlp-wrap`        | Latest  | Video format extraction (Phase 3) |
-| `minio`              | ^7.0.0  | S3-compatible storage (Phase 3)   |
-| `jsonwebtoken`       | ^9.0.0  | JWT token handling                |
-| `bcryptjs`           | ^2.4.0  | Password hashing                  |
-| `axios`              | ^1.0.0  | HTTP requests (adapters)          |
-| `zod`                | ^3.0.0  | Schema validation                 |
-| `cors`               | ^2.8.0  | CORS middleware                   |
-| `helmet`             | ^7.0.0  | Security headers                  |
-| `express-rate-limit` | ^6.0.0  | Rate limiting                     |
-| `morgan`             | ^1.10.0 | Request logging                   |
-
-### Frontend (`apps/web/package.json`)
-
-| Package                 | Version | Purpose                               |
-| ----------------------- | ------- | ------------------------------------- |
-| `react`                 | ^19.0.0 | UI library                            |
-| `react-router-dom`      | ^7.0.0  | Client routing                        |
-| `@tanstack/react-query` | ^5.0.0  | Server state management               |
-| `zustand`               | ^5.0.0  | Client state (Zustand)                |
-| `socket.io-client`      | ^4.7.0  | Real-time client (Phase 3)            |
-| `tailwindcss`           | ^4.0.0  | Utility CSS                           |
-| `shadcn/ui`             | Latest  | Component library                     |
-| `recharts`              | ^2.0.0  | Charts & data visualization (Phase 5) |
-| `date-fns`              | ^4.0.0  | Date formatting utilities (Phase 5)   |
-| `vite`                  | ^6.0.0  | Build tool                            |
-| `typescript`            | ^5.3.0  | Type checking                         |
-| `zod`                   | ^3.0.0  | Schema validation                     |
-
-### Shared (`packages/shared-types/package.json`)
-
-| Package      | Version | Purpose            |
-| ------------ | ------- | ------------------ |
-| `zod`        | ^3.0.0  | Schema definitions |
-| `typescript` | ^5.3.0  | Type definitions   |
+**Backend:** Express 5, Prisma 6, Redis 4, BullMQ 5, Socket.IO 4, yt-dlp-wrap, MinIO, JWT, bcrypt, Axios, Zod, Helmet
+**Frontend:** React 19, React Router 7, TanStack Query 5, Zustand 5, Socket.IO Client 4, Tailwind 4, Vibe @core 3.85.1, Vibe @icons 1.16.0, Recharts 2, date-fns 4
+**Shared:** Zod 3, TypeScript 5
 
 ## Development Scripts
 
@@ -647,6 +529,73 @@ pnpm db:studio        # Open Prisma Studio
 pnpm -F api dev       # Start API only
 pnpm -F web dev       # Start Web only
 ```
+
+## Frontend Styling Architecture (Vibe Design System)
+
+**Status:** 100% Complete (All components migrated)
+
+The frontend styling system is built on a hybrid approach:
+
+1. **Vibe Design System** (`@vibe/core` v3.85.1, `@vibe/icons` v1.16.0)
+   - All visual design tokens (colors, typography, shadows, borders, radius)
+   - React component wrappers (Icon, Button, Loader, etc.)
+   - Automatic light/dark theme switching via CSS custom properties
+   - ThemeProvider manages theme state and applies via `data-vibe-theme` attribute
+
+2. **Tailwind CSS** (v4 - Structural layout only)
+   - Flexbox/Grid layout utilities
+   - Spacing (margin, padding, gap)
+   - Sizing (width, height, min/max constraints)
+   - Responsive breakpoints (sm, md, lg, xl)
+   - Border (without color), overflow, transform
+
+3. **Custom Utilities** (`apps/web/src/styles/vibe-overrides.css`)
+   - Shorthand classes for repeated Vibe token patterns
+   - Surface, text, border, semantic color utilities
+   - Used when inline `style={{}}` is impractical
+
+**Styling Pattern:**
+
+- Inline `style={{ backgroundColor: 'var(--primary-background-color)' }}` for Vibe tokens
+- Tailwind classes for layout and responsive behavior
+- Event handlers (`onMouseEnter`, `onMouseLeave`) for interactive hover states
+- `useVibeColors()` hook to extract hex values for chart libraries (Recharts)
+
+**Key Implementation Details:**
+
+- All hardcoded colors removed (except platform branding: YouTube red #FF0000, TikTok black #000000, Instagram pink #E1306C)
+- Typography via `font: 'var(--font-h2-bold)'` shorthand (size + weight + line-height)
+- Shadows: `--box-shadow-xs`, `--box-shadow-small`, `--box-shadow-medium`
+- Borders: `--ui-border-color` (interactive), `--layout-border-color` (structural)
+- Semantic colors: `--positive-color`, `--negative-color`, `--warning-color` (+ `-selected` variants)
+- Theme colors: `--primary-text-color`, `--secondary-text-color`, `--primary-background-color`, etc.
+
+**Files:**
+
+- `apps/web/src/main.tsx` - Import order: @vibe/core/tokens → vibe-overrides.css → app → index.css
+- `apps/web/src/styles/vibe-overrides.css` - Utility class definitions
+- `apps/web/src/hooks/use-vibe-colors.ts` - Extract CSS vars as hex for charts
+- `apps/web/src/stores/theme-store.ts` - Zustand theme state (light/dark/system)
+- All component files use `style={{}}` with CSS variables
+- See `/docs/design-guidelines.md` for complete styling reference
+
+## Phase 0 Implementation Summary
+
+**Vibe UI Foundation (Complete):**
+
+- @vibe/core and @vibe/icons as web dependencies
+- ThemeProvider wrapping root app component
+- VibeCard custom component using Vibe @core
+- useVibeColors hook for theme color access
+- 22 custom SVG icon components for UI consistency
+
+**Files Created:**
+
+- `apps/web/src/components/ui/vibe-card.tsx` - Reusable Vibe card component
+- `apps/web/src/hooks/use-vibe-colors.ts` - Theme color management hook
+- Custom SVG icon components in `apps/web/src/components/icons/`
+
+**Architecture:** Vibe replaces shadcn/ui as primary component library. Progressive migration approach allows building new features with Vibe while retrofitting existing components.
 
 ## Phase 4 Implementation Summary
 

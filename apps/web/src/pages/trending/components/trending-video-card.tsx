@@ -1,4 +1,5 @@
-import { ExternalLink, Clock, Eye, ThumbsUp, MessageCircle, Download, Loader2 } from 'lucide-react';
+import { Icon, Loader } from '@vibe/core';
+import { ExternalPage, Time, Show, ThumbsUp, Comment, Download } from '@vibe/icons';
 import type { TrendingVideo } from '@trendvault/shared-types';
 import { useQueueDownload } from '@/pages/downloads/hooks/use-downloads';
 import { cn } from '@/lib/utils';
@@ -33,14 +34,26 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
     <div
       role="link"
       onClick={handleCardClick}
-      className="group block cursor-pointer rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+      className="group block cursor-pointer rounded-lg border overflow-hidden transition-shadow"
+      style={{
+        backgroundColor: 'var(--primary-background-color)',
+        borderColor: 'var(--ui-border-color)',
+        boxShadow: 'var(--box-shadow-xs)',
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--box-shadow-small)';
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--box-shadow-xs)';
+      }}
     >
       {/* Thumbnail */}
       <div
         className={cn(
-          'relative overflow-hidden rounded-t-lg bg-gray-100',
+          'relative overflow-hidden rounded-t-lg',
           video.isShort ? 'aspect-[9/16] max-w-[200px]' : 'aspect-video',
         )}
+        style={{ backgroundColor: 'var(--allgrey-background-color)' }}
       >
         {video.thumbnailUrl ? (
           <img
@@ -50,25 +63,41 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
             loading="lazy"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-gray-400">No thumbnail</div>
+          <div
+            className="flex h-full items-center justify-center"
+            style={{ color: 'var(--disabled-text-color)' }}
+          >
+            No thumbnail
+          </div>
         )}
 
         {/* Duration badge */}
         {video.duration != null && (
-          <span className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 text-xs font-medium text-white">
+          <span
+            className="absolute bottom-2 right-2 rounded px-1.5 py-0.5"
+            style={{
+              font: 'var(--font-text3-medium)',
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              color: '#ffffff',
+            }}
+          >
             {formatDuration(video.duration)}
           </span>
         )}
 
-        {/* Platform badge */}
+        {/* Platform badge — branded colors kept intentionally */}
         <span
-          className={`absolute top-2 left-2 rounded px-1.5 py-0.5 text-xs font-bold text-white ${
-            video.platform === 'YOUTUBE'
-              ? 'bg-red-600'
-              : video.platform === 'INSTAGRAM'
-                ? 'bg-pink-600'
-                : 'bg-black'
-          }`}
+          className="absolute top-2 left-2 rounded px-1.5 py-0.5"
+          style={{
+            font: 'var(--font-text3-bold)',
+            color: '#ffffff',
+            backgroundColor:
+              video.platform === 'YOUTUBE'
+                ? '#dc2626'
+                : video.platform === 'INSTAGRAM'
+                  ? '#db2777'
+                  : '#000000',
+          }}
         >
           {video.platform === 'YOUTUBE' ? 'YT' : video.platform === 'INSTAGRAM' ? 'IG' : 'TT'}
         </span>
@@ -78,17 +107,26 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
 
         {/* Hover overlay with actions */}
         <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/0 group-hover:bg-black/20 transition-colors">
-          <ExternalLink className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+          <Icon
+            icon={ExternalPage}
+            iconSize={24}
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ color: '#ffffff' }}
+          />
           <button
             onClick={handleDownload}
             disabled={queueDownload.isPending}
-            className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full bg-blue-600 p-2 text-white hover:bg-blue-700 disabled:opacity-50"
+            className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-2 disabled:opacity-50"
+            style={{
+              backgroundColor: 'var(--primary-color)',
+              color: 'var(--text-color-on-primary)',
+            }}
             title="Download video"
           >
             {queueDownload.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader size={Loader.sizes?.XS} />
             ) : (
-              <Download className="h-4 w-4" />
+              <Icon icon={Download} iconSize={16} />
             )}
           </button>
         </div>
@@ -96,34 +134,47 @@ export function TrendingVideoCard({ video }: TrendingVideoCardProps) {
 
       {/* Info */}
       <div className="p-3">
-        <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">{video.title}</h3>
+        <h3
+          className="line-clamp-2 mb-1"
+          style={{ font: 'var(--font-text2-medium)', color: 'var(--primary-text-color)' }}
+        >
+          {video.title}
+        </h3>
         {video.channelName && (
-          <p className="text-xs text-gray-500 mb-2 truncate">{video.channelName}</p>
+          <p
+            className="mb-2 truncate"
+            style={{ font: 'var(--font-text3-normal)', color: 'var(--secondary-text-color)' }}
+          >
+            {video.channelName}
+          </p>
         )}
 
         {/* Stats row */}
-        <div className="flex items-center gap-3 text-xs text-gray-500">
+        <div
+          className="flex items-center gap-3"
+          style={{ font: 'var(--font-text3-normal)', color: 'var(--secondary-text-color)' }}
+        >
           {video.viewCount != null && (
             <span className="flex items-center gap-1">
-              <Eye className="h-3 w-3" />
+              <Icon icon={Show} iconSize={12} />
               {formatCount(video.viewCount)}
             </span>
           )}
           {video.likeCount != null && (
             <span className="flex items-center gap-1">
-              <ThumbsUp className="h-3 w-3" />
+              <Icon icon={ThumbsUp} iconSize={12} />
               {formatCount(video.likeCount)}
             </span>
           )}
           {video.commentCount != null && (
             <span className="flex items-center gap-1">
-              <MessageCircle className="h-3 w-3" />
+              <Icon icon={Comment} iconSize={12} />
               {formatCount(video.commentCount)}
             </span>
           )}
           {video.publishedAt && (
             <span className="flex items-center gap-1 ml-auto">
-              <Clock className="h-3 w-3" />
+              <Icon icon={Time} iconSize={12} />
               {formatTimeAgo(video.publishedAt)}
             </span>
           )}

@@ -6,14 +6,19 @@ interface VideoPlayerProps {
 export function VideoPlayer({ src, title }: VideoPlayerProps) {
   if (!src) {
     return (
-      <div className="flex aspect-video items-center justify-center rounded-lg bg-gray-100">
-        <p className="text-sm text-gray-400">Video preview not available</p>
+      <div
+        className="flex aspect-video items-center justify-center rounded-lg"
+        style={{ backgroundColor: 'var(--allgrey-background-color)' }}
+      >
+        <p style={{ font: 'var(--font-text2-normal)', color: 'var(--disabled-text-color)' }}>
+          Video preview not available
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-lg bg-black">
+    <div className="overflow-hidden rounded-lg" style={{ backgroundColor: '#000' }}>
       <video controls className="aspect-video w-full" title={title} preload="metadata">
         <source src={src} type="video/mp4" />
         Your browser does not support the video element.

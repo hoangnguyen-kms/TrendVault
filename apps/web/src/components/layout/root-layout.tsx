@@ -13,7 +13,9 @@ export default function RootLayout() {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <div style={{ font: 'var(--font-text1-normal)', color: 'var(--secondary-text-color)' }}>
+          Loading...
+        </div>
       </div>
     );
   }
@@ -27,7 +29,7 @@ export default function RootLayout() {
   return (
     <>
       <TosAcceptanceModal isOpen={showTosModal} />
-      <div className="flex h-screen bg-gray-50">
+      <div className="flex h-screen" style={{ backgroundColor: 'var(--allgrey-background-color)' }}>
         <AppSidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
           <AppHeader />

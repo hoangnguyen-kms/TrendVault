@@ -20,6 +20,17 @@ const STATUS_OPTIONS = [
   { value: 'CANCELLED', label: 'Cancelled' },
 ];
 
+const selectStyle: React.CSSProperties = {
+  font: 'var(--font-text2-normal)',
+  color: 'var(--primary-text-color)',
+  backgroundColor: 'var(--primary-background-color)',
+  border: '1px solid var(--ui-border-color)',
+  borderRadius: 'var(--border-radius-small)',
+  padding: '0.5rem 0.75rem',
+  boxShadow: 'var(--box-shadow-xs)',
+  outline: 'none',
+};
+
 export function DownloadFilters({
   platform,
   status,
@@ -31,7 +42,7 @@ export function DownloadFilters({
       <select
         value={platform}
         onChange={(e) => onPlatformChange(e.target.value)}
-        className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        style={selectStyle}
       >
         {PLATFORM_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -40,11 +51,7 @@ export function DownloadFilters({
         ))}
       </select>
 
-      <select
-        value={status}
-        onChange={(e) => onStatusChange(e.target.value)}
-        className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-      >
+      <select value={status} onChange={(e) => onStatusChange(e.target.value)} style={selectStyle}>
         {STATUS_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>
             {opt.label}

@@ -86,7 +86,7 @@ web/src/
 
 - **State Management:** Zustand (auth), TanStack Query (server state)
 - **Routing:** React Router 7 (SPA mode)
-- **UI Components:** shadcn/ui
+- **UI Components:** Vibe @core (Phase 0+), custom SVG icons (lucide-react replacements)
 - **Styling:** TailwindCSS 4
 - **HTTP:** Fetch API (wrapped by api-client)
 
@@ -1160,10 +1160,37 @@ export function computeAspectRatio(width: number, height: number): number {
 - Backfill script: 100+ videos processed successfully
 - Detection accuracy: 95%+ against YouTube criteria
 
+## Phase 0: Vibe UI Migration Foundation (Complete ✓)
+
+**Objective:** Establish foundation for Vibe UI component library migration
+
+**Components Added:**
+
+- **@vibe/core** (`^3.85.1`): Core Vibe component library
+- **@vibe/icons** (`^1.16.0`): Vibe icon components
+- **VibeCard** component: Reusable card wrapper using Vibe @core
+- **useVibeColors** hook: Theme color management via Vibe colors
+- **ThemeProvider**: Wraps app root for Vibe theme context
+- **22 custom SVG icon components**: For platform-specific and feature icons
+
+**Architecture Decision:**
+
+- Vibe replaces shadcn/ui as primary component library
+- Custom SVG icons replacing lucide-react for consistent iconography
+- Progressive migration: Build new features with Vibe, retrofit existing components over time
+
+**Integration Points:**
+
+1. App root: ThemeProvider wraps entire application
+2. UI layer: VibeCard used for consistent card styling
+3. Icons: Custom SVG components for trending, download, upload, analytics views
+4. Theming: useVibeColors hook provides color values per theme
+
 ## Production Status
 
-**All 7 phases complete and committed:**
+**Phase 0 + All 7 phases complete and committed:**
 
+- Phase 0: Vibe Foundation ✓
 - Phase 1: Foundation ✓
 - Phase 2: Trending Discovery ✓
 - Phase 3: Download Engine ✓
@@ -1171,5 +1198,6 @@ export function computeAspectRatio(width: number, height: number): number {
 - Phase 5: Analytics ✓
 - Phase 6: Polish & Security ✓
 - Phase 7: Shorts Integration ✓
+- Phase 8: Instagram Reels ✓
 
 **System is production-ready for deployment.**

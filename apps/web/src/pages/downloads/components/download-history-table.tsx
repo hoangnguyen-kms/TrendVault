@@ -1,4 +1,5 @@
-import { Download, RotateCcw, Trash2, ExternalLink, Upload } from 'lucide-react';
+import { Icon } from '@vibe/core';
+import { Download, Rotate, Delete, ExternalPage, Upload } from '@vibe/icons';
 import { useNavigate } from 'react-router';
 import type { DownloadedVideo } from '@trendvault/shared-types';
 import { apiClient } from '@/lib/api-client';
@@ -21,10 +22,26 @@ export function DownloadHistoryTable({
 }: DownloadHistoryTableProps) {
   if (downloads.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-lg border bg-white px-6 py-16">
-        <Download className="mb-3 h-10 w-10 text-gray-300" />
-        <p className="mb-1 text-lg font-medium text-gray-900">No downloads yet</p>
-        <p className="text-sm text-gray-500">
+      <div
+        className="flex flex-col items-center justify-center rounded-lg border px-6 py-16"
+        style={{
+          backgroundColor: 'var(--primary-background-color)',
+          borderColor: 'var(--ui-border-color)',
+        }}
+      >
+        <Icon
+          icon={Download}
+          iconSize={40}
+          className="mb-3"
+          style={{ color: 'var(--disabled-text-color)' }}
+        />
+        <p
+          className="mb-1"
+          style={{ font: 'var(--font-text1-bold)', color: 'var(--primary-text-color)' }}
+        >
+          No downloads yet
+        </p>
+        <p style={{ font: 'var(--font-text2-normal)', color: 'var(--secondary-text-color)' }}>
           Go to Trending and click the download button on a video
         </p>
       </div>
@@ -32,31 +49,32 @@ export function DownloadHistoryTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-white">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div
+      className="overflow-hidden rounded-lg border"
+      style={{
+        backgroundColor: 'var(--primary-background-color)',
+        borderColor: 'var(--ui-border-color)',
+      }}
+    >
+      <table className="min-w-full" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+        <thead style={{ backgroundColor: 'var(--allgrey-background-color)' }}>
           <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              Video
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              Platform
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              Status
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              Size
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              Date
-            </th>
-            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
-              Actions
-            </th>
+            {['Video', 'Platform', 'Status', 'Size', 'Date', ''].map((header, i) => (
+              <th
+                key={header || 'actions'}
+                className={`px-4 py-3 uppercase ${i === 5 ? 'text-right' : 'text-left'}`}
+                style={{
+                  font: 'var(--font-text3-medium)',
+                  color: 'var(--secondary-text-color)',
+                  borderBottom: '1px solid var(--ui-border-color)',
+                }}
+              >
+                {header || 'Actions'}
+              </th>
+            ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody>
           {downloads.map((dl) => (
             <DownloadRow
               key={dl.id}
@@ -98,89 +116,158 @@ function DownloadRow({
     }
   };
 
+  const tdStyle = { borderBottom: '1px solid var(--ui-border-color)' };
+
   return (
-    <tr className="hover:bg-gray-50">
+    <tr
+      style={{ transition: 'background-color 0.1s' }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLTableRowElement).style.backgroundColor =
+          'var(--primary-background-hover-color)';
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLTableRowElement).style.backgroundColor = 'transparent';
+      }}
+    >
       {/* Video info */}
-      <td className="px-4 py-3">
+      <td className="px-4 py-3" style={tdStyle}>
         <div className="flex items-center gap-3">
           {download.thumbnailUrl && (
             <img src={download.thumbnailUrl} alt="" className="h-10 w-16 rounded object-cover" />
           )}
-          <span className="text-sm font-medium text-gray-900 line-clamp-1 max-w-[240px]">
+          <span
+            className="line-clamp-1 max-w-[240px]"
+            style={{ font: 'var(--font-text2-medium)', color: 'var(--primary-text-color)' }}
+          >
             {download.title}
           </span>
         </div>
       </td>
 
       {/* Platform */}
-      <td className="px-4 py-3">
+      <td className="px-4 py-3" style={tdStyle}>
         <span
-          className={`inline-flex rounded px-1.5 py-0.5 text-xs font-bold text-white ${
-            download.platform === 'YOUTUBE'
-              ? 'bg-red-600'
-              : download.platform === 'INSTAGRAM'
-                ? 'bg-pink-600'
-                : 'bg-black'
-          }`}
+          className="inline-flex rounded px-1.5 py-0.5"
+          style={{
+            font: 'var(--font-text3-bold)',
+            color: '#ffffff',
+            backgroundColor:
+              download.platform === 'YOUTUBE'
+                ? '#dc2626'
+                : download.platform === 'INSTAGRAM'
+                  ? '#db2777'
+                  : '#000000',
+          }}
         >
           {download.platform === 'YOUTUBE' ? 'YT' : download.platform === 'INSTAGRAM' ? 'IG' : 'TT'}
         </span>
       </td>
 
       {/* Status */}
-      <td className="px-4 py-3">
+      <td className="px-4 py-3" style={tdStyle}>
         <DownloadStatusBadge status={download.status} progress={download.progress} />
       </td>
 
       {/* Size */}
-      <td className="px-4 py-3 text-sm text-gray-500">
-        {download.fileSize ? formatFileSize(download.fileSize) : '—'}
+      <td
+        className="px-4 py-3"
+        style={{
+          ...tdStyle,
+          font: 'var(--font-text2-normal)',
+          color: 'var(--secondary-text-color)',
+        }}
+      >
+        {download.fileSize ? formatFileSize(download.fileSize) : '\u2014'}
       </td>
 
       {/* Date */}
-      <td className="px-4 py-3 text-sm text-gray-500">{formatDate(download.createdAt)}</td>
+      <td
+        className="px-4 py-3"
+        style={{
+          ...tdStyle,
+          font: 'var(--font-text2-normal)',
+          color: 'var(--secondary-text-color)',
+        }}
+      >
+        {formatDate(download.createdAt)}
+      </td>
 
       {/* Actions */}
-      <td className="px-4 py-3">
+      <td className="px-4 py-3" style={tdStyle}>
         <div className="flex items-center justify-end gap-1">
           {download.status === 'COMPLETED' && (
             <>
-              <button
+              <ActionButton
                 onClick={() => navigate('/uploads')}
-                className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-purple-600"
                 title="Upload to platform"
+                hoverColor="var(--color-purple)"
               >
-                <Upload className="h-4 w-4" />
-              </button>
-              <button
+                <Icon icon={Upload} iconSize={16} />
+              </ActionButton>
+              <ActionButton
                 onClick={handleGetUrl}
-                className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600"
                 title="Download file"
+                hoverColor="var(--primary-color)"
               >
-                <ExternalLink className="h-4 w-4" />
-              </button>
+                <Icon icon={ExternalPage} iconSize={16} />
+              </ActionButton>
             </>
           )}
           {(download.status === 'FAILED' || download.status === 'CANCELLED') && (
-            <button
+            <ActionButton
               onClick={() => onRetry(download.id)}
               disabled={isRetrying}
-              className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-green-600 disabled:opacity-50"
               title="Retry download"
+              hoverColor="var(--positive-color)"
             >
-              <RotateCcw className="h-4 w-4" />
-            </button>
+              <Icon icon={Rotate} iconSize={16} />
+            </ActionButton>
           )}
-          <button
+          <ActionButton
             onClick={() => onDelete(download.id)}
             disabled={isDeleting}
-            className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-600 disabled:opacity-50"
             title="Delete download"
+            hoverColor="var(--negative-color)"
           >
-            <Trash2 className="h-4 w-4" />
-          </button>
+            <Icon icon={Delete} iconSize={16} />
+          </ActionButton>
         </div>
       </td>
     </tr>
+  );
+}
+
+function ActionButton({
+  onClick,
+  disabled,
+  title,
+  hoverColor,
+  children,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  title: string;
+  hoverColor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="rounded p-1.5 transition-colors disabled:opacity-50"
+      style={{ color: 'var(--icon-color)' }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+          'var(--primary-background-hover-color)';
+        (e.currentTarget as HTMLButtonElement).style.color = hoverColor;
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
+        (e.currentTarget as HTMLButtonElement).style.color = 'var(--icon-color)';
+      }}
+      title={title}
+    >
+      {children}
+    </button>
   );
 }

@@ -42,7 +42,12 @@ export function ChannelOverview({ channelId }: ChannelOverviewProps) {
 
       {data.recentVideos.length > 0 && (
         <div>
-          <h3 className="mb-3 text-sm font-semibold text-gray-500 uppercase">Recent Videos</h3>
+          <h3
+            className="mb-3 uppercase"
+            style={{ font: 'var(--font-text2-medium)', color: 'var(--secondary-text-color)' }}
+          >
+            Recent Videos
+          </h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {data.recentVideos.map((video) => (
               <VideoLibraryCard

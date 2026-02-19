@@ -26,7 +26,10 @@ interface PlatformComparisonChartProps {
 export function PlatformComparisonChart({ data }: PlatformComparisonChartProps) {
   if (!data?.platformBreakdown || data.platformBreakdown.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center text-sm text-gray-400">
+      <div
+        className="flex h-64 items-center justify-center"
+        style={{ font: 'var(--font-text2-normal)', color: 'var(--disabled-text-color)' }}
+      >
         No platform data available.
       </div>
     );

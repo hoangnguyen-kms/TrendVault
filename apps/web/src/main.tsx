@@ -1,5 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import '@vibe/core/tokens';
+import './styles/vibe-overrides.css';
 import App from './app';
 import './index.css';
 

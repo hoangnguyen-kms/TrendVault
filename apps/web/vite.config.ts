@@ -4,6 +4,9 @@ import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
 export default defineConfig({
+  define: {
+    global: 'globalThis', // polyfill for react-dates (via @vibe/core) which references Node's `global`
+  },
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

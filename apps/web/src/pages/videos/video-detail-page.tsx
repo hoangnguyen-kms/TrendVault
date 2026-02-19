@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { Icon } from '@vibe/core';
+import { MoveArrowLeftNarrow, ExternalPage } from '@vibe/icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -41,7 +42,7 @@ export default function VideoDetailPage() {
   if (!video) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-gray-500">Video not found.</p>
+        <p style={{ color: 'var(--secondary-text-color)' }}>Video not found.</p>
       </div>
     );
   }
@@ -49,13 +50,18 @@ export default function VideoDetailPage() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" asChild>
-          <Link to={video.channelId ? `/channels` : '/'}>
-            <ArrowLeft className="mr-1 h-4 w-4" />
+        <Link to={video.channelId ? `/channels` : '/'}>
+          <Button variant="ghost" size="sm">
+            <Icon icon={MoveArrowLeftNarrow} iconSize={16} className="mr-1" />
             Back
-          </Link>
-        </Button>
-        <h1 className="flex-1 truncate text-xl font-semibold">{video.title}</h1>
+          </Button>
+        </Link>
+        <h1
+          className="flex-1 truncate"
+          style={{ font: 'var(--font-h3-bold)', color: 'var(--primary-text-color)' }}
+        >
+          {video.title}
+        </h1>
         <Badge variant="outline">{video.platform}</Badge>
       </div>
 
@@ -66,22 +72,28 @@ export default function VideoDetailPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <div>
-                  <p className="text-xs text-gray-500">Views</p>
-                  <p className="text-lg font-semibold">{formatCompactNumber(video.viewCount)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Likes</p>
-                  <p className="text-lg font-semibold">{formatCompactNumber(video.likeCount)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Comments</p>
-                  <p className="text-lg font-semibold">{formatCompactNumber(video.commentCount)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Shares</p>
-                  <p className="text-lg font-semibold">{formatCompactNumber(video.shareCount)}</p>
-                </div>
+                {[
+                  { label: 'Views', value: video.viewCount },
+                  { label: 'Likes', value: video.likeCount },
+                  { label: 'Comments', value: video.commentCount },
+                  { label: 'Shares', value: video.shareCount },
+                ].map((stat) => (
+                  <div key={stat.label}>
+                    <p
+                      style={{
+                        font: 'var(--font-text3-normal)',
+                        color: 'var(--secondary-text-color)',
+                      }}
+                    >
+                      {stat.label}
+                    </p>
+                    <p
+                      style={{ font: 'var(--font-text1-bold)', color: 'var(--primary-text-color)' }}
+                    >
+                      {formatCompactNumber(stat.value)}
+                    </p>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -89,7 +101,9 @@ export default function VideoDetailPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Performance Over Time</CardTitle>
+                <CardTitle>
+                  <span style={{ font: 'var(--font-text1-medium)' }}>Performance Over Time</span>
+                </CardTitle>
                 <div className="flex gap-2">
                   <Select value={metric} onValueChange={(v) => setMetric(v as typeof metric)}>
                     <SelectTrigger className="w-32">
@@ -124,30 +138,72 @@ export default function VideoDetailPage() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Details</CardTitle>
+              <CardTitle>
+                <span style={{ font: 'var(--font-text1-medium)' }}>Details</span>
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm">
+            <CardContent className="space-y-3">
               {video.channel?.name && (
                 <div>
-                  <p className="text-xs text-gray-500">Channel</p>
-                  <p className="font-medium">{video.channel.name}</p>
+                  <p
+                    style={{
+                      font: 'var(--font-text3-normal)',
+                      color: 'var(--secondary-text-color)',
+                    }}
+                  >
+                    Channel
+                  </p>
+                  <p
+                    style={{ font: 'var(--font-text2-medium)', color: 'var(--primary-text-color)' }}
+                  >
+                    {video.channel.name}
+                  </p>
                 </div>
               )}
               {video.publishedAt && (
                 <div>
-                  <p className="text-xs text-gray-500">Published</p>
-                  <p>{formatDate(video.publishedAt)}</p>
+                  <p
+                    style={{
+                      font: 'var(--font-text3-normal)',
+                      color: 'var(--secondary-text-color)',
+                    }}
+                  >
+                    Published
+                  </p>
+                  <p
+                    style={{ font: 'var(--font-text2-normal)', color: 'var(--primary-text-color)' }}
+                  >
+                    {formatDate(video.publishedAt)}
+                  </p>
                 </div>
               )}
               {video.duration != null && (
                 <div>
-                  <p className="text-xs text-gray-500">Duration</p>
-                  <p>{formatDuration(video.duration)}</p>
+                  <p
+                    style={{
+                      font: 'var(--font-text3-normal)',
+                      color: 'var(--secondary-text-color)',
+                    }}
+                  >
+                    Duration
+                  </p>
+                  <p
+                    style={{ font: 'var(--font-text2-normal)', color: 'var(--primary-text-color)' }}
+                  >
+                    {formatDuration(video.duration)}
+                  </p>
                 </div>
               )}
               {video.privacyStatus && (
                 <div>
-                  <p className="text-xs text-gray-500">Privacy</p>
+                  <p
+                    style={{
+                      font: 'var(--font-text3-normal)',
+                      color: 'var(--secondary-text-color)',
+                    }}
+                  >
+                    Privacy
+                  </p>
                   <Badge variant="outline" className="capitalize">
                     {video.privacyStatus}
                   </Badge>
@@ -155,7 +211,15 @@ export default function VideoDetailPage() {
               )}
               {video.tags && video.tags.length > 0 && (
                 <div>
-                  <p className="mb-1 text-xs text-gray-500">Tags</p>
+                  <p
+                    className="mb-1"
+                    style={{
+                      font: 'var(--font-text3-normal)',
+                      color: 'var(--secondary-text-color)',
+                    }}
+                  >
+                    Tags
+                  </p>
                   <div className="flex flex-wrap gap-1">
                     {video.tags.slice(0, 8).map((tag: string) => (
                       <Badge key={tag} variant="secondary" className="text-xs">
@@ -163,41 +227,61 @@ export default function VideoDetailPage() {
                       </Badge>
                     ))}
                     {video.tags.length > 8 && (
-                      <span className="text-xs text-gray-400">+{video.tags.length - 8}</span>
+                      <span
+                        style={{
+                          font: 'var(--font-text3-normal)',
+                          color: 'var(--disabled-text-color)',
+                        }}
+                      >
+                        +{video.tags.length - 8}
+                      </span>
                     )}
                   </div>
                 </div>
               )}
               {video.description && (
                 <div>
-                  <p className="text-xs text-gray-500">Description</p>
-                  <p className="line-clamp-6 whitespace-pre-wrap text-gray-700">
+                  <p
+                    style={{
+                      font: 'var(--font-text3-normal)',
+                      color: 'var(--secondary-text-color)',
+                    }}
+                  >
+                    Description
+                  </p>
+                  <p
+                    className="line-clamp-6 whitespace-pre-wrap"
+                    style={{
+                      font: 'var(--font-text2-normal)',
+                      color: 'var(--secondary-text-color)',
+                    }}
+                  >
                     {video.description}
                   </p>
                 </div>
               )}
               {video.platformVideoId && (
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <a
-                    href={
-                      video.platform === 'YOUTUBE'
-                        ? `https://youtube.com/watch?v=${video.platformVideoId}`
-                        : video.platform === 'INSTAGRAM'
-                          ? `https://www.instagram.com/reel/${video.platformVideoId}`
-                          : `https://tiktok.com/@_/video/${video.platformVideoId}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ExternalLink className="mr-1 h-3 w-3" />
+                <a
+                  href={
+                    video.platform === 'YOUTUBE'
+                      ? `https://youtube.com/watch?v=${video.platformVideoId}`
+                      : video.platform === 'INSTAGRAM'
+                        ? `https://www.instagram.com/reel/${video.platformVideoId}`
+                        : `https://tiktok.com/@_/video/${video.platformVideoId}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="outline" size="sm" className="w-full">
+                    <Icon icon={ExternalPage} iconSize={12} className="mr-1" />
                     View on{' '}
                     {video.platform === 'YOUTUBE'
                       ? 'YouTube'
                       : video.platform === 'INSTAGRAM'
                         ? 'Instagram'
                         : 'TikTok'}
-                  </a>
-                </Button>
+                  </Button>
+                </a>
               )}
             </CardContent>
           </Card>

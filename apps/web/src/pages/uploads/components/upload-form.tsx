@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Upload, AlertCircle } from 'lucide-react';
+import { Icon } from '@vibe/core';
+import { Upload, Alert } from '@vibe/icons';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { useCreateUpload } from '../hooks/use-uploads';
@@ -7,6 +8,18 @@ import { useChannels } from '@/pages/settings/hooks/use-connected-accounts';
 import { ShortsUploadToggle } from './shorts-upload-toggle';
 import { UploadMetadataEditor } from './upload-metadata-editor';
 import type { DownloadedVideo, ApiSuccess } from '@trendvault/shared-types';
+
+const labelStyle = {
+  font: 'var(--font-text2-medium)',
+  color: 'var(--secondary-text-color)',
+};
+
+const inputStyle = {
+  font: 'var(--font-text2-normal)',
+  borderColor: 'var(--ui-border-color)',
+  backgroundColor: 'var(--primary-background-color)',
+  color: 'var(--primary-text-color)',
+};
 
 export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
   const [selectedVideoId, setSelectedVideoId] = useState('');
@@ -80,17 +93,32 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border bg-white p-6">
-      <h2 className="mb-4 text-lg font-semibold text-gray-900">New Upload</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-lg border p-6"
+      style={{
+        backgroundColor: 'var(--primary-background-color)',
+        borderColor: 'var(--ui-border-color)',
+      }}
+    >
+      <h2
+        className="mb-4"
+        style={{ font: 'var(--font-text1-bold)', color: 'var(--primary-text-color)' }}
+      >
+        New Upload
+      </h2>
 
       <div className="space-y-4">
         {/* Video selection */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Select Video</label>
+          <label className="mb-1 block" style={labelStyle}>
+            Select Video
+          </label>
           <select
             value={selectedVideoId}
             onChange={(e) => handleVideoSelect(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            className="w-full rounded-md border px-3 py-2"
+            style={inputStyle}
             required
           >
             <option value="">Choose a downloaded video...</option>
@@ -104,11 +132,14 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
 
         {/* Channel selection */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Target Channel</label>
+          <label className="mb-1 block" style={labelStyle}>
+            Target Channel
+          </label>
           <select
             value={selectedChannelId}
             onChange={(e) => setSelectedChannelId(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            className="w-full rounded-md border px-3 py-2"
+            style={inputStyle}
             required
           >
             <option value="">Choose a channel...</option>
@@ -119,7 +150,10 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
             ))}
           </select>
           {channels?.length === 0 && (
-            <p className="mt-1 text-xs text-gray-500">
+            <p
+              className="mt-1"
+              style={{ font: 'var(--font-text3-normal)', color: 'var(--secondary-text-color)' }}
+            >
               No channels found. Connect an account in Settings first.
             </p>
           )}
@@ -127,10 +161,21 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
 
         {/* TikTok warning */}
         {isTikTok && (
-          <div className="rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2">
+          <div
+            className="rounded-md border px-3 py-2"
+            style={{
+              backgroundColor: 'var(--warning-color-selected)',
+              borderColor: 'var(--warning-color)',
+            }}
+          >
             <div className="flex items-start gap-2">
-              <AlertCircle className="mt-0.5 h-4 w-4 text-yellow-600" />
-              <p className="text-xs text-yellow-700">
+              <Icon
+                icon={Alert}
+                iconSize={16}
+                className="mt-0.5"
+                style={{ color: 'var(--warning-color)' }}
+              />
+              <p style={{ font: 'var(--font-text3-normal)', color: 'var(--warning-color)' }}>
                 TikTok: Video will be sent to your inbox as a draft. Privacy is set to private
                 (unaudited app limitation).
               </p>
@@ -140,10 +185,21 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
 
         {/* Instagram info */}
         {isInstagram && (
-          <div className="rounded-md border border-pink-200 bg-pink-50 px-3 py-2">
+          <div
+            className="rounded-md border px-3 py-2"
+            style={{
+              backgroundColor: 'var(--color-sofia_pink-selected)',
+              borderColor: 'var(--color-sofia_pink)',
+            }}
+          >
             <div className="flex items-start gap-2">
-              <AlertCircle className="mt-0.5 h-4 w-4 text-pink-600" />
-              <p className="text-xs text-pink-700">
+              <Icon
+                icon={Alert}
+                iconSize={16}
+                className="mt-0.5"
+                style={{ color: 'var(--color-sofia_pink)' }}
+              />
+              <p style={{ font: 'var(--font-text3-normal)', color: 'var(--color-sofia_pink)' }}>
                 Instagram: Video will be published as a Reel. Vertical (9:16) videos are recommended
                 for best reach.
               </p>
@@ -153,34 +209,45 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
 
         {/* Title */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Title</label>
+          <label className="mb-1 block" style={labelStyle}>
+            Title
+          </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             maxLength={100}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            className="w-full rounded-md border px-3 py-2"
+            style={inputStyle}
             required
           />
-          <p className="mt-0.5 text-xs text-gray-400">{title.length}/100</p>
+          <p
+            className="mt-0.5"
+            style={{ font: 'var(--font-text3-normal)', color: 'var(--disabled-text-color)' }}
+          >
+            {title.length}/100
+          </p>
         </div>
 
         {/* Description */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
+          <label className="mb-1 block" style={labelStyle}>
+            Description
+          </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             maxLength={5000}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            className="w-full rounded-md border px-3 py-2"
+            style={inputStyle}
           />
           <UploadMetadataEditor uploadAsShort={uploadAsShort} />
         </div>
 
         {/* Tags */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block" style={labelStyle}>
             Tags (comma-separated)
           </label>
           <input
@@ -188,20 +255,24 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             placeholder="tag1, tag2, tag3"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            className="w-full rounded-md border px-3 py-2"
+            style={inputStyle}
           />
         </div>
 
         {/* Privacy (YouTube only — TikTok and Instagram use fixed privacy) */}
         {!isTikTok && !isInstagram && (
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Privacy</label>
+            <label className="mb-1 block" style={labelStyle}>
+              Privacy
+            </label>
             <select
               value={privacyStatus}
               onChange={(e) =>
                 setPrivacyStatus(e.target.value as 'public' | 'private' | 'unlisted')
               }
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border px-3 py-2"
+              style={inputStyle}
             >
               <option value="private">Private</option>
               <option value="unlisted">Unlisted</option>
@@ -226,14 +297,19 @@ export function UploadForm({ onSuccess }: { onSuccess: () => void }) {
         <button
           type="submit"
           disabled={createUpload.isPending || !selectedVideoId || !selectedChannelId || !title}
-          className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-md px-4 py-2.5 disabled:opacity-50"
+          style={{
+            font: 'var(--font-text2-medium)',
+            backgroundColor: 'var(--primary-color)',
+            color: 'var(--text-color-on-primary)',
+          }}
         >
-          <Upload className="h-4 w-4" />
+          <Icon icon={Upload} iconSize={16} />
           {createUpload.isPending ? 'Uploading...' : 'Start Upload'}
         </button>
 
         {createUpload.isError && (
-          <p className="text-sm text-red-600">
+          <p style={{ font: 'var(--font-text2-normal)', color: 'var(--negative-color)' }}>
             {createUpload.error instanceof Error ? createUpload.error.message : 'Upload failed'}
           </p>
         )}

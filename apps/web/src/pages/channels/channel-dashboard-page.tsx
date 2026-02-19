@@ -41,10 +41,18 @@ export default function ChannelDashboardPage() {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <h2 className="text-lg font-semibold text-gray-700">No Channels Connected</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 style={{ font: 'var(--font-text1-bold)', color: 'var(--primary-text-color)' }}>
+            No Channels Connected
+          </h2>
+          <p
+            className="mt-1"
+            style={{ font: 'var(--font-text2-normal)', color: 'var(--secondary-text-color)' }}
+          >
             Connect a YouTube or TikTok account in{' '}
-            <a href="/settings" className="text-blue-600 underline">
+            <a
+              href="/settings"
+              style={{ color: 'var(--primary-color)', textDecoration: 'underline' }}
+            >
               Settings
             </a>{' '}
             to get started.

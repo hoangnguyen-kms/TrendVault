@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { Card, CardContent } from '@/components/ui/card';
-import { Eye, ThumbsUp } from 'lucide-react';
+import { Icon } from '@vibe/core';
+import { Show, ThumbsUp } from '@vibe/icons';
 import { formatCompactNumber, formatDate } from '@/lib/format-utils';
 import { ShortsBadge } from '../../trending/components/shorts-badge';
 
@@ -25,26 +26,43 @@ export function VideoLibraryCard({
 }: VideoLibraryCardProps) {
   return (
     <Link to={`/videos/${id}`}>
-      <Card className="overflow-hidden transition-shadow hover:shadow-md">
-        <div className="relative aspect-video bg-gray-100">
+      <Card
+        className="overflow-hidden transition-shadow"
+        style={{ boxShadow: 'var(--box-shadow-xs)' }}
+      >
+        <div
+          className="relative aspect-video"
+          style={{ backgroundColor: 'var(--allgrey-background-color)' }}
+        >
           {thumbnailUrl ? (
             <img src={thumbnailUrl} alt={title} className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full items-center justify-center text-gray-400">
+            <div
+              className="flex h-full items-center justify-center"
+              style={{ color: 'var(--disabled-text-color)' }}
+            >
               No thumbnail
             </div>
           )}
           {isShort && <ShortsBadge className="absolute top-1 right-1" />}
         </div>
         <CardContent className="p-3">
-          <h4 className="line-clamp-2 text-sm font-medium leading-tight">{title}</h4>
-          <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
+          <h4
+            className="line-clamp-2 leading-tight"
+            style={{ font: 'var(--font-text2-medium)', color: 'var(--primary-text-color)' }}
+          >
+            {title}
+          </h4>
+          <div
+            className="mt-2 flex items-center gap-3"
+            style={{ font: 'var(--font-text3-normal)', color: 'var(--secondary-text-color)' }}
+          >
             <span className="flex items-center gap-1">
-              <Eye className="h-3 w-3" />
+              <Icon icon={Show} iconSize={12} />
               {formatCompactNumber(viewCount)}
             </span>
             <span className="flex items-center gap-1">
-              <ThumbsUp className="h-3 w-3" />
+              <Icon icon={ThumbsUp} iconSize={12} />
               {formatCompactNumber(likeCount)}
             </span>
             <span className="ml-auto">{formatDate(publishedAt)}</span>
